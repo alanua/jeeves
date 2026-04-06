@@ -6,6 +6,10 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+
 from app.db.base import Base
 from app.db import models  # noqa: F401 — ensure models are registered
 
