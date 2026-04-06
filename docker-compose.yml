@@ -16,15 +16,28 @@ services:
       retries: 10
 
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    env_file:
-      - .env
+    build: .
     environment:
-      DATABASE_URL: postgresql+asyncpg://jeeves:jeeves@postgres:5432/jeeves
+      - DATABASE_URL=${DATABASE_URL}
+      - API_KEY=${API_KEY}
+      - DEFAULT_MODE=${DEFAULT_MODE}
+      - ENABLE_CLOUD_FALLBACK=${ENABLE_CLOUD_FALLBACK}
+      - MOCK_PROVIDER_ENABLED=${MOCK_PROVIDER_ENABLED}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL}
+      - OLLAMA_MODEL_DEFAULT=${OLLAMA_MODEL_DEFAULT}
+      - OLLAMA_TIMEOUT_SECONDS=${OLLAMA_TIMEOUT_SECONDS}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - OPENROUTER_BASE_URL=${OPENROUTER_BASE_URL}
+      - OPENROUTER_MODEL_DEFAULT=${OPENROUTER_MODEL_DEFAULT}
+      - OPENROUTER_TIMEOUT_SECONDS=${OPENROUTER_TIMEOUT_SECONDS}
+      - TOOL_SHELL_ENABLED=${TOOL_SHELL_ENABLED}
+      - TOOL_FILESYSTEM_ENABLED=${TOOL_FILESYSTEM_ENABLED}
+      - TOOL_HTTP_ENABLED=${TOOL_HTTP_ENABLED}
+      - SELF_MODIFICATION_ENABLED=${SELF_MODIFICATION_ENABLED}
     ports:
       - "127.0.0.1:8000:8000"
+    volumes:
+      - .:/app
     depends_on:
       postgres:
         condition: service_healthy
