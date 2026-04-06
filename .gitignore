@@ -44,3 +44,6 @@ migrations/versions/*.pyc
 
 # Ruff
 .ruff_cache/
+
+# Deployment
+deploy.tar.gz
