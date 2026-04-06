@@ -49,11 +49,7 @@ class Orchestrator:
 
         # --- Policy pre-flight ---
         self._policy.enforce_self_modification(message)
-        if allow_tools:
-            # Stage 1: Explicitly log/enforce the policy bypass for tools
-            # Even if they ask for tools, if they aren't enabled in config, crash.
-            # E.g. Check 'shell' just to trigger the default deny.
-            self._policy.enforce_tool_access("shell", allow_tools=allow_tools)
+        # Pre-flight check for 'shell' crash removed to allow structured denial later.
 
         # --- Task classification ---
         task_type = classify_task(message)
@@ -99,6 +95,39 @@ class Orchestrator:
             history=history,
             metadata=metadata,
         )
+
+        tool_calls = []
+        if allow_tools and message.startswith("tool:shell "):
+            from app.tools.registry import ToolRegistry
+            tool_reg = ToolRegistry()
+            decision = self._policy.check_tool_access("shell", allow_tools=allow_tools)
+            if not decision.allowed:
+                tool_calls.append({
+                    "tool": "shell",
+                    "status": "denied",
+                    "reason": decision.reason,
+                    "arguments": message[len("tool:shell "):].strip()
+                })
+                # Add to registry warning so it gets picked up below
+                if registry_warning:
+                    registry_warning += f" | {decision.reason}"
+                else:
+                    registry_warning = decision.reason
+            else:
+                # Should not reach here in Stage 2, but scaffold handles it safely
+                tool = tool_reg.get_tool("shell")
+                res = await tool.execute()
+                if not res.success:
+                    tool_calls.append({
+                        "tool": "shell",
+                        "status": "denied",
+                        "reason": str(res.error),
+                        "arguments": message[len("tool:shell "):].strip()
+                    })
+                    if registry_warning:
+                        registry_warning += f" | {res.error}"
+                    else:
+                        registry_warning = str(res.error)
 
         fallback_used = False
         warnings: list[str] = []
@@ -186,7 +215,7 @@ class Orchestrator:
             "selected_provider": provider,
             "selected_model": model,
             "fallback_used": fallback_used,
-            "tool_calls": [],
+            "tool_calls": tool_calls,
             "latency_ms": round(latency_ms, 2),
             "warnings": warnings,
         }

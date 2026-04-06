@@ -78,6 +78,40 @@ async def test_orchestrator_deterministic_fallback(db_session, monkeypatch):
         db=db_session
     )
     
-    # It should fall back to executor and emit a warning
     assert res["selected_agent"] == "executor"
     assert any("planner agent not implemented; fell back to executor" in w for w in res["warnings"])
+
+@pytest.mark.asyncio
+async def test_orchestrator_tool_shell_denial(db_session, monkeypatch):
+    # Mock LLM Router to return successfully
+    from app.agents.base import AgentResult
+    from app.orchestration.orchestrator import Orchestrator
+    async def mock_execute(self, context):
+        return AgentResult(
+            agent_name="executor",
+            answer="I am an AI.",
+            tool_calls=[],
+            warnings=[],
+            extra={}
+        )
+    monkeypatch.setattr(ExecutorAgent, "execute", mock_execute)
+    
+    orch = Orchestrator()
+    # Explicitly test the orchestrator handles allow_tools=True and tool:shell input
+    res = await orch.handle(
+        request_id="test",
+        message="tool:shell whoami",
+        session_id="test-session-125",
+        user_id="user1",
+        allow_tools=True,
+        preferred_mode=None,
+        metadata={},
+        db=db_session
+    )
+    
+    assert res["answer"] == "I am an AI."
+    assert len(res["tool_calls"]) == 1
+    assert res["tool_calls"][0]["tool"] == "shell"
+    assert res["tool_calls"][0]["status"] == "denied"
+    assert "disabled in configuration" in res["tool_calls"][0]["reason"]
+    assert any("disabled in configuration" in w for w in res["warnings"])
