@@ -6,11 +6,10 @@ import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agents.base import AgentContext, AgentResult
-from app.agents.executor_agent import ExecutorAgent
+from app.agents.registry import AgentRegistry
 from app.core.exceptions import PolicyViolationError, ProviderError
-from app.db.models import Message as DBMessage
-from app.db.models import Session as DBSession
 from app.db.models import Trace
+from app.memory.repository import MemoryRepository
 from app.orchestration.task_classifier import classify_task
 from app.policy.engine import PolicyEngine
 
@@ -32,7 +31,7 @@ class Orchestrator:
 
     def __init__(self) -> None:
         self._policy = PolicyEngine()
-        self._executor = ExecutorAgent()
+        self._agent_registry = AgentRegistry()
 
     async def handle(
         self,
@@ -46,6 +45,7 @@ class Orchestrator:
         db: AsyncSession,
     ) -> dict:
         start_ms = time.monotonic()
+        memory_repo = MemoryRepository(db)
 
         # --- Policy pre-flight ---
         self._policy.enforce_self_modification(message)
@@ -59,27 +59,19 @@ class Orchestrator:
         task_type = classify_task(message)
 
         # --- Session memory (DB-backed) ---
-        from sqlalchemy import select
-        stmt = (
-            select(DBMessage)
-            .where(DBMessage.session_id == session_id)
-            .order_by(DBMessage.created_at.desc())
-            .limit(10)
-        )
-        recent = (await db.scalars(stmt)).all()
-        history = [{"role": msg.role, "content": msg.content} for msg in reversed(recent)]
+        history = await memory_repo.get_recent_history(session_id, limit=10)
 
         # --- Ensure DB session row exists ---
-        existing = await db.get(DBSession, session_id)
-        if existing is None:
-            db_session = DBSession(id=session_id, user_id=user_id)
-            db.add(db_session)
+        await memory_repo.ensure_session(session_id, user_id)
 
         # --- Persist user message ---
-        db.add(DBMessage(session_id=session_id, role="user", content=message))
+        await memory_repo.add_message(session_id, "user", message)
 
-        # --- Select agent (always executor in Stage 1) ---
-        agent = self._executor
+        # --- Select agent ---
+        # Hardcoded to executor for now, but resolved via registry
+        agent_name = "executor"
+        agent = self._agent_registry.get_agent(agent_name)
+        
         context = AgentContext(
             request_id=request_id,
             session_id=session_id,
@@ -130,7 +122,7 @@ class Orchestrator:
         latency_ms = (time.monotonic() - start_ms) * 1000
 
         # --- Persist assistant message ---
-        db.add(DBMessage(session_id=session_id, role="assistant", content=answer))
+        await memory_repo.add_message(session_id, "assistant", answer)
 
         # --- Persist trace ---
         db.add(
@@ -153,8 +145,6 @@ class Orchestrator:
         )
 
         await db.commit()
-
-        # Session memory is fully DB-backed now
 
         log.info(
             "orchestrator.done",
