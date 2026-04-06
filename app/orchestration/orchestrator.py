@@ -73,17 +73,7 @@ class Orchestrator:
             target_agent = "executor"
 
         registry_warning = None
-        try:
-            agent = self._agent_registry.get_agent(target_agent)
-            agent_name = target_agent
-        except ValueError as e:
-            if "registered as a placeholder" in str(e):
-                agent_name = "executor"
-                agent = self._agent_registry.get_agent(agent_name)
-                # Keep warning for later injection into response
-                registry_warning = f"{target_agent} agent not implemented; fell back to executor"
-            else:
-                raise
+        agent = self._agent_registry.get_agent(target_agent)
 
         context = AgentContext(
             request_id=request_id,

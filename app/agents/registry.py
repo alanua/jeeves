@@ -1,19 +1,19 @@
 from app.agents.base import BaseAgent
 from app.agents.executor_agent import ExecutorAgent
+from app.agents.planner_agent import PlannerAgent
+from app.agents.research_agent import ResearchAgent
 
 
 class AgentRegistry:
     def __init__(self):
-        self._agents = {
+        self._agents: dict[str, BaseAgent] = {
             "executor": ExecutorAgent(),
-            "planner": None, # Placeholder
-            "research": None, # Placeholder
+            "planner": PlannerAgent(),
+            "research": ResearchAgent(),
         }
 
     def get_agent(self, name: str) -> BaseAgent:
         agent = self._agents.get(name)
         if agent is None:
-            if name in self._agents:
-                raise ValueError(f"Agent '{name}' is registered as a placeholder but not fully implemented.")
             raise ValueError(f"Agent '{name}' not found in registry.")
         return agent

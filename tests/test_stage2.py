@@ -1,7 +1,9 @@
 import pytest
 
 from app.agents.executor_agent import ExecutorAgent
+from app.agents.planner_agent import PlannerAgent
 from app.agents.registry import AgentRegistry
+from app.agents.research_agent import ResearchAgent
 from app.memory.repository import MemoryRepository
 from app.tools.registry import ToolRegistry
 
@@ -11,8 +13,11 @@ def test_agent_registry():
     agent = registry.get_agent("executor")
     assert isinstance(agent, ExecutorAgent)
 
-    with pytest.raises(ValueError, match="not fully implemented"):
-        registry.get_agent("planner")
+    planet_agent = registry.get_agent("planner")
+    assert isinstance(planet_agent, PlannerAgent)
+    
+    research_agent = registry.get_agent("research")
+    assert isinstance(research_agent, ResearchAgent)
 
     with pytest.raises(ValueError, match="not found"):
         registry.get_agent("nonexistent")
@@ -66,7 +71,7 @@ async def test_orchestrator_deterministic_fallback(db_session, monkeypatch):
     orch = Orchestrator()
     orch._policy = MockPolicy()
     
-    # Test falling back on complex task (planner placeholder)
+    # Test routing to complex task (planner concrete class)
     res = await orch.handle(
         request_id="test1",
         message="Please write a complex long term plan that takes multiple steps",
@@ -78,8 +83,8 @@ async def test_orchestrator_deterministic_fallback(db_session, monkeypatch):
         db=db_session
     )
     
-    assert res["selected_agent"] == "executor"
-    assert any("planner agent not implemented; fell back to executor" in w for w in res["warnings"])
+    assert res["selected_agent"] == "planner"
+    assert any("Planner logic is currently delegated to base executor." in w for w in res["warnings"])
 
     # Verify trace was saved correctly with no tool summary
     from sqlalchemy import select
@@ -90,6 +95,47 @@ async def test_orchestrator_deterministic_fallback(db_session, monkeypatch):
     
     assert trace is not None
     assert trace.tool_calls_summary is None
+
+@pytest.mark.asyncio
+async def test_orchestrator_research_route(db_session, monkeypatch):
+    from app.orchestration.orchestrator import Orchestrator
+    
+    class MockPolicy:
+        def enforce_self_modification(self, msg): pass
+        def enforce_tool_access(self, tool, allow_tools): pass
+        def check_tool_access(self, tool, allow_tools): 
+            from app.policy.engine import PolicyDecision
+            return PolicyDecision(allowed=True, reason="allowed")
+    
+    from app.agents.base import AgentResult
+    async def mock_execute(self, context):
+        return AgentResult(
+            agent_name="executor",
+            answer="Research response",
+            tool_calls=[],
+            warnings=[],
+            extra={}
+        )
+    
+    from app.agents.executor_agent import ExecutorAgent
+    monkeypatch.setattr(ExecutorAgent, "execute", mock_execute)
+    
+    orch = Orchestrator()
+    orch._policy = MockPolicy()
+    
+    res = await orch.handle(
+        request_id="test-res",
+        message="Please research the top papers from the last decade",
+        session_id="test-session-126",
+        user_id="user1",
+        allow_tools=False,
+        preferred_mode=None,
+        metadata={},
+        db=db_session
+    )
+    
+    assert res["selected_agent"] == "research"
+    assert any("Research logic is currently delegated to base executor." in w for w in res["warnings"])
 
 @pytest.mark.asyncio
 async def test_orchestrator_tool_shell_denial(db_session, monkeypatch):

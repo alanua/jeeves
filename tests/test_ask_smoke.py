@@ -28,7 +28,7 @@ async def test_ask_returns_answer(client):
     ):
         resp = await client.post(
             "/ask",
-            json={"message": "What is the capital of France?"},
+            json={"message": "Tell me a joke"},
         )
 
     assert resp.status_code == 200
