@@ -47,3 +47,9 @@ migrations/versions/*.pyc
 
 # Deployment
 deploy.tar.gz
+*_deploy.sh
+*_deploy_out.txt
+*_out.txt
+output.txt
+output2.txt
+temp.sh
