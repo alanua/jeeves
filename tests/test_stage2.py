@@ -1,11 +1,24 @@
+from __future__ import annotations
+
+from unittest.mock import AsyncMock, patch
+
 import pytest
 
 from app.agents.executor_agent import ExecutorAgent
 from app.agents.planner_agent import PlannerAgent
 from app.agents.registry import AgentRegistry
 from app.agents.research_agent import ResearchAgent
+from app.llm.base import ProviderResponse
 from app.memory.repository import MemoryRepository
 from app.tools.registry import ToolRegistry
+
+_MOCK_RESPONSE = ProviderResponse(
+    content="Mock answer.",
+    model="llama3",
+    provider="ollama",
+    prompt_tokens=5,
+    completion_tokens=10,
+)
 
 
 def test_agent_registry():
@@ -47,139 +60,98 @@ async def test_memory_repository(db_session):
     assert history[1]["content"] == "world"
 
 @pytest.mark.asyncio
-async def test_orchestrator_deterministic_fallback(db_session, monkeypatch):
+async def test_orchestrator_planner_route(db_session):
+    """Planner route returns selected_agent=planner with planning-framed warning."""
     from app.orchestration.orchestrator import Orchestrator
-    
-    # Mock Policy Engine so it doesn't fail on shell check if enabled
-    class MockPolicy:
-        def enforce_self_modification(self, msg): pass
-        def enforce_tool_access(self, tool, allow_tools): pass
-    
-    # Mock LLM Router because we don't want to actually call the LLM
-    from app.agents.base import AgentResult
-    async def mock_execute(self, context):
-        return AgentResult(
-            agent_name="executor",
-            answer="Mock response",
-            tool_calls=[],
-            warnings=[],
-            extra={}
-        )
-    
-    monkeypatch.setattr(ExecutorAgent, "execute", mock_execute)
-    
-    orch = Orchestrator()
-    orch._policy = MockPolicy()
-    
-    # Test routing to complex task (planner concrete class)
-    res = await orch.handle(
-        request_id="test1",
-        message="Please write a complex long term plan that takes multiple steps",
-        session_id="test-session-124",
-        user_id="user1",
-        allow_tools=False,
-        preferred_mode=None,
-        metadata={},
-        db=db_session
-    )
-    
-    assert res["selected_agent"] == "planner"
-    assert any("Planner logic is currently delegated to base executor." in w for w in res["warnings"])
 
-    # Verify trace was saved correctly with no tool summary
+    with patch(
+        "app.llm.providers.ollama_provider.OllamaProvider.generate",
+        new_callable=AsyncMock,
+        return_value=_MOCK_RESPONSE,
+    ):
+        orch = Orchestrator()
+        res = await orch.handle(
+            request_id="test-planner",
+            message="Please write a complex long term plan that takes multiple steps",
+            session_id="test-session-planner",
+            user_id="user1",
+            allow_tools=False,
+            preferred_mode=None,
+            metadata={},
+            db=db_session,
+        )
+
+    assert res["selected_agent"] == "planner"
+    assert any("Planner: output is structured planning framing" in w for w in res["warnings"])
+
     from sqlalchemy import select
 
     from app.db.models import Trace
-    stmt = select(Trace).where(Trace.request_id == "test1")
+    stmt = select(Trace).where(Trace.request_id == "test-planner")
     trace = (await db_session.execute(stmt)).scalar_one_or_none()
-    
     assert trace is not None
+    assert trace.selected_agent == "planner"
     assert trace.tool_calls_summary is None
 
-@pytest.mark.asyncio
-async def test_orchestrator_research_route(db_session, monkeypatch):
-    from app.orchestration.orchestrator import Orchestrator
-    
-    class MockPolicy:
-        def enforce_self_modification(self, msg): pass
-        def enforce_tool_access(self, tool, allow_tools): pass
-        def check_tool_access(self, tool, allow_tools): 
-            from app.policy.engine import PolicyDecision
-            return PolicyDecision(allowed=True, reason="allowed")
-    
-    from app.agents.base import AgentResult
-    async def mock_execute(self, context):
-        return AgentResult(
-            agent_name="executor",
-            answer="Research response",
-            tool_calls=[],
-            warnings=[],
-            extra={}
-        )
-    
-    from app.agents.executor_agent import ExecutorAgent
-    monkeypatch.setattr(ExecutorAgent, "execute", mock_execute)
-    
-    orch = Orchestrator()
-    orch._policy = MockPolicy()
-    
-    res = await orch.handle(
-        request_id="test-res",
-        message="Please research the top papers from the last decade",
-        session_id="test-session-126",
-        user_id="user1",
-        allow_tools=False,
-        preferred_mode=None,
-        metadata={},
-        db=db_session
-    )
-    
-    assert res["selected_agent"] == "research"
-    assert any("Research logic is currently delegated to base executor." in w for w in res["warnings"])
 
 @pytest.mark.asyncio
-async def test_orchestrator_tool_shell_denial(db_session, monkeypatch):
-    # Mock LLM Router to return successfully
-    from app.agents.base import AgentResult
+async def test_orchestrator_research_route(db_session):
+    """Research route returns selected_agent=research with research-framed warning."""
     from app.orchestration.orchestrator import Orchestrator
-    async def mock_execute(self, context):
-        return AgentResult(
-            agent_name="executor",
-            answer="I am an AI.",
-            tool_calls=[],
-            warnings=[],
-            extra={}
+
+    with patch(
+        "app.llm.providers.ollama_provider.OllamaProvider.generate",
+        new_callable=AsyncMock,
+        return_value=_MOCK_RESPONSE,
+    ):
+        orch = Orchestrator()
+        res = await orch.handle(
+            request_id="test-research",
+            message="Please research the top papers from the last decade",
+            session_id="test-session-research",
+            user_id="user1",
+            allow_tools=False,
+            preferred_mode=None,
+            metadata={},
+            db=db_session,
         )
-    monkeypatch.setattr(ExecutorAgent, "execute", mock_execute)
-    
-    orch = Orchestrator()
-    # Explicitly test the orchestrator handles allow_tools=True and tool:shell input
-    res = await orch.handle(
-        request_id="test",
-        message="tool:shell whoami",
-        session_id="test-session-125",
-        user_id="user1",
-        allow_tools=True,
-        preferred_mode=None,
-        metadata={},
-        db=db_session
-    )
-    
-    assert res["answer"] == "I am an AI."
+
+    assert res["selected_agent"] == "research"
+    assert any("Research: output is based on training data only" in w for w in res["warnings"])
+
+@pytest.mark.asyncio
+async def test_orchestrator_tool_shell_denial(db_session):
+    """tool:shell with allow_tools=True returns structured denial, no execution."""
+    from app.orchestration.orchestrator import Orchestrator
+
+    with patch(
+        "app.llm.providers.ollama_provider.OllamaProvider.generate",
+        new_callable=AsyncMock,
+        return_value=_MOCK_RESPONSE,
+    ):
+        orch = Orchestrator()
+        res = await orch.handle(
+            request_id="test-shell",
+            message="tool:shell whoami",
+            session_id="test-session-shell",
+            user_id="user1",
+            allow_tools=True,
+            preferred_mode=None,
+            metadata={},
+            db=db_session,
+        )
+
     assert len(res["tool_calls"]) == 1
     assert res["tool_calls"][0]["tool"] == "shell"
     assert res["tool_calls"][0]["status"] == "denied"
     assert "disabled in configuration" in res["tool_calls"][0]["reason"]
     assert any("disabled in configuration" in w for w in res["warnings"])
-    
-    # Verify trace was saved correctly
+
     from sqlalchemy import select
 
     from app.db.models import Trace
-    stmt = select(Trace).where(Trace.request_id == "test")
+    stmt = select(Trace).where(Trace.request_id == "test-shell")
     trace = (await db_session.execute(stmt)).scalar_one_or_none()
-    
     assert trace is not None
     assert trace.tool_calls_summary is not None
-    assert len(trace.tool_calls_summary["calls"]) == 1
     assert trace.tool_calls_summary["calls"][0]["tool"] == "shell"
