@@ -68,7 +68,7 @@ async def test_orchestrator_deterministic_fallback(db_session, monkeypatch):
     
     # Test falling back on complex task (planner placeholder)
     res = await orch.handle(
-        request_id="test",
+        request_id="test1",
         message="Please write a complex long term plan that takes multiple steps",
         session_id="test-session-124",
         user_id="user1",
@@ -80,6 +80,16 @@ async def test_orchestrator_deterministic_fallback(db_session, monkeypatch):
     
     assert res["selected_agent"] == "executor"
     assert any("planner agent not implemented; fell back to executor" in w for w in res["warnings"])
+
+    # Verify trace was saved correctly with no tool summary
+    from sqlalchemy import select
+
+    from app.db.models import Trace
+    stmt = select(Trace).where(Trace.request_id == "test1")
+    trace = (await db_session.execute(stmt)).scalar_one_or_none()
+    
+    assert trace is not None
+    assert trace.tool_calls_summary is None
 
 @pytest.mark.asyncio
 async def test_orchestrator_tool_shell_denial(db_session, monkeypatch):
@@ -115,3 +125,15 @@ async def test_orchestrator_tool_shell_denial(db_session, monkeypatch):
     assert res["tool_calls"][0]["status"] == "denied"
     assert "disabled in configuration" in res["tool_calls"][0]["reason"]
     assert any("disabled in configuration" in w for w in res["warnings"])
+    
+    # Verify trace was saved correctly
+    from sqlalchemy import select
+
+    from app.db.models import Trace
+    stmt = select(Trace).where(Trace.request_id == "test")
+    trace = (await db_session.execute(stmt)).scalar_one_or_none()
+    
+    assert trace is not None
+    assert trace.tool_calls_summary is not None
+    assert len(trace.tool_calls_summary["calls"]) == 1
+    assert trace.tool_calls_summary["calls"][0]["tool"] == "shell"

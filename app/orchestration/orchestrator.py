@@ -174,6 +174,7 @@ class Orchestrator:
         await memory_repo.add_message(session_id, "assistant", answer)
 
         # --- Persist trace ---
+        summary_payload = {"calls": tool_calls} if tool_calls else None
         db.add(
             Trace(
                 request_id=request_id,
@@ -189,7 +190,7 @@ class Orchestrator:
                 completion_tokens=completion_tokens,
                 success=success,
                 error=error_msg,
-                tool_calls_summary=None,
+                tool_calls_summary=summary_payload,
             )
         )
 
