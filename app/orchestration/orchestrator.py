@@ -68,10 +68,27 @@ class Orchestrator:
         await memory_repo.add_message(session_id, "user", message)
 
         # --- Select agent ---
-        # Hardcoded to executor for now, but resolved via registry
-        agent_name = "executor"
-        agent = self._agent_registry.get_agent(agent_name)
-        
+        task_str = task_type.value
+        if task_str == "complex":
+            target_agent = "planner"
+        elif task_str == "research":
+            target_agent = "research"
+        else:
+            target_agent = "executor"
+
+        registry_warning = None
+        try:
+            agent = self._agent_registry.get_agent(target_agent)
+            agent_name = target_agent
+        except ValueError as e:
+            if "registered as a placeholder" in str(e):
+                agent_name = "executor"
+                agent = self._agent_registry.get_agent(agent_name)
+                # Keep warning for later injection into response
+                registry_warning = f"{target_agent} agent not implemented; fell back to executor"
+            else:
+                raise
+
         context = AgentContext(
             request_id=request_id,
             session_id=session_id,
@@ -85,6 +102,8 @@ class Orchestrator:
 
         fallback_used = False
         warnings: list[str] = []
+        if registry_warning:
+            warnings.append(registry_warning)
         answer = ""
         provider = "unknown"
         model = "unknown"
@@ -101,7 +120,8 @@ class Orchestrator:
             fallback_used = result.extra.get("fallback_used", False)
             prompt_tokens = result.extra.get("prompt_tokens")
             completion_tokens = result.extra.get("completion_tokens")
-            warnings = result.warnings
+            for w in result.warnings:
+                warnings.append(w)
         except PolicyViolationError as exc:
             success = False
             error_msg = exc.reason
