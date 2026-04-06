@@ -96,38 +96,18 @@ class Orchestrator:
             metadata=metadata,
         )
 
-        tool_calls = []
-        if allow_tools and message.startswith("tool:shell "):
-            from app.tools.registry import ToolRegistry
-            tool_reg = ToolRegistry()
-            decision = self._policy.check_tool_access("shell", allow_tools=allow_tools)
-            if not decision.allowed:
-                tool_calls.append({
-                    "tool": "shell",
-                    "status": "denied",
-                    "reason": decision.reason,
-                    "arguments": message[len("tool:shell "):].strip()
-                })
-                # Add to registry warning so it gets picked up below
-                if registry_warning:
-                    registry_warning += f" | {decision.reason}"
-                else:
-                    registry_warning = decision.reason
+        # --- Handle explicit tool intent ---
+        from app.tools.handler import ToolHandler
+        from app.tools.registry import ToolRegistry
+        
+        tool_handler = ToolHandler(self._policy, ToolRegistry())
+        tool_calls, warning = await tool_handler.handle_tool_intent(message, allow_tools)
+        
+        if warning:
+            if registry_warning:
+                registry_warning += f" | {warning}"
             else:
-                # Should not reach here in Stage 2, but scaffold handles it safely
-                tool = tool_reg.get_tool("shell")
-                res = await tool.execute()
-                if not res.success:
-                    tool_calls.append({
-                        "tool": "shell",
-                        "status": "denied",
-                        "reason": str(res.error),
-                        "arguments": message[len("tool:shell "):].strip()
-                    })
-                    if registry_warning:
-                        registry_warning += f" | {res.error}"
-                    else:
-                        registry_warning = str(res.error)
+                registry_warning = warning
 
         fallback_used = False
         warnings: list[str] = []
