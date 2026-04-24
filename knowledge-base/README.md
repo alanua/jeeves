@@ -1,8 +1,25 @@
 # Jeeves Knowledge Base
 
-Last updated: 2026-04-21
+Last updated: 2026-04-24
 
-This directory is the durable project knowledge base for **Jeeves**. It is intended to make project continuation possible for a new engineer, agent, or reviewer without relying on chat history.
+This directory is the durable project knowledge base for **Jeeves**.
+
+Its primary purpose is **continuity insurance**: it makes project continuation possible for a new engineer, agent, or reviewer without depending on one specific AI chat session, one specific AI developer, or an active subscription context.
+
+## Important distinction
+
+This GitHub knowledge base is **not** the runtime memory of Jeeves.
+
+It is a human- and agent-readable project documentation / insurance layer.
+
+The future Jeeves memory subsystem is a separate runtime subsystem that will handle things like:
+- session continuity
+- wake-up context
+- handoff state
+- remembered decisions
+- retrieval over operational memory
+
+The GitHub KB protects project continuity. The memory subsystem supports the running assistant.
 
 ## Read order for a new contributor
 
@@ -34,7 +51,7 @@ This knowledge base captures accepted project information about:
 This directory is not a replacement for:
 - canonical code-level contracts in the repo
 - tests as the source of behavioral truth
-- future memory / handoff runtime objects
+- future runtime memory / handoff subsystem
 - future research wiki / external knowledge-base subsystem
 
 ## Current project snapshot
