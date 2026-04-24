@@ -6,7 +6,7 @@ Last updated: 2026-04-24
 
 When the agent system is mature enough, it should be deployable to a remote server through clear commands and scripts.
 
-The user wants to run Jeeves not only as a development experiment, but eventually as a hosted assistant system for personal and family use.
+The user wants Jeeves to have a simple install/deploy mechanism similar in spirit to OpenClaw: a straightforward way to prepare a server, deploy the runtime, configure environment variables, and start the agents without manually rebuilding the whole stack each time.
 
 ## Universal adaptive system model
 
@@ -31,6 +31,7 @@ The future deployment flow should allow the operator to:
 - provision or prepare a remote server
 - deploy the Jeeves backend/runtime
 - configure providers, secrets, and environment variables safely
+- create or register personal agents for users
 - start and stop services predictably
 - update the system from Git
 - inspect logs and health checks
@@ -41,13 +42,17 @@ The future deployment flow should allow the operator to:
 
 The preferred deployment style should be boring, repeatable, and scriptable.
 
+The target is not a manual installation guide only. It should be a command/script-driven installation path.
+
 Likely future shape:
 
 ```text
 scripts/
-  deploy_remote.sh
+  install_remote.sh
   setup_server.sh
+  deploy_remote.sh
   update_remote.sh
+  create_user_agent.sh
   backup_state.sh
   restore_state.sh
   healthcheck.sh
@@ -80,7 +85,7 @@ The future system should support trusted family usage.
 
 Accepted model: **one personal adaptive agent per family member**.
 
-This is not one shared family agent with one shared context. It is a multi-user family runtime with separate personal assistants under one controlled deployment.
+This is not one shared family agent, and there is no shared family context by default. The desired model is simple: each family member has their own agent.
 
 Each family member's agent should have:
 - separate user identity
@@ -91,14 +96,12 @@ Each family member's agent should have:
 - separate conversation/session history
 - clear boundaries around user-specific information
 
-A shared family space may exist later, but only as an explicit shared area with clear access rules.
+The current accepted model does **not** require a shared family workspace. Shared resources may be reconsidered later only as an explicit feature, not as part of the baseline family runtime.
 
 This introduces requirements beyond a single-user development agent:
 - user identity
-- role/access separation
 - per-user context boundaries
 - user-scoped memory and handoff
-- explicitly designed shared family context
 - safe permissions
 - auditability of actions
 - no accidental cross-user memory leakage
@@ -111,20 +114,18 @@ Accepted conceptual model:
 ```text
 Remote Jeeves deployment
   ├─ operator/admin account
-  │   └─ admin/supervisor agent
+  │   └─ personal/admin agent
   ├─ family member A
   │   └─ personal adaptive agent A
-  ├─ family member B
-  │   └─ personal adaptive agent B
-  └─ optional shared family space
-      └─ shared tasks / calendar / household knowledge / approved integrations
+  └─ family member B
+      └─ personal adaptive agent B
 ```
 
 Important rules:
+- each user gets their own agent
 - personal agents do not read each other's memory by default
-- shared family resources must be explicitly marked as shared
+- there is no shared family memory/context by default
 - action permissions may differ by user
-- family-wide actions require clear ownership and approval rules
 - adaptation must not override privacy, policy, or permission boundaries
 
 ## Safety requirements for family deployment
@@ -133,7 +134,6 @@ Before family use, the system must have at least:
 - authentication
 - explicit user/session separation
 - per-user memory/context isolation
-- clear shared-space rules
 - operation permission matrix
 - safe default denial for side-effectful operations
 - approval-gated action execution
@@ -184,20 +184,19 @@ Minimum requirements:
 - multiple users
 - one personal adaptive agent per user
 - user-scoped memory/context
-- explicit shared family space if needed
 - role/permission model
 - audit log
 - action approval gates
 - safe fallback behavior
 
-### Stage D3 — Action-capable family assistant
+### Stage D3 — Action-capable personal agents
 Purpose:
-- real actions with safeguards
+- real actions with safeguards for each user-owned agent
 
 Minimum requirements:
 - approved action contracts
 - action runner isolation
-- per-user and shared-action approval rules
+- per-user action approval rules
 - audit trail for executed actions
 - rollback/recovery strategy where possible
 
@@ -209,7 +208,7 @@ This deployment goal depends on existing and future subsystems:
 - dry-run executor from Stage 2.5
 - future action proposal and approval layer
 - future runtime memory / handoff subsystem
-- future project/user-scoped memory boundaries
+- future user-scoped memory boundaries
 - future permission matrix
 - future deployment scripts and ops documentation
 
@@ -219,4 +218,4 @@ This is an accepted future product and ops goal.
 
 It is not yet implemented.
 
-Near-term development should continue to prioritize correctness and safety of runtime contracts before exposing Jeeves as a family-facing hosted assistant.
+Near-term development should continue to prioritize correctness and safety of runtime contracts before exposing Jeeves as a hosted multi-user assistant.
