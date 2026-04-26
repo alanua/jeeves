@@ -46,7 +46,7 @@ class ActionApproval(BaseModel):
 
     proposal_id: str = Field(..., min_length=1)
     approved: bool
-    status: ActionStatus
+    status: ActionStatus = ActionStatus.approved
     approved_by: str | None = None
     reason: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -107,7 +107,7 @@ class ActionResult(BaseModel):
 
     proposal_id: str = Field(..., min_length=1)
     success: bool = True
-    status: ActionStatus
+    status: ActionStatus = ActionStatus.completed
     output: Any = None
     error: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)

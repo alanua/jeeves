@@ -84,6 +84,20 @@ def test_action_approval_normalizes_default_status():
     assert rejection.status is ActionStatus.rejected
 
 
+def test_action_approval_status_can_be_omitted_by_callers():
+    schema = ActionApproval.model_json_schema()
+
+    assert "status" not in schema["required"]
+    assert (
+        ActionApproval(proposal_id="proposal-1", approved=True).model_dump(mode="json")["status"]
+        == "approved"
+    )
+    assert (
+        ActionApproval(proposal_id="proposal-1", approved=False).model_dump(mode="json")["status"]
+        == "rejected"
+    )
+
+
 def test_action_approval_rejects_mismatched_status():
     with pytest.raises(ValidationError, match="approval status must match approved flag"):
         ActionApproval(
@@ -120,6 +134,17 @@ def test_action_result_failure_shape():
 
     assert result.status is ActionStatus.failed
     assert result.model_dump(mode="json")["error"] == "Action was not executed."
+
+
+def test_action_result_status_can_be_omitted_by_callers():
+    schema = ActionResult.model_json_schema()
+
+    assert "status" not in schema["required"]
+    assert ActionResult(proposal_id="proposal-1").model_dump(mode="json")["status"] == "completed"
+    assert (
+        ActionResult(proposal_id="proposal-1", success=False).model_dump(mode="json")["status"]
+        == "failed"
+    )
 
 
 def test_action_proposal_allows_only_proposed_status():
