@@ -28,8 +28,9 @@ class LLMRouter:
     def __init__(self) -> None:
         self._ollama = OllamaProvider()
         self._openrouter = OpenRouterProvider()
-        
+
         from app.llm.providers.mock_provider import MockProvider
+
         self._mock = MockProvider()
 
     def _preferred_order(self, mode: DefaultMode, task_type: TaskType) -> list[BaseProvider]:
@@ -79,12 +80,16 @@ class LLMRouter:
             )
 
         if not settings.enable_cloud_fallback:
-            raise ProviderError(f"Primary provider '{primary.name}' failed and cloud fallback is disabled")
+            raise ProviderError(
+                f"Primary provider '{primary.name}' failed and cloud fallback is disabled"
+            )
 
         for fallback in fallbacks:
             # Skip OpenRouter if no API key configured
             if fallback.name == "openrouter" and not settings.openrouter_api_key:
-                log.warning("llm.generate.fallback_skipped", provider=fallback.name, reason="no_api_key")
+                log.warning(
+                    "llm.generate.fallback_skipped", provider=fallback.name, reason="no_api_key"
+                )
                 continue
             try:
                 resp = await fallback.generate(messages, system_prompt, options)

@@ -56,7 +56,9 @@ class ExecutorAgent(BaseAgent):
                 task_type=context.task_type,  # type: ignore[arg-type]
             )
         except Exception as exc:
-            log.error("executor_agent.generate_failed", error=str(exc), request_id=context.request_id)
+            log.error(
+                "executor_agent.generate_failed", error=str(exc), request_id=context.request_id
+            )
             raise
 
         return AgentResult(

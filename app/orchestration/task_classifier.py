@@ -13,16 +13,44 @@ class TaskType(str, Enum):
 
 # Keywords that signal task type — simple heuristics, no ML needed at this stage.
 _CODING_KEYWORDS = {
-    "code", "function", "class", "bug", "debug", "implement", "python",
-    "javascript", "typescript", "sql", "script", "program", "refactor",
+    "code",
+    "function",
+    "class",
+    "bug",
+    "debug",
+    "implement",
+    "python",
+    "javascript",
+    "typescript",
+    "sql",
+    "script",
+    "program",
+    "refactor",
 }
 _RESEARCH_KEYWORDS = {
-    "research", "summarise", "summarize", "explain", "compare", "analyse",
-    "analyze", "find out", "what is", "how does", "why does", "latest",
+    "research",
+    "summarise",
+    "summarize",
+    "explain",
+    "compare",
+    "analyse",
+    "analyze",
+    "find out",
+    "what is",
+    "how does",
+    "why does",
+    "latest",
 }
 _COMPLEX_KEYWORDS = {
-    "architecture", "design", "plan", "strategy", "system", "multi-step",
-    "detailed", "comprehensive", "elaborate",
+    "architecture",
+    "design",
+    "plan",
+    "strategy",
+    "system",
+    "multi-step",
+    "detailed",
+    "comprehensive",
+    "elaborate",
 }
 
 

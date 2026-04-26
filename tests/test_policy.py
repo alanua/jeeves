@@ -13,6 +13,7 @@ def policy():
 
 # --- Tool access ---
 
+
 def test_tool_denied_when_allow_tools_false(policy):
     decision = policy.check_tool_access("shell", allow_tools=False)
     assert not decision.allowed
@@ -38,8 +39,10 @@ def test_enforce_tool_raises_violation(policy):
 
 # --- Provider access ---
 
+
 def test_openrouter_denied_when_cloud_fallback_disabled(policy):
     import app.core.config as cfg
+
     original = cfg.settings.enable_cloud_fallback
     try:
         cfg.settings.enable_cloud_fallback = False  # type: ignore[misc]
@@ -55,6 +58,7 @@ def test_ollama_always_allowed(policy):
 
 
 # --- Self-modification ---
+
 
 def test_self_modification_blocked_by_default(policy):
     decision = policy.check_self_modification("Please modify your own code to be smarter")

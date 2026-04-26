@@ -89,10 +89,10 @@ class Orchestrator:
         # --- Handle explicit tool intent ---
         from app.tools.handler import ToolHandler
         from app.tools.registry import ToolRegistry
-        
+
         tool_handler = ToolHandler(self._policy, ToolRegistry())
         tool_calls, warning = await tool_handler.handle_tool_intent(message, allow_tools)
-        
+
         if warning:
             if registry_warning:
                 registry_warning += f" | {warning}"

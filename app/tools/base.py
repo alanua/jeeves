@@ -8,6 +8,7 @@ class ToolResult(BaseModel):
     output: Any
     error: str | None = None
 
+
 class BaseTool:
     name: str
     description: str

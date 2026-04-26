@@ -70,7 +70,9 @@ class OllamaProvider(BaseProvider):
                 resp.raise_for_status()
                 data = resp.json()
         except httpx.HTTPStatusError as exc:
-            raise ProviderError(f"Ollama HTTP error {exc.response.status_code}: {exc.response.text}") from exc
+            raise ProviderError(
+                f"Ollama HTTP error {exc.response.status_code}: {exc.response.text}"
+            ) from exc
         except (httpx.ConnectError, httpx.TimeoutException) as exc:
             raise ProviderError(f"Ollama unreachable: {exc}") from exc
 

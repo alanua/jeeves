@@ -22,9 +22,12 @@ _orchestrator = Orchestrator()
 security = HTTPBearer(auto_error=False)
 
 
-def verify_api_key(credentials: HTTPAuthorizationCredentials | None = Security(security)) -> str | None:
+def verify_api_key(
+    credentials: HTTPAuthorizationCredentials | None = Security(security),
+) -> str | None:
     if not credentials:
         from app.core.config import AppEnv
+
         if settings.app_env == AppEnv.development:
             log.info("ask.auth_bypassed", reason="development_mode")
             return "dev-bypass"
