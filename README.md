@@ -100,16 +100,22 @@ The app boots fine without Ollama. If Ollama is unavailable and `ENABLE_CLOUD_FA
 
 | Variable | Default | Description |
 |---|---|---|
-| `APP_ENV` | `development` | Environment tag |
+| `APP_ENV` | `development` | Environment tag (`development`, `production`, `test`) |
+| `APP_HOST` | `0.0.0.0` | API bind host |
 | `APP_PORT` | `8000` | API listen port |
+| `APP_LOG_LEVEL` | `INFO` | Application log level |
 | `DATABASE_URL` | `postgresql+asyncpg://...` | PostgreSQL connection string |
+| `API_KEY` | `dev-secret-key` | API key value. Use a strong secret outside local development |
 | `DEFAULT_MODE` | `local_first` | Provider strategy (`local_first`, `cloud_first`, `cheapest`, `strongest`) |
+| `ENABLE_CLOUD_FALLBACK` | `true` | Allow fallback to OpenRouter if local inference fails |
+| `MOCK_PROVIDER_ENABLED` | `false` | Enable the mock LLM provider for local/testing scenarios |
 | `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server URL |
 | `OLLAMA_MODEL_DEFAULT` | `llama3` | Default Ollama model |
 | `OLLAMA_TIMEOUT_SECONDS` | `30` | Request timeout for Ollama |
 | `OPENROUTER_API_KEY` | _(empty)_ | OpenRouter API key |
+| `OPENROUTER_BASE_URL` | `https://openrouter.ai/api/v1` | OpenRouter API base URL |
 | `OPENROUTER_MODEL_DEFAULT` | `openai/gpt-4o-mini` | Default OpenRouter model |
-| `ENABLE_CLOUD_FALLBACK` | `true` | Allow fallback to OpenRouter if local fails |
+| `OPENROUTER_TIMEOUT_SECONDS` | `60` | Request timeout for OpenRouter |
 | `TOOL_SHELL_ENABLED` | `false` | Enable shell execution tool |
 | `TOOL_FILESYSTEM_ENABLED` | `false` | Enable filesystem tool |
 | `TOOL_HTTP_ENABLED` | `false` | Enable HTTP fetch tool |
