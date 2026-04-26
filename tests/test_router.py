@@ -12,6 +12,7 @@ from app.orchestration.task_classifier import TaskType, classify_task
 
 # --- Task classifier ---
 
+
 def test_classify_coding_task():
     assert classify_task("Write a Python function to sort a list") == TaskType.coding
 
@@ -25,17 +26,18 @@ def test_classify_short_task_is_simple():
 
 
 def test_classify_general_task():
-    result = classify_task("Tell me about the history of the Roman Empire in detail and do not omit anything about it")
+    result = classify_task(
+        "Tell me about the history of the Roman Empire in detail and do not omit anything about it"
+    )
     assert result in (TaskType.general, TaskType.complex, TaskType.research)
 
 
 # --- LLM Router ---
 
+
 @pytest.mark.asyncio
 async def test_router_uses_ollama_by_default():
-    mock_resp = ProviderResponse(
-        content="hello", model="llama3", provider="ollama"
-    )
+    mock_resp = ProviderResponse(content="hello", model="llama3", provider="ollama")
     router = LLMRouter()
     with patch.object(router._ollama, "generate", new_callable=AsyncMock, return_value=mock_resp):
         resp, fallback = await router.generate(

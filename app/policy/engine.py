@@ -9,11 +9,12 @@ from app.core.exceptions import PolicyViolationError
 @dataclass
 class PolicyContext:
     """All information needed for a policy decision."""
-    request_tool: str | None = None          # tool name being requested
-    provider_name: str | None = None          # provider being selected
-    allow_tools: bool = False                 # did user opt in to tools?
-    task_message: str = ""                    # raw user message
-    is_code_execution: bool = False           # is this a shell/code-exec request?
+
+    request_tool: str | None = None  # tool name being requested
+    provider_name: str | None = None  # provider being selected
+    allow_tools: bool = False  # did user opt in to tools?
+    task_message: str = ""  # raw user message
+    is_code_execution: bool = False  # is this a shell/code-exec request?
 
 
 @dataclass

@@ -14,7 +14,9 @@ class PreferredMode(str, Enum):
 
 
 class AskRequest(BaseModel):
-    message: str = Field(..., min_length=1, max_length=32_000, description="The user's task or question")
+    message: str = Field(
+        ..., min_length=1, max_length=32_000, description="The user's task or question"
+    )
     session_id: str | None = Field(None, description="Conversation session identifier")
     user_id: str | None = Field(None, description="Optional user identifier")
     preferred_mode: PreferredMode | None = Field(

@@ -8,6 +8,7 @@ from typing import Any
 @dataclass
 class AgentContext:
     """All information an agent needs to produce a response."""
+
     request_id: str
     session_id: str
     user_id: str | None
@@ -21,6 +22,7 @@ class AgentContext:
 @dataclass
 class AgentResult:
     """The output of a single agent execution."""
+
     agent_name: str
     answer: str
     tool_calls: list[dict[str, Any]] = field(default_factory=list)

@@ -140,7 +140,9 @@ async def test_ask_unauthorized_in_prod(client):
     from app.main import app
 
     with patch("app.core.config.settings.app_env", new=AppEnv.production):
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as anon_client:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as anon_client:
             resp = await anon_client.post("/ask", json={"message": "Unauth request"})
             assert resp.status_code == 401
             assert "Missing Authorization" in resp.json()["detail"]
@@ -157,7 +159,11 @@ async def test_ask_authorized_with_invalid_token(client):
     from app.main import app
 
     with patch("app.core.config.settings.app_env", new=AppEnv.production):
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers={"Authorization": "Bearer BAD_TOKEN"}) as bad_client:
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+            headers={"Authorization": "Bearer BAD_TOKEN"},
+        ) as bad_client:
             resp = await bad_client.post("/ask", json={"message": "Bad token request"})
             assert resp.status_code == 401
             assert "Invalid API key" in resp.json()["detail"]
@@ -170,30 +176,28 @@ async def test_ask_session_history_continuity(client):
     from the database and injects them into the provider message list.
     """
     mock_generate = AsyncMock(return_value=MOCK_RESPONSE)
-    
+
     with patch("app.llm.providers.ollama_provider.OllamaProvider.generate", mock_generate):
         # First request
         resp1 = await client.post(
-            "/ask",
-            json={"message": "First message", "session_id": "test-continuity-1"}
+            "/ask", json={"message": "First message", "session_id": "test-continuity-1"}
         )
         assert resp1.status_code == 200
 
         # Second request on the same session
         resp2 = await client.post(
-            "/ask",
-            json={"message": "Second message", "session_id": "test-continuity-1"}
+            "/ask", json={"message": "Second message", "session_id": "test-continuity-1"}
         )
         assert resp2.status_code == 200
 
     assert mock_generate.call_count == 2
-    
+
     second_call_args = mock_generate.call_args_list[1]
     kwargs = second_call_args.kwargs
     messages = kwargs.get("messages", second_call_args.args[0] if second_call_args.args else [])
-        
+
     roles_contents = [(m.role, m.content) for m in messages]
-    
+
     assert ("user", "First message") in roles_contents
     assert ("assistant", MOCK_RESPONSE.content) in roles_contents
     assert ("user", "Second message") in roles_contents

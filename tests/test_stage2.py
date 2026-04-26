@@ -28,12 +28,13 @@ def test_agent_registry():
 
     planet_agent = registry.get_agent("planner")
     assert isinstance(planet_agent, PlannerAgent)
-    
+
     research_agent = registry.get_agent("research")
     assert isinstance(research_agent, ResearchAgent)
 
     with pytest.raises(ValueError, match="not found"):
         registry.get_agent("nonexistent")
+
 
 @pytest.mark.asyncio
 async def test_tool_shell_denial():
@@ -43,21 +44,23 @@ async def test_tool_shell_denial():
     assert not result.success
     assert "disabled" in result.error
 
+
 @pytest.mark.asyncio
 async def test_memory_repository(db_session):
     repo = MemoryRepository(db_session)
     session_id = "test-session-123"
-    
+
     await repo.ensure_session(session_id)
     await repo.add_message(session_id, "user", "hello")
     await repo.add_message(session_id, "assistant", "world")
-    
+
     history = await repo.get_recent_history(session_id, limit=10)
     assert len(history) == 2
     assert history[0]["role"] == "user"
     assert history[0]["content"] == "hello"
     assert history[1]["role"] == "assistant"
     assert history[1]["content"] == "world"
+
 
 @pytest.mark.asyncio
 async def test_orchestrator_planner_route(db_session):
@@ -87,6 +90,7 @@ async def test_orchestrator_planner_route(db_session):
     from sqlalchemy import select
 
     from app.db.models import Trace
+
     stmt = select(Trace).where(Trace.request_id == "test-planner")
     trace = (await db_session.execute(stmt)).scalar_one_or_none()
     assert trace is not None
@@ -119,6 +123,7 @@ async def test_orchestrator_research_route(db_session):
     assert res["selected_agent"] == "research"
     assert any("Research: output is based on training data only" in w for w in res["warnings"])
 
+
 @pytest.mark.asyncio
 async def test_orchestrator_tool_shell_denial(db_session):
     """tool:shell with allow_tools=True returns structured denial, no execution."""
@@ -150,6 +155,7 @@ async def test_orchestrator_tool_shell_denial(db_session):
     from sqlalchemy import select
 
     from app.db.models import Trace
+
     stmt = select(Trace).where(Trace.request_id == "test-shell")
     trace = (await db_session.execute(stmt)).scalar_one_or_none()
     assert trace is not None
