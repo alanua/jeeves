@@ -1,86 +1,133 @@
-# 03 — Implementation State
+# 03 - Implementation State
 
-## Stage overview
+Last reconciled against code/tests/tags: 2026-04-26
 
-### Stage 1 — Foundation
-Stage 1 is **closed**.
+## Verification snapshot
 
-Accepted outcomes:
-- canonical contracts and enums became the runtime source of truth
-- canonical runtime execution flow was established
-- runtime evidence and validation were populated
-- runtime-to-boundary serialization was hardened
-- `/ask` HTTP behavior was locked with tests
+This file describes the current repository state, not only prior project intent.
 
-Known project tags from accepted work:
-- `stage1-closed`
-- `stage1-http-locked`
+Verified in this checkout:
+- actual git tag present: `stage2-runtime-a27beb3`
+- current HEAD: `deaf223` on branch `codex/docs-drift-audit-20260426-233221`
+- tests exist for `/ask`, routing, policy, provider fallback, session history, tool denial, and trace persistence
+- tests were inspected, but not executed here because `pytest` is not installed in the current environment
 
-### Stage 2 — Hybrid coordination
-Stage 2 is **live**.
+Not present in this checkout:
+- tags `stage1-closed`, `stage1-http-locked`, or `stage2-dry-run-executor-stable`
+- commits `0591122`, `fe81bd2`, `36c3dfe`, or `6a455f7`
+- implemented hybrid choreography such as `research -> planner`
+- implemented execution-aware choreography such as `research -> planner -> executor`
+- canonical `ActionProposal` or `ActionApproval` runtime contracts
+- action execution runner or approval workflow
 
-Accepted outcomes:
-- true hybrid coordination exists in the live runtime
-- plain hybrid uses a deterministic `research -> planner` path
-- planner remains the final user-facing answer producer
-- coordinated provenance, validation, trace semantics, and tool attribution were hardened
+## Current implemented runtime
 
-### Stage 2.5 — Execution-aware hybrid with dry-run executor
-This slice is **live and stable**.
+The live `/ask` path is a deterministic single-agent routing flow:
+- messages classified as `complex` select `planner`
+- messages classified as `research` select `research`
+- all other task classes select `executor`
 
-Accepted outcomes:
-- execution-aware hybrid uses `research -> planner -> executor`
-- executor is optional, dry-run only, and advisory
-- executor is not action-producing
-- planner remains the final visible agent and final answer source
-- optional executor failure degrades in place without erasing planner success
-- execution-aware hybrid provenance and trace semantics are hardened
+Each selected agent calls the LLM router directly and returns one answer. The current orchestrator does not compose multiple agents into a single coordinated answer.
 
-Known project tag from accepted work:
-- `stage2-dry-run-executor-stable`
+Verified current behavior:
+- request pre-flight self-modification policy check
+- task classification by keyword heuristics
+- DB-backed session history hydration
+- user and assistant message persistence
+- trace persistence with selected agent/provider/model, latency, token counts, success/error state, and optional tool-call summary
+- local-first provider routing with optional OpenRouter fallback, as covered by tests
+- `/ask` response shape includes `request_id`, `answer`, selected agent/provider/model, fallback flag, `tool_calls`, latency, and warnings
+- explicit `tool:shell ...` intent can produce a structured denial when tools are allowed but shell is disabled
+
+## Agent state
+
+Implemented agents:
+- `ExecutorAgent`: general-purpose answer generation
+- `PlannerAgent`: planning-framed answer generation for `complex` tasks
+- `ResearchAgent`: research-framed answer generation for `research` tasks
+
+The planner and research agents have distinct system prompts and warnings. They are not currently chained together.
+
+## Stage documentation status
+
+### Stage 1 - Foundation
+
+Stage 1 is documented as a prior foundation target, and several foundation behaviors are present in code/tests:
+- canonical `/ask` request/response schemas
+- LLM router and provider fallback behavior
+- policy checks for tools/providers/self-modification
+- DB session/message/trace persistence
+- `/ask` smoke and authorization tests
+
+However, the historical Stage 1 tags named in older notes are not present in this checkout. Treat "Stage 1 closed" as a documented historical claim, not a tag-verified fact in this repository clone.
+
+### Stage 2 - Agent routing
+
+The tag `stage2-runtime-a27beb3` verifies a concrete routing slice: planner and research agents were added and routed directly by task type.
+
+Accepted current scope:
+- distinct planner and research agents exist
+- planner route is tested through selected agent and warning checks
+- research route is tested through selected agent and warning checks
+- executor remains the fallback/general route
+
+Not accepted as current implemented behavior:
+- "true hybrid coordination"
+- deterministic `research -> planner` chaining
+- planner as final answer producer after research
+- coordinated multi-agent provenance semantics
+
+Those are documented targets or historical notes until code and tests reintroduce them.
+
+### Stage 2.5 - Execution-aware dry-run executor
+
+This slice is not present in the current code/tests/tags. Treat prior claims that execution-aware hybrid uses `research -> planner -> executor` as unverified target documentation.
+
+Not currently implemented:
+- optional dry-run executor step after planner
+- executor advisory output inside a coordinated hybrid flow
+- failure degradation from executor back to planner success
+- hardened execution-aware provenance or trace semantics
 
 ## Action-layer foundation
-The action layer is **foundationally present but not live**.
 
-Already added:
-- canonical action contracts
+The current repo has policy and disabled-tool scaffolding, but no canonical action layer.
+
+Present:
+- `PolicyEngine` gates tool access, provider access, and self-modification
+- `ToolHandler` recognizes explicit shell intent in one narrow path
+- `ShellScaffoldTool` always denies execution by default
+- tests cover policy denial and shell tool denial
+
+Not present:
+- canonical action proposal contracts
 - approval and execution status enums
-- policy scaffolding for future proposal assessment and execution authorization
-
-Not yet live:
-- action proposal generation in the live runtime
-- action approval handling in live flows
+- live action proposal generation
+- action approval handling
 - action execution runner
 - real side effects
-
-## Current behavior summary
-
-What live runtime can do now:
-- route requests
-- execute single-agent flows
-- execute coordinated hybrid flows
-- execute execution-aware hybrid flows with a dry-run advisory executor step
-- produce canonical evidence / validation / aggregate results
-- preserve stable `/ask` behavior
-
-What live runtime cannot do yet:
-- execute approved real-world actions
-- expose action state through `/ask`
-- persist rich per-action ledgers in DB schema
-- act as a mature browser-use / computer-use runtime
+- rich per-action DB ledgers
 
 ## Current safe next engineering direction
 
-The most recently accepted next-step posture is:
-- implement **proposal-only generation in isolation** for execution-aware hybrid
-- keep live behavior unchanged until proposal semantics are stable
-- defer real action execution until the approval-gated action layer is deliberately wired
+Conservative next step:
+- first decide whether to implement proposal-only action artifacts or multi-agent coordination
+- add isolated contracts and tests before changing `/ask` behavior
+- keep real action execution out of scope until approval semantics, persistence, and policy are explicit
+
+Do not treat older hybrid or action-layer claims as accepted current runtime behavior unless new code/tests/tags are added.
 
 ## Project stability summary
 
-Current stability posture:
-- Stage 1 is stable
-- plain hybrid coordination is stable
-- execution-aware dry-run executor coordination is stable
-- boundary/API compatibility is stable
-- action foundation exists but is not yet behaviorally active
+Current verified stability posture:
+- single-agent `/ask` routing is present
+- planner/research/executor direct routing is present
+- provider fallback and policy scaffolding are present
+- session/message/trace persistence is present
+- shell tool execution remains disabled by default
+
+Current unverified or target-only posture:
+- Stage 1 historical tags and commit references
+- hybrid coordination
+- execution-aware dry-run executor coordination
+- canonical action proposal/approval layer
