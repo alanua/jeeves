@@ -28,6 +28,15 @@ Last consolidated: 2026-05-01
 - Contract-first spawning is required for complex coordinated development.
 - Agent outputs should be artifact-driven via files, not hidden chat-only state.
 
+### Runner-mediated executor workflow
+
+- The user does not manually pass tasks to Codex.
+- ChatGPT/architect writes structured task files or task instructions in the KB/workspace.
+- Runner reads those tasks and passes them to Codex or the selected executor.
+- Runner returns execution results/logs/handoff for ChatGPT review.
+- ChatGPT then audits the result, updates KB/handoff, and prepares the next task if needed.
+- Therefore, task files must be written for machine/runner consumption: clear goal, context, allowed changes, forbidden changes, commands/checks, expected output, and handoff requirements.
+
 ### Safety and self-improvement
 
 - No autonomous self-rewrites.
@@ -47,3 +56,4 @@ Last consolidated: 2026-05-01
 - Do not copy Claude-specific tmux/iTerm settings as core design.
 - Do not accept marketing claims about autonomous corporations as canon.
 - Do not store secrets in Markdown, prompts, or public GitHub.
+- Do not tell the user to manually give Codex tasks when the runner workflow is available; runner is the executor handoff mechanism.
