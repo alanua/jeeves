@@ -3,18 +3,6 @@
 Status: ACTIVE_HANDOFF
 Last updated: 2026-05-01
 
-## What changed
-
-Project-specific KB structure for Jeeves was created.
-
-Files created:
-- `knowledge_base/projects/jeeves/START_HERE.md`
-- `knowledge_base/projects/jeeves/current_state.md`
-- `knowledge_base/projects/jeeves/decisions.md`
-- `knowledge_base/projects/jeeves/open_questions.md`
-- `knowledge_base/projects/jeeves/tasks.md`
-- `knowledge_base/projects/jeeves/handoff.md`
-
 ## Current working rule
 
 For Jeeves context, start with:
@@ -24,20 +12,62 @@ For Jeeves context, start with:
 ```
 
 Then load:
-- global startup file
-- memory policy
-- working protocol
-- Jeeves startup prompt
-- this project-specific folder
+- `knowledge_base/START_HERE_FOR_CHATGPT.md`
+- `knowledge_base/MEMORY_POLICY.md`
+- `knowledge_base/WORKING_PROTOCOL.md`
+- `knowledge_base/assistant_startup_prompt.md`
+- `knowledge_base/projects/jeeves/START_HERE.md`
+- this handoff
 
-## Current focus
+## Current decision
 
-Create project-specific KB structure first, then use it consistently.
+We continue according to the staged plan.
 
-## Next action
+Do not jump directly to a development-agent team before Stage-1 is validated.
 
-Create equivalent initial structure for BauClock (`БК`).
+## Active next step
+
+Runner should pick up the current runner-readable task:
+
+```text
+knowledge_base/projects/jeeves/executor_tasks/2026-05-01_stage1_bootstrap_validation.md
+```
+
+Goal: validate the current Stage-1 bootstrap before Stage-2.
+
+## Expected runner return
+
+Runner/executor should return:
+
+```text
+Summary:
+What works:
+What fails:
+Commands run:
+Errors/logs:
+Files changed:
+Recommended next task:
+```
+
+## Review step after runner result
+
+After runner returns result/logs/handoff:
+
+1. ChatGPT reviews the result.
+2. Update `current_state.md`, `tasks.md`, and this `handoff.md` if needed.
+3. Only then prepare the next `КОД ДЖ` task.
+
+## Planned next phase after Stage-1 validation
+
+If Stage-1 is stable, prepare Stage-2 runner task for:
+- `agent_runtime/` artifact layout
+- `contract_chain` schema
+- task locking / race-condition prevention
+- reviewer/monitor role skeleton
+- no uncontrolled multi-agent team yet
 
 ## User action
 
-No user action needed unless they want to adjust project aliases or folder names.
+No manual Codex task copying.
+
+User only needs to trigger/allow the runner workflow if it is not automatic.
