@@ -50,9 +50,9 @@ Current runnable baseline is Stage-1 vertical slice:
 - orchestrator
 - policy gate
 - task classifier
-- bounded/session memory
+- bounded working/session context
 - provider router
-- DB persistence/traces
+- DB-backed messages/sessions/traces persistence
 
 Strategic target architecture must not be forced too early.
 
