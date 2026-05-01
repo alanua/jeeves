@@ -7,7 +7,7 @@ Last consolidated: 2026-05-01
 
 ## Purpose
 
-Read this file when work is about Jeeves, OpenClaw-style agents, agent memory, orchestration, tools, skills, observability, controlled self-improvement, or the future personal assistant runtime.
+Read this file when work is about Jeeves, OpenClaw-style agents, agent memory, orchestration, tools, skills, observability, controlled self-improvement, runner/executor workflow, or the future personal assistant runtime.
 
 Global startup files:
 - `knowledge_base/START_HERE_FOR_CHATGPT.md`
@@ -24,9 +24,24 @@ It is not a chaotic autonomous corporation. It should behave as a controlled lea
 Role model:
 - User = operator / owner / final controller
 - ChatGPT = architect / reviewer / memory organizer / task framer
+- Runner = execution bridge that reads structured task files and passes them to Codex/executors
 - Codex/coding agents = implementation executors
 - Jeeves = future orchestrator
 - GitHub KB + Drive = temporary shared memory until Jeeves memory is mature
+
+## Executor workflow
+
+For `КОД ДЖ`:
+
+```text
+ChatGPT creates or updates runner-readable task file
+-> runner reads task file
+-> runner gives task to Codex/executor
+-> runner returns result/logs/handoff
+-> ChatGPT reviews and updates KB/handoff
+```
+
+The user should not be told to manually copy tasks into Codex when runner is available.
 
 ## Current implementation baseline
 
@@ -35,7 +50,7 @@ Current runnable baseline is Stage-1 vertical slice:
 - orchestrator
 - policy gate
 - task classifier
-- bounded session memory
+- bounded/session memory
 - provider router
 - DB persistence/traces
 
@@ -70,6 +85,7 @@ Core principles:
 - `open_questions.md`
 - `tasks.md`
 - `handoff.md`
+- `codex_tasks/` for runner-readable executor tasks when applicable
 
 ## Default startup command
 
