@@ -85,7 +85,7 @@ Core principles:
 - `open_questions.md`
 - `tasks.md`
 - `handoff.md`
-- `codex_tasks/` for runner-readable executor tasks when applicable
+- `executor_tasks/` for runner-readable executor tasks when applicable
 
 ## Default startup command
 
