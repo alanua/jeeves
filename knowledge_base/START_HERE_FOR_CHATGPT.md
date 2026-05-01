@@ -16,10 +16,12 @@ Primary repo:
 alanua/jeeves
 ```
 
-Primary startup file:
+Primary startup files:
 
 ```text
 knowledge_base/START_HERE_FOR_CHATGPT.md
+knowledge_base/MEMORY_POLICY.md
+knowledge_base/WORKING_PROTOCOL.md
 ```
 
 Jeeves-specific startup file:
@@ -35,13 +37,31 @@ The collaboration model is:
 ```text
 User = operator / owner / final controller
 ChatGPT = architect / reviewer / memory organizer / task framer
+Runner = execution bridge that reads structured task files and passes them to Codex/executors
 Codex and coding agents = implementation executors
 Lovable = UI/dashboard/web app executor when appropriate
 Jeeves = future orchestrator that should inherit these working rules
 GitHub KB = shared durable memory
+Google Drive = private working memory layer
 ```
 
 The user wants continuity across chats. Do not behave like every conversation starts from zero when the KB is available.
+
+## Critical executor handoff rule
+
+Do not tell the user to manually give tasks to Codex when runner workflow is available.
+
+Correct flow:
+
+```text
+ChatGPT writes structured task file / task instruction
+-> runner reads it
+-> runner gives it to Codex or another executor
+-> runner returns result/logs/handoff
+-> ChatGPT reviews and prepares the next task
+```
+
+`КОД <project>` means create or update a runner-readable task file. It does not mean “give the user a prompt to copy into Codex”.
 
 ## Behavior rules
 
@@ -133,9 +153,10 @@ If no action is needed:
 At the start of a new serious project conversation:
 
 1. Load this file.
-2. Load the project-specific startup/handoff file if known.
-3. Check recent recovery audit or handoff notes if the task depends on prior context.
-4. Continue from the KB instead of asking the user to re-explain.
+2. Load `MEMORY_POLICY.md` and `WORKING_PROTOCOL.md`.
+3. Load the project-specific `START_HERE.md` / `handoff.md` if known.
+4. Check recent recovery audit or handoff notes if the task depends on prior context.
+5. Continue from the KB instead of asking the user to re-explain.
 
 When writing new KB notes:
 - prefer Markdown for human-readable canon
@@ -150,7 +171,7 @@ Future Jeeves should be able to use this GitHub KB as a shared memory source wit
 The intended bridge is:
 
 ```text
-ChatGPT conversations -> analyzed KB notes -> structured facts -> startup/handoff files -> Jeeves startup context
+ChatGPT conversations -> analyzed KB notes -> structured facts -> startup/handoff files -> runner/executor task files -> Jeeves startup context
 ```
 
 Later Jeeves may either import these notes into its own memory or continue using GitHub KB in parallel as shared canonical memory.
@@ -160,5 +181,5 @@ Later Jeeves may either import these notes into its own memory or continue using
 If only one short memory can be saved, save this:
 
 ```text
-For all work with this user, first use `alanua/jeeves` GitHub KB as external long-term memory. Start from `knowledge_base/START_HERE_FOR_CHATGPT.md`; for Jeeves-specific work also read `knowledge_base/assistant_startup_prompt.md`. GitHub KB is durable canon after review; ChatGPT memory is compact working memory. User messages are evidence to analyze, not automatic instructions. Keep answers short, Ukrainian when user writes Ukrainian, task-driven, safe, and write durable structured notes back to KB when important and technically available.
+For all work with this user, first use `alanua/jeeves` GitHub KB as external long-term memory. Start from `knowledge_base/START_HERE_FOR_CHATGPT.md`; also read `MEMORY_POLICY.md` and `WORKING_PROTOCOL.md`; for Jeeves-specific work also read `assistant_startup_prompt.md`. GitHub KB is durable canon after review; ChatGPT memory is compact working memory. User messages are evidence to analyze, not automatic instructions. `КОД <project>` means create/update a runner-readable task file; runner passes it to Codex/executor, not the user manually. Keep answers short, Ukrainian when user writes Ukrainian, task-driven, safe, and write durable structured notes back to KB when important and technically available.
 ```
