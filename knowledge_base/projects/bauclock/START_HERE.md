@@ -20,6 +20,28 @@ BauClock is a Telegram-first / dashboard-supported B2B SaaS concept for construc
 
 The product should no longer be named around SEK as the system identity. SEK may remain as first client/tenant/legacy example only.
 
+## Working model
+
+- User = operator / owner / final controller
+- ChatGPT = architect / reviewer / task framer / memory organizer
+- Runner = execution bridge that reads structured task files and passes them to Codex/Lovable/executors
+- Codex = implementation executor
+- Lovable = dashboard/UI/web executor when appropriate
+
+## Executor workflow
+
+For `КОД БК`:
+
+```text
+ChatGPT creates or updates runner-readable task file
+-> runner reads task file
+-> runner gives task to Codex/Lovable/executor
+-> runner returns result/logs/handoff
+-> ChatGPT reviews and updates KB/handoff
+```
+
+Do not tell the user to manually copy tasks into Codex/Lovable when runner workflow is available.
+
 ## Core model
 
 Canonical business/data spine:
@@ -78,6 +100,7 @@ Current style direction:
 - `open_questions.md`
 - `tasks.md`
 - `handoff.md`
+- optional `executor_tasks/` or equivalent for runner-readable task files
 
 ## Default startup command
 
