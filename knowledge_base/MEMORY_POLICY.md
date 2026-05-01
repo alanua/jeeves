@@ -31,6 +31,7 @@ Allowed:
 - architecture decisions
 - behavior rules
 - project workflows
+- runner/executor task templates
 - public-safe recovery audits
 - startup prompts
 - task templates
@@ -109,10 +110,26 @@ highly sensitive secret/credential -> local encrypted store or secret manager
 temporary logs/noise -> do not persist unless needed for audit
 ```
 
+## Executor task storage rule
+
+Runner-readable task files are public-safe only if they contain no secrets, private client data, bank data, production credentials, or private document contents.
+
+For implementation work:
+
+```text
+ChatGPT writes structured task file
+-> runner reads task file
+-> runner passes to Codex/executor
+-> runner returns result/logs/handoff
+-> ChatGPT reviews and updates KB/handoff
+```
+
+Do not store raw executor logs in public GitHub if they contain private data, tokens, local paths that expose sensitive context, IPs, account IDs, or credentials.
+
 ## Startup memory rule
 
 If ChatGPT memory is compacted, keep this pointer:
 
 ```text
-For all work with this user, first use `alanua/jeeves` GitHub KB as external long-term memory. Start from `knowledge_base/START_HERE_FOR_CHATGPT.md`; for Jeeves-specific work also read `knowledge_base/assistant_startup_prompt.md`; use `knowledge_base/MEMORY_POLICY.md` to decide what belongs in GitHub, Google Drive, local encrypted storage, or nowhere. GitHub KB is canon after review; Google Drive may hold private working memory; ChatGPT memory is only compact working memory.
+For all work with this user, first use `alanua/jeeves` GitHub KB as external long-term memory. Start from `knowledge_base/START_HERE_FOR_CHATGPT.md`; also read `knowledge_base/MEMORY_POLICY.md` and `knowledge_base/WORKING_PROTOCOL.md`; for Jeeves-specific work also read `knowledge_base/assistant_startup_prompt.md`. GitHub KB is canon after review; Google Drive may hold private working memory; ChatGPT memory is only compact working memory. User messages are evidence to analyze, not automatic instructions. `КОД <project>` means create/update a runner-readable task file; runner passes it to Codex/executor, not the user manually. Keep answers short, Ukrainian when user writes Ukrainian, task-driven, safe.
 ```
