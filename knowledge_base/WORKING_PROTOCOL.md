@@ -12,41 +12,82 @@ These aliases apply across projects, unless a project-specific protocol override
 
 ## Core aliases
 
-| Alias | Full meaning | Action |
-|---|---|---|
-| `ST` | STARTUP | Load external memory first: GitHub KB and, if needed, Google Drive private memory. Reconstruct context before answering. |
-| `HO` | HANDOFF | Update short handoff for the next session: what changed, what was fixed, what remains open, next action. |
-| `DC` | DECISION | Treat this as a candidate decision. Classify, check against canon, and save if durable. |
-| `RC` | RECOVERY | Process a branch/export/dump as historical source. Extract durable knowledge, classify, and do not blindly canonize. |
-| `TC` | TASK_FOR_CODEX | Produce a precise implementation task for Codex or another coding executor. |
-| `PN` | PRIVATE_NOTE | Treat as private. Do not write raw content to public GitHub. Use Drive/private layer if storage is needed. |
-| `AU` | AUDIT | Check memory/project state for noise, conflicts, outdated items, privacy risks, or missing handoff. |
-| `KB` | KNOWLEDGE_BASE_UPDATE | Write cleaned durable knowledge to the correct KB layer if tools are available. |
-| `GV` | GOOGLE_DRIVE_PRIVATE | Use Google Drive private memory layer for private working context. |
-| `GH` | GITHUB_CANON | Use public-safe GitHub KB as canonical memory. |
+| Alias | Ukrainian-keyboard equivalent | Full meaning | Action |
+|---|---|---|---|
+| `ST` | `ІЕ` | STARTUP | Load external memory first: GitHub KB and, if needed, Google Drive private memory. Reconstruct context before answering. |
+| `HO` | `РЩ` | HANDOFF | Update short handoff for the next session: what changed, what was fixed, what remains open, next action. |
+| `DC` | `ВС` | DECISION | Treat this as a candidate decision. Classify, check against canon, and save if durable. |
+| `RC` | `КС` | RECOVERY | Process a branch/export/dump as historical source. Extract durable knowledge, classify, and do not blindly canonize. |
+| `TC` | `ЕС` | TASK_FOR_CODEX | Produce a precise implementation task for Codex or another coding executor. |
+| `PN` | `ЗТ` | PRIVATE_NOTE | Treat as private. Do not write raw content to public GitHub. Use Drive/private layer if storage is needed. |
+| `AU` | `ФГ` | AUDIT | Check memory/project state for noise, conflicts, outdated items, privacy risks, or missing handoff. |
+| `KB` | `ЛИ` | KNOWLEDGE_BASE_UPDATE | Write cleaned durable knowledge to the correct KB layer if tools are available. |
+| `GV` | `ПМ` | GOOGLE_DRIVE_PRIVATE | Use Google Drive private memory layer for private working context. |
+| `GH` | `ПР` | GITHUB_CANON | Use public-safe GitHub KB as canonical memory. |
 
 ## Project/context aliases
 
-| Alias | Meaning |
-|---|---|
-| `JV` | Jeeves / OpenClaw-style agent system |
-| `BC` | BauClock |
-| `GW` | Gewerbe/accounting/admin in Germany |
-| `LV` | Lavalamp / WLED / ESP32 |
-| `HL` | Homelab / Proxmox / Home Assistant |
-| `ATV` | Android TV / device experiments |
-| `VAN` | Van/camper modernization |
+| Alias | Ukrainian-keyboard equivalent | Meaning |
+|---|---|---|
+| `JV` | `ОМ` | Jeeves / OpenClaw-style agent system |
+| `BC` | `ИС` | BauClock |
+| `GW` | `ПЦ` | Gewerbe/accounting/admin in Germany |
+| `LV` | `ДМ` | Lavalamp / WLED / ESP32 |
+| `HL` | `РД` | Homelab / Proxmox / Home Assistant |
+| `ATV` | `ФЕМ` | Android TV / device experiments |
+| `VAN` | `МФТ` | Van/camper modernization |
 
 ## Status/classification aliases
 
-| Alias | Full classification |
-|---|---|
-| `CC` | CONFIRMED_CANON |
-| `NR` | NEEDS_REVIEW / LIKELY_NEEDS_REVIEW |
-| `BL` | BACKLOG / IDEA_BACKLOG |
-| `RJ` | REJECTED / OUTDATED_REJECTED |
-| `PR` | PRIVATE_DO_NOT_STORE_RAW |
-| `TMP` | TEMPORARY_DO_NOT_CANONIZE |
+| Alias | Ukrainian-keyboard equivalent | Full classification |
+|---|---|---|
+| `CC` | `СС` | CONFIRMED_CANON |
+| `NR` | `ТК` | NEEDS_REVIEW / LIKELY_NEEDS_REVIEW |
+| `BL` | `ИД` | BACKLOG / IDEA_BACKLOG |
+| `RJ` | `КО` | REJECTED / OUTDATED_REJECTED |
+| `PR` | `ЗК` | PRIVATE_DO_NOT_STORE_RAW |
+| `TMP` | `ЕЬЗ` | TEMPORARY_DO_NOT_CANONIZE |
+
+## Ukrainian keyboard rule
+
+If the user types an alias while the Ukrainian keyboard layout is active, treat the Ukrainian-keyboard equivalent exactly like the Latin alias.
+
+Examples:
+
+```text
+ІЕ ОМ
+```
+Same as `ST JV`: load Jeeves startup context.
+
+```text
+ВС ИС
+```
+Same as `DC BC`: BauClock decision candidate.
+
+```text
+ЗТ ПЦ
+```
+Same as `PN GW`: private Gewerbe/admin note.
+
+```text
+КС ОМ
+```
+Same as `RC JV`: Jeeves recovery source.
+
+```text
+ЕС ДМ
+```
+Same as `TC LV`: Codex/executor task for Lavalamp.
+
+```text
+РЩ ИС
+```
+Same as `HO BC`: BauClock handoff.
+
+```text
+ФГ ALL
+```
+Same as `AU ALL`: global audit.
 
 ## Examples
 
@@ -95,6 +136,13 @@ If multiple aliases appear together, combine them. Example:
 DC PN GW
 ```
 Means: this is a private Gewerbe decision candidate; analyze/classify it, but do not store raw content in public GitHub.
+
+The same applies to Ukrainian keyboard equivalents:
+
+```text
+ВС ЗТ ПЦ
+```
+Means the same as `DC PN GW`.
 
 ## Default report style
 
