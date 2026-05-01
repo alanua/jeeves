@@ -1,8 +1,25 @@
-# Codex Task — Validate Jeeves Stage 1 Bootstrap
+# Runner Task — Validate Jeeves Stage 1 Bootstrap
 
-Status: READY_FOR_EXECUTOR
+Status: READY_FOR_RUNNER
 Project: Jeeves
+Alias: `КОД ДЖ`
 Date: 2026-05-01
+
+## Runner handoff
+
+This file is for the runner.
+
+The user does not manually copy this task into Codex.
+
+Correct flow:
+
+```text
+runner reads this file
+-> runner passes the task to Codex/executor
+-> executor runs validation/fixes within allowed scope
+-> runner returns result/logs/handoff
+-> ChatGPT reviews and updates KB/handoff
+```
 
 ## Goal
 
@@ -68,6 +85,12 @@ Not allowed:
 - no enabling dangerous tools by default
 - no secrets
 - no new architecture rewrite
+
+## Safety/privacy boundaries
+
+Do not commit secrets, tokens, private account data, local private paths, or private logs.
+
+If logs contain sensitive data, redact before returning them.
 
 ## Final handoff
 
