@@ -1,7 +1,7 @@
 # WORKING PROTOCOL
 
 Status: CONFIRMED_CANON
-Scope: compact mnemonic command aliases for collaboration with ChatGPT and future Jeeves.
+Scope: compact mnemonic command aliases for collaboration with ChatGPT, runner, executors, and future Jeeves.
 Last consolidated: 2026-05-01
 
 ## Purpose
@@ -18,7 +18,7 @@ Main rule: prefer Ukrainian mnemonic aliases because they are easier to remember
 | `СТАН` | стан / передача стану | `HO` | HANDOFF | Update short handoff for the next session: what changed, what was fixed, what remains open, next action. |
 | `РІШ` | рішення | `DC` | DECISION | Treat this as a candidate decision. Classify, check against canon, and save if durable. |
 | `ВІДН` | відновлення | `RC` | RECOVERY | Process a branch/export/dump as historical source. Extract durable knowledge, classify, and do not blindly canonize. |
-| `КОД` | код / задача для коду | `TC` | TASK_FOR_CODEX | Produce a precise implementation task for Codex or another coding executor. |
+| `КОД` | задача для коду | `TC` | TASK_FOR_EXECUTOR | Create or update a runner-readable structured task file. Runner passes it to Codex/executor; the user does not manually copy tasks to Codex. |
 | `ПРИВ` | приватне | `PN` | PRIVATE_NOTE | Treat as private. Do not write raw content to public GitHub. Use Drive/private layer if storage is needed. |
 | `АУД` | аудит | `AU` | AUDIT | Check memory/project state for noise, conflicts, outdated items, privacy risks, or missing handoff. |
 | `БЗ` | база знань | `KB` | KNOWLEDGE_BASE_UPDATE | Write cleaned durable knowledge to the correct KB layer if tools are available. |
@@ -57,12 +57,36 @@ Main rule: prefer Ukrainian mnemonic aliases because they are easier to remember
 | HANDOFF | передача стану / стан для наступної сесії | `СТАН` |
 | DECISION | рішення | `РІШ` |
 | RECOVERY | відновлення / обробка історичного джерела | `ВІДН` |
-| TASK_FOR_CODEX | задача для Codex / задача для коду | `КОД` |
+| TASK_FOR_EXECUTOR | задача для runner/Codex/executor | `КОД` |
 | PRIVATE_NOTE | приватна нотатка | `ПРИВ` |
 | AUDIT | аудит / перевірка | `АУД` |
 | KNOWLEDGE_BASE_UPDATE | оновлення бази знань | `БЗ` |
 | GOOGLE_DRIVE_PRIVATE | приватний Google Drive | `ДР` |
 | GITHUB_CANON | GitHub-канон | `ГХ` |
+
+## Runner-mediated executor rule
+
+`КОД <project>` never means “tell the user to manually pass this to Codex”.
+
+It means:
+
+```text
+ChatGPT/architect creates or updates a structured task file
+-> runner reads that task file
+-> runner passes the task to Codex or another executor
+-> runner returns logs/result/handoff
+-> ChatGPT reviews the result and prepares the next task
+```
+
+Task files must be written for runner consumption:
+- clear goal
+- context
+- allowed changes
+- forbidden changes
+- checks/commands
+- expected output
+- handoff requirements
+- safety/privacy boundaries
 
 ## Examples
 
@@ -89,7 +113,7 @@ Same as `RC JV`: process a Jeeves branch/memory dump as historical source.
 ```text
 КОД ЛАВ
 ```
-Same as `TC LV`: prepare an exact Codex/executor task for Lavalamp.
+Create/update a runner-readable executor task for Lavalamp. Do not tell the user to copy it to Codex manually.
 
 ```text
 СТАН БК
