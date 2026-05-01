@@ -27,6 +27,11 @@ Active and next tasks.
 ### handoff.md
 Short active handoff for the next session.
 
+### executor_tasks/ or codex_tasks/
+Optional folder for runner-readable task files. Use it when `КОД <project>` is invoked.
+
+These files are for the runner, not for the user to manually copy into Codex.
+
 ## Rules
 
 - Keep project memory separated.
@@ -35,3 +40,6 @@ Short active handoff for the next session.
 - Secrets and credentials go to neither plain GitHub nor plain Drive.
 - End important sessions with `СТАН <project>`.
 - Start serious project sessions with `СТ <project>`.
+- `КОД <project>` means create/update a runner-readable task file.
+- Runner passes tasks to Codex/executor and returns result/logs/handoff.
+- Do not tell the user to manually pass tasks to Codex when runner workflow is available.
