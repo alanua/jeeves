@@ -119,3 +119,21 @@ Operating rule:
 - The development team workflow is part of the exoskeleton.
 - The memory tools are parts of the exoskeleton.
 - Jeeves may inherit selected tested tools later only after review, cleanup, adaptation, testing, approval, and implementation.
+
+## 2026-05-03 — Recovery mode integrated into exoskeleton
+
+Classification: CONFIRMED_CANON
+Sensitivity: public-safe
+
+What changed:
+- Older `JEEVES_BRANCH_RECOVERY_MODE` instructions were reviewed as historical source.
+- The useful parts were integrated into `CHATGPT_EXOSKELETON.md` as `Recovery / Historical Source Layer`.
+- The old recovery process is now a module of the ChatGPT exoskeleton, not the whole operating model.
+- The exoskeleton now explicitly records the strategic goal: first strengthen ChatGPT through the exoskeleton, then use that stronger collaboration loop to design and build Jeeves as a separate independent private assistant.
+
+Operating rule:
+- Treat old branches/files/exports/screenshots/docs as historical sources.
+- Extract durable knowledge only.
+- Classify before saving.
+- Write only minimal history source index, behavior rule, recovery audit note, or approved canonical doc.
+- Never overwrite canon from old chat without approval.
