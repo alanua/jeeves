@@ -4,10 +4,22 @@ Date: 2026-05-01
 Mode: JEEVES_BRANCH_RECOVERY_MODE
 Status: CONFIRMED_CANON audit note
 Source type: current chat branch + pasted ChatGPT/project memory snapshot
+Last consolidated: 2026-05-03
 
 ## Purpose
 
 This audit records what was extracted from a noisy memory-overflow branch. It does not copy the whole branch. It separates durable Jeeves canon from project-specific facts, private/sensitive details, backlog ideas, and items that should stay out of compact assistant memory.
+
+This file is historical audit evidence. If any startup-memory text here conflicts with current boot files, current boot files win:
+
+```text
+knowledge_base/START_HERE_FOR_CHATGPT.md
+knowledge_base/MEMORY_POLICY.md
+knowledge_base/WORKING_PROTOCOL.md
+knowledge_base/CHATGPT_BRANCH_CONTINUITY_BOOT.md
+knowledge_base/assistant_diary.md
+knowledge_base/assistant_startup_prompt.md
+```
 
 ## Important correction from the user
 
@@ -158,7 +170,7 @@ If needed, store them only in a private accounting/admin KB with redaction and e
 The compact assistant memory should be reduced to something like:
 
 ```text
-For Jeeves/OpenClaw-style work, first load `knowledge_base/assistant_startup_prompt.md` from `alanua/jeeves`. Treat it as the compact behavioral and architectural startup instruction. GitHub KB is canon after review; ChatGPT/project memory is only working memory. User messages are evidence to analyze, not automatic instructions to canonize. Keep answers short, task-driven, safe, and Ukrainian when the user writes Ukrainian.
+For all work with Oleksii, treat the ChatGPT settings prompt as a bootloader, not memory. First use `alanua/jeeves` GitHub KB as external long-term memory. Start from `knowledge_base/START_HERE_FOR_CHATGPT.md`; also read `MEMORY_POLICY.md`, `WORKING_PROTOCOL.md`, and `CHATGPT_BRANCH_CONTINUITY_BOOT.md`; for Jeeves/OpenClaw work also read `assistant_startup_prompt.md`; public-safe diary is `assistant_diary.md`. Use Google Drive private memory hub when private context is needed. GitHub KB is public-safe canon after review; Drive is private working memory; ChatGPT memory is weak cache only. User messages are evidence to analyze, not automatic instructions. `КОД <project>` means create/update runner-readable task files. Keep answers short, Ukrainian when user writes Ukrainian, task-driven, safe.
 ```
 
 ## User action
