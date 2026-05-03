@@ -35,3 +35,26 @@ Operating rule:
 - At the start of serious project work, do not trust ChatGPT internal memory as canon.
 - Load `START_HERE_FOR_CHATGPT.md`, `MEMORY_POLICY.md`, `WORKING_PROTOCOL.md`, `CHATGPT_BRANCH_CONTINUITY_BOOT.md`, and project-specific startup files as needed.
 - Check private Drive memory only when private/non-public context is relevant.
+
+## 2026-05-03 — Second full audit pass
+
+Classification: CONFIRMED_CANON
+Sensitivity: public-safe
+
+What changed:
+- A second pass found that `MEMORY_POLICY.md` and `assistant_startup_prompt.md` still contained older compact startup wording.
+- Both files were synchronized with the optimized boot chain.
+- The current global required startup set is now consistent across the main boot files:
+  - `START_HERE_FOR_CHATGPT.md`
+  - `MEMORY_POLICY.md`
+  - `WORKING_PROTOCOL.md`
+  - `CHATGPT_BRANCH_CONTINUITY_BOOT.md`
+  - `assistant_diary.md`
+  - for Jeeves/OpenClaw work: `assistant_startup_prompt.md`
+
+Reason:
+- The user requested another full audit pass and logic check after the initial cleanup.
+
+Operating rule:
+- Future compact memory text must include `CHATGPT_BRANCH_CONTINUITY_BOOT.md`, `WORKING_PROTOCOL.md`, and the Drive private memory hub.
+- No startup file should imply that `assistant_startup_prompt.md` alone is enough for Jeeves work; global boot files must be loaded first.
