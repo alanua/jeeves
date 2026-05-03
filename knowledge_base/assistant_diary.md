@@ -81,3 +81,23 @@ Current required boot set:
 
 Operating rule:
 - Historical recovery/audit notes are not primary startup instructions. If any historical text conflicts with current boot files, current boot files win.
+
+## 2026-05-03 — Debt closure pass: private infrastructure split
+
+Classification: CONFIRMED_CANON
+Sensitivity: public-safe summary only
+
+What changed:
+- The remaining hygiene debt was closed: raw private Jeeves runner / Hetzner / Termux infrastructure details were removed from the global Drive handoff.
+- A dedicated private Drive document now holds those operational details: `Jeeves Private Memory - Runner Hetzner Handoff`.
+- The global Drive handoff now keeps only a redacted pointer to that private project-specific handoff.
+- `Jeeves Private Memory - START HERE` now lists the runner/Hetzner handoff as a project-specific private memory file.
+- `Jeeves Private Memory - Structured Facts` now contains an index row for `jeeves_runner` / private handoff.
+
+Reason:
+- The user requested another full audit pass and explicitly asked to close the remaining debt.
+
+Operating rule:
+- Global handoff should stay compact and should not carry raw infrastructure details.
+- Runner/Hetzner/Termux operational details must stay in the dedicated private Drive handoff.
+- Do not copy raw IPs, SSH details, access notes, keys, or credentials into public GitHub.
