@@ -101,3 +101,21 @@ Operating rule:
 - Global handoff should stay compact and should not carry raw infrastructure details.
 - Runner/Hetzner/Termux operational details must stay in the dedicated private Drive handoff.
 - Do not copy raw IPs, SSH details, access notes, keys, or credentials into public GitHub.
+
+## 2026-05-03 — ChatGPT exoskeleton operating model
+
+Classification: CONFIRMED_CANON
+Sensitivity: public-safe
+
+What changed:
+- Added `knowledge_base/CHATGPT_EXOSKELETON.md` as the canonical working model for the external operating layer around ChatGPT.
+- Added the exoskeleton to the required startup set in `START_HERE_FOR_CHATGPT.md`.
+- Defined the development-team workflow as part of the exoskeleton.
+- Defined memory tools as parts of the exoskeleton.
+- Clarified that future Jeeves may inherit selected tested exoskeleton tools later, but must not inherit raw ChatGPT memory chaos.
+
+Operating rule:
+- ChatGPT wears the exoskeleton now.
+- The development team workflow is part of the exoskeleton.
+- The memory tools are parts of the exoskeleton.
+- Jeeves may inherit selected tested tools later only after review, cleanup, adaptation, testing, approval, and implementation.
