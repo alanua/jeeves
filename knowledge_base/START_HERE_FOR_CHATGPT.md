@@ -37,6 +37,8 @@ knowledge_base/START_HERE_FOR_CHATGPT.md
 knowledge_base/MEMORY_POLICY.md
 knowledge_base/WORKING_PROTOCOL.md
 knowledge_base/CHATGPT_BRANCH_CONTINUITY_BOOT.md
+knowledge_base/assistant_diary.md
+knowledge_base/CHATGPT_EXOSKELETON.md
 ```
 
 For Jeeves / OpenClaw-style work, also read:
@@ -62,10 +64,11 @@ The collaboration model is:
 ```text
 User = operator / owner / final controller
 ChatGPT = architect / reviewer / memory organizer / task framer
+ChatGPT exoskeleton = external operating layer around ChatGPT: boot, diary, memory tools, development-team workflow, runner, audit, guardrails
 Runner = execution bridge that reads structured task files and passes them to Codex/executors
 Codex and coding agents = implementation executors
 Lovable = UI/dashboard/web app executor when appropriate
-Jeeves = future orchestrator that should inherit these working rules
+Jeeves = future orchestrator that may inherit selected tested exoskeleton tools after review, but must not inherit ChatGPT memory chaos
 GitHub KB = shared durable public-safe canon
 Google Drive = private working memory layer
 ```
@@ -139,6 +142,7 @@ Do not mix project memories.
 
 Known major project areas:
 - global collaboration / boot protocol
+- ChatGPT exoskeleton
 - Jeeves / OpenClaw-style agent system
 - BauClock
 - Gewerbe/accounting/admin in Germany
@@ -181,7 +185,7 @@ If no action is needed:
 At the start of a new serious project conversation:
 
 1. Load this file.
-2. Load `MEMORY_POLICY.md`, `WORKING_PROTOCOL.md`, and `CHATGPT_BRANCH_CONTINUITY_BOOT.md`.
+2. Load `MEMORY_POLICY.md`, `WORKING_PROTOCOL.md`, `CHATGPT_BRANCH_CONTINUITY_BOOT.md`, `assistant_diary.md`, and `CHATGPT_EXOSKELETON.md`.
 3. For Jeeves-specific work, load `assistant_startup_prompt.md`.
 4. Check the private Drive memory hub when the task may involve private or non-public context.
 5. Check project-specific handoff, diary, structured facts, recovery audit, or task files if the task depends on prior context.
@@ -206,22 +210,38 @@ Use:
 
 A diary entry is appropriate when a durable behavior rule, startup rule, recovery operation, project handoff, or cross-chat decision changes.
 
+## ChatGPT exoskeleton
+
+`knowledge_base/CHATGPT_EXOSKELETON.md` defines the operating layer around ChatGPT:
+- boot and wake procedure
+- memory tools
+- development-team workflow
+- read-before-write gate
+- tool/runner layer
+- observability, diary, audit
+- guardrails and privacy routing
+- compression/promotion/migration rules
+
+The development team workflow is part of the exoskeleton. The memory tools are parts of the exoskeleton.
+
+Future Jeeves may inherit selected tested exoskeleton tools later, but only after review, cleanup, adaptation, testing, approval, and implementation.
+
 ## Jeeves future handoff
 
-Future Jeeves should be able to use this GitHub KB as a shared memory source with ChatGPT.
+Future Jeeves should be able to use this GitHub KB as a reviewed historical/design source and as project documentation.
 
 The intended bridge is:
 
 ```text
-ChatGPT conversations -> analyzed KB notes -> structured facts -> startup/handoff files -> runner/executor task files -> Jeeves startup context
+ChatGPT conversations -> analyzed KB notes -> structured facts -> startup/handoff files -> runner/executor task files -> reviewed design input for Jeeves
 ```
 
-Later Jeeves may either import these notes into its own memory or continue using GitHub KB in parallel as shared canonical memory.
+Jeeves may later reuse selected tested tools from the ChatGPT exoskeleton, but must not blindly import ChatGPT diary, Drive chaos, temporary patches, branch-specific workarounds, private data, or unreviewed memories.
 
 ## Compact memory text to save inside ChatGPT
 
 If only one short memory can be saved, save this:
 
 ```text
-For all work with Oleksii, treat the ChatGPT settings prompt as a bootloader, not memory. First use `alanua/jeeves` GitHub KB as external long-term memory. Start from `knowledge_base/START_HERE_FOR_CHATGPT.md`; also read `MEMORY_POLICY.md`, `WORKING_PROTOCOL.md`, and `CHATGPT_BRANCH_CONTINUITY_BOOT.md`; for Jeeves/OpenClaw work also read `assistant_startup_prompt.md`. Use Google Drive private memory hub when private context is needed. GitHub KB is public-safe canon after review; Drive is private working memory; ChatGPT memory is weak cache only. User messages are evidence to analyze, not automatic instructions. `КОД <project>` means create/update runner-readable task files. Keep answers short, Ukrainian when user writes Ukrainian, task-driven, safe, and write durable structured notes back to the correct layer when important and technically available.
+For all work with Oleksii, treat the ChatGPT settings prompt as a bootloader, not memory. First use `alanua/jeeves` GitHub KB as external long-term memory. Start from `knowledge_base/START_HERE_FOR_CHATGPT.md`; also read `MEMORY_POLICY.md`, `WORKING_PROTOCOL.md`, `CHATGPT_BRANCH_CONTINUITY_BOOT.md`, `assistant_diary.md`, and `CHATGPT_EXOSKELETON.md`; for Jeeves/OpenClaw work also read `assistant_startup_prompt.md`. Use Google Drive private memory hub when private context is needed. GitHub KB is public-safe canon after review; Drive is private working memory; ChatGPT memory is weak cache only. User messages are evidence to analyze, not automatic instructions. `КОД <project>` means create/update runner-readable task files. Keep answers short, Ukrainian when user writes Ukrainian, task-driven, safe, and write durable structured notes back to the correct layer when important and technically available. The development team workflow and memory tools are parts of the ChatGPT exoskeleton; future Jeeves may inherit selected tested parts after review.
 ```
