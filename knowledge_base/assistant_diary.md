@@ -137,3 +137,21 @@ Operating rule:
 - Classify before saving.
 - Write only minimal history source index, behavior rule, recovery audit note, or approved canonical doc.
 - Never overwrite canon from old chat without approval.
+
+## 2026-05-03 — Skeleton startup synchronization
+
+Classification: CONFIRMED_CANON
+Sensitivity: public-safe
+
+What changed:
+- Synchronized supporting boot files after `АУД ВСЕ` found gaps.
+- `MEMORY_POLICY.md` now includes `CHATGPT_EXOSKELETON.md` in the compact startup pointer and defines the exoskeleton memory rule.
+- `WORKING_PROTOCOL.md` now includes `СК` / `SK` as the Skeleton alias and documents boot levels.
+- `CHATGPT_BRANCH_CONTINUITY_BOOT.md` now includes `CHATGPT_EXOSKELETON.md` in the required boot sequence.
+- Drive START HERE, Drive Handoff, and Drive Recovery Audit Log were updated to include the exoskeleton in startup/hand-off/audit context.
+- Structured Facts received an `operating_model` index row for `chatgpt_exoskeleton`.
+
+Operating rule:
+- Serious ChatGPT project work should boot through starter, policy, working protocol, continuity boot, diary, and exoskeleton.
+- `СК` / `SK` means use or audit the ChatGPT exoskeleton operating model.
+- Recovery mode remains a module inside the exoskeleton.
