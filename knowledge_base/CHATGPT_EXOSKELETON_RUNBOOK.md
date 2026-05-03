@@ -27,8 +27,8 @@ Use the lowest level that is safe for the task.
 
 ```text
 L0 quick: current chat only
-L1 normal: starter + diary + exoskeleton
-L2 project: starter + diary + exoskeleton + project docs
+L1 normal: starter + diary + exoskeleton + runbook
+L2 project: starter + diary + exoskeleton + runbook + project docs
 L3 private: L2 + Drive private hub
 L4 audit/recovery: full scan + structured facts + logs
 ```
@@ -48,6 +48,7 @@ knowledge_base/WORKING_PROTOCOL.md
 knowledge_base/CHATGPT_BRANCH_CONTINUITY_BOOT.md
 knowledge_base/assistant_diary.md
 knowledge_base/CHATGPT_EXOSKELETON.md
+knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md
 ```
 
 For Jeeves/OpenClaw-style work, also read:
@@ -211,6 +212,21 @@ Procedure:
 5. If not durable, answer without storing.
 ```
 
+### Behavior adjustment request
+
+Goal: adapt ChatGPT to Oleksii without creating duplicate or conflicting rules.
+
+Procedure:
+
+```text
+1. Treat the request as a candidate durable behavior rule.
+2. Check START_HERE and this runbook for existing similar rules.
+3. If it duplicates an existing rule, do not create a second copy; refine the existing rule only if needed.
+4. If it conflicts with an existing rule, report the conflict briefly before changing anything.
+5. Save only the cleaned rule, not the whole conversation.
+6. Keep the chat answer very short.
+```
+
 ### `ПРИВ` / private
 
 Goal: keep private material out of public GitHub.
@@ -337,6 +353,14 @@ Defense:
 Skeleton is ChatGPT-side.
 Jeeves may inherit selected tested parts later.
 Jeeves must not inherit ChatGPT memory chaos.
+```
+
+### Failure: adaptation-rule drift
+
+Defense:
+
+```text
+When Oleksii asks for adaptation, save one cleaned rule and audit for duplicates/conflicts.
 ```
 
 ## Stage 1 implementation rule
