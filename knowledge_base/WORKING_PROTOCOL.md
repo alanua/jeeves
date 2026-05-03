@@ -14,15 +14,15 @@ Main rule: prefer Ukrainian mnemonic aliases because they are easier to remember
 
 | Preferred alias | Meaning in Ukrainian | English alias | English meaning | Action |
 |---|---|---|---|---|
-| `СТ` | старт | `ST` | STARTUP | Load external memory first: GitHub KB, ChatGPT exoskeleton, and, if needed, Google Drive private memory. Reconstruct context before answering. |
-| `СК` | скелетон / екзоскелет | `SK` | SKELETON | Use or audit the ChatGPT exoskeleton model: boot, diary, memory tools, dev-team workflow, runner, guardrails, recovery. |
+| `СТ` | старт | `ST` | STARTUP | Load external memory first: GitHub KB, ChatGPT exoskeleton/runbook, and, if needed, Google Drive private memory. Reconstruct context before answering. |
+| `СК` | скелетон / екзоскелет | `SK` | SKELETON | Use or audit the ChatGPT exoskeleton model and runbook: boot, diary, memory tools, dev-team workflow, runner, guardrails, recovery. |
 | `СТАН` | стан / передача стану | `HO` | HANDOFF | Update short handoff for the next session: what changed, what was fixed, what remains open, next action. |
 | `РІШ` | рішення | `DC` | DECISION | Treat this as a candidate decision. Classify, check against canon, and save if durable. |
-| `ВІДН` | відновлення | `RC` | RECOVERY | Process a branch/export/dump as historical source. Use the Recovery / Historical Source Layer of the ChatGPT exoskeleton. |
+| `ВІДН` | відновлення | `RC` | RECOVERY | Process a branch/export/dump as historical source. Use the Recovery / Historical Source Layer and the runbook recovery checklist. |
 | `КОД` | задача для коду | `TC` | TASK_FOR_EXECUTOR | Create or update a runner-readable structured task file. Runner passes it to Codex/executor; the user does not manually copy tasks to Codex. |
 | `ПРИВ` | приватне | `PN` | PRIVATE_NOTE | Treat as private. Do not write raw content to public GitHub. Use Drive/private layer if storage is needed. |
-| `АУД` | аудит | `AU` | AUDIT | Check memory/project/exoskeleton state for noise, conflicts, outdated items, privacy risks, or missing handoff. |
-| `БЗ` | база знань | `KB` | KNOWLEDGE_BASE_UPDATE | Write cleaned durable knowledge to the correct KB layer if tools are available. Use read-before-write first. |
+| `АУД` | аудит | `AU` | AUDIT | Check memory/project/exoskeleton state for noise, conflicts, outdated items, privacy risks, or missing handoff. Use the runbook audit checklist. |
+| `БЗ` | база знань | `KB` | KNOWLEDGE_BASE_UPDATE | Write cleaned durable knowledge to the correct KB layer. Use read-before-write and post-write verification from the runbook. |
 | `ДР` | Драйв | `GV` | GOOGLE_DRIVE_PRIVATE | Use Google Drive private memory layer for private working context. |
 | `ГХ` | GitHub | `GH` | GITHUB_CANON | Use public-safe GitHub KB as canonical memory/documentation. |
 
@@ -53,12 +53,12 @@ Main rule: prefer Ukrainian mnemonic aliases because they are easier to remember
 
 ## Boot levels
 
-Use boot levels from `CHATGPT_EXOSKELETON.md` to avoid both amnesia and excessive context loading.
+Use boot levels from `CHATGPT_EXOSKELETON_RUNBOOK.md`.
 
 ```text
 L0 quick: current chat only
-L1 normal: starter + diary + exoskeleton
-L2 project: starter + diary + exoskeleton + project docs
+L1 normal: starter + diary + exoskeleton + runbook
+L2 project: starter + diary + exoskeleton + runbook + project docs
 L3 private: L2 + Drive private hub
 L4 audit/recovery: full scan + structured facts + logs
 ```
@@ -90,11 +90,11 @@ Default for audit/recovery: L4.
 It means:
 
 ```text
-ChatGPT/architect creates or updates a structured task file
--> runner reads that task file
--> runner passes the task to Codex or another executor
+ChatGPT creates or updates a structured task file
+-> runner reads it
+-> runner passes it to Codex/executor
 -> runner returns logs/result/handoff
--> ChatGPT reviews the result and prepares the next task
+-> ChatGPT reviews and prepares the next task
 ```
 
 Task files must be written for runner consumption:
@@ -109,76 +109,48 @@ Task files must be written for runner consumption:
 
 ## ChatGPT exoskeleton rule
 
-`СК` / `SK` refers to the ChatGPT exoskeleton in `knowledge_base/CHATGPT_EXOSKELETON.md`.
+`СК` / `SK` refers to both:
 
-The exoskeleton includes:
-- boot/wake procedure
-- memory tools
-- development-team workflow
-- runner-mediated execution
-- read-before-write gate
-- diary/handoff/audit
-- guardrails/privacy routing
-- recovery/historical source layer
-- compression/promotion/migration layer
+```text
+knowledge_base/CHATGPT_EXOSKELETON.md
+knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md
+```
 
-When the user says `СК`, `Skeleton`, `екзоскелет`, or asks to strengthen ChatGPT through the exoskeleton, use that file as the operating model.
+The model defines what Skeleton is.
+The runbook defines how to use it in real work.
+
+When the user says `СК`, `Skeleton`, `екзоскелет`, or asks to strengthen ChatGPT through the exoskeleton, use both files.
 
 ## Examples
 
 ```text
 СТ ДЖ
 ```
-Same as `ST JV`: load Jeeves startup context from GitHub/Drive before answering.
+Load Jeeves startup context from GitHub/Drive before answering.
 
 ```text
 СТ СК
 ```
-Same as `ST SK`: load ChatGPT exoskeleton context.
+Load ChatGPT exoskeleton and runbook context.
 
 ```text
 АУД СК
 ```
-Same as `AU SK`: audit the ChatGPT exoskeleton state.
+Audit the ChatGPT exoskeleton and runbook state.
 
 ```text
-РІШ БК
+БЗ СК
 ```
-Same as `DC BC`: BauClock decision candidate. Check, classify, and save if durable.
-
-```text
-ПРИВ ГЕВ
-```
-Same as `PN GW`: private Gewerbe/admin context. Do not store raw in public GitHub.
-
-```text
-ВІДН ДЖ
-```
-Same as `RC JV`: process a Jeeves branch/memory dump as historical source through the Recovery / Historical Source Layer.
+Update Skeleton knowledge base using read-before-write and post-write verification.
 
 ```text
 КОД ЛАВ
 ```
 Create/update a runner-readable executor task for Lavalamp. Do not tell the user to copy it to Codex manually.
 
-```text
-СТАН БК
-```
-Same as `HO BC`: update BauClock handoff after this work session.
-
-```text
-АУД ВСЕ
-```
-Same as `AU ALL`: audit overall memory/exoskeleton structure and report issues briefly.
-
-```text
-РІШ ПРИВ ГЕВ
-```
-Same as `DC PN GW`: this is a private Gewerbe decision candidate; analyze/classify it, but do not store raw content in public GitHub.
-
 ## Legacy keyboard-layout aliases
 
-Old mechanical Ukrainian-keyboard equivalents like `ІЕ`, `РЩ`, `ВС`, `КС`, `ЕС`, `ЗТ`, `ФГ`, `ЛИ`, `ПМ`, `ПР` are deprecated because they are not mnemonic.
+Old mechanical Ukrainian-keyboard equivalents are deprecated because they are not mnemonic.
 
 If the user uses them accidentally, still interpret them, but do not teach them as the preferred protocol.
 
