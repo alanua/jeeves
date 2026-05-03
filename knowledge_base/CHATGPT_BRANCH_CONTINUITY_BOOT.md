@@ -11,7 +11,7 @@ This protocol is for ChatGPT, not for future Jeeves runtime memory.
 
 Future Jeeves should have its own proper memory subsystem. ChatGPT currently has branch-local context and unreliable internal memory. Without an external boot process, each new chat can behave like a different partial version of the assistant, causing repeated context setup, inconsistent behavior, and the user's "Groundhog Day" problem.
 
-The fix is not to trust internal ChatGPT memory. The fix is to boot every serious project chat through the same external memory route and the ChatGPT exoskeleton.
+The fix is not to trust internal ChatGPT memory. The fix is to boot every serious project chat through the same external memory route, the ChatGPT exoskeleton, and the exoskeleton runbook.
 
 ## Core rule
 
@@ -21,7 +21,7 @@ It should not try to contain all project facts. It should start the correct work
 
 ```text
 settings startup prompt
--> GitHub KB public canon and ChatGPT exoskeleton
+-> GitHub KB public canon and ChatGPT exoskeleton/runbook
 -> private Google Drive memory when needed
 -> project-specific handoff/diary/structured facts
 -> current chat task
@@ -41,6 +41,7 @@ For every serious project conversation with Oleksii:
    - `knowledge_base/CHATGPT_BRANCH_CONTINUITY_BOOT.md`
    - `knowledge_base/assistant_diary.md`
    - `knowledge_base/CHATGPT_EXOSKELETON.md`
+   - `knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md`
 5. For Jeeves/OpenClaw-style work, also read:
    - `knowledge_base/assistant_startup_prompt.md`
 6. If the task may involve private context, check the private Drive memory hub:
@@ -55,12 +56,12 @@ For every serious project conversation with Oleksii:
 
 ## Boot levels
 
-Use boot levels from `CHATGPT_EXOSKELETON.md`:
+Use boot levels from `CHATGPT_EXOSKELETON_RUNBOOK.md`:
 
 ```text
 L0 quick: current chat only
-L1 normal: starter + diary + exoskeleton
-L2 project: starter + diary + exoskeleton + project docs
+L1 normal: starter + diary + exoskeleton + runbook
+L2 project: starter + diary + exoskeleton + runbook + project docs
 L3 private: L2 + Drive private hub
 L4 audit/recovery: full scan + structured facts + logs
 ```
@@ -73,7 +74,7 @@ Default for audit/recovery: L4.
 
 ```text
 1. Current explicit user instruction in this chat, after safety/policy checks
-2. GitHub KB public-safe canon and ChatGPT exoskeleton
+2. GitHub KB public-safe canon, ChatGPT exoskeleton, and runbook
 3. Private Google Drive memory for private working context
 4. Current chat context
 5. ChatGPT internal memory as weak cache only
@@ -107,6 +108,7 @@ A diary entry is appropriate when:
 - a project handoff changed
 - a decision affects future chats
 - the ChatGPT exoskeleton changes
+- the ChatGPT exoskeleton runbook changes
 
 A diary entry must be classified before saving and must not include raw private data in public GitHub.
 
@@ -127,6 +129,18 @@ It defines:
 - guardrails/privacy/safety
 - compression/promotion/migration
 - recovery/historical source layer
+
+`knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md` is also part of the required boot set.
+
+It defines the operational checklist for applying the exoskeleton in real work:
+- boot-level selection
+- command handling
+- read-before-write
+- post-write verification
+- private/public routing
+- recovery handling
+- runner task behavior
+- common failure defenses
 
 ## Anti-amnesia rule
 
