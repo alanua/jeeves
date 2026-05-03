@@ -155,3 +155,19 @@ Operating rule:
 - Serious ChatGPT project work should boot through starter, policy, working protocol, continuity boot, diary, and exoskeleton.
 - `СК` / `SK` means use or audit the ChatGPT exoskeleton operating model.
 - Recovery mode remains a module inside the exoskeleton.
+
+## 2026-05-03 — Skeleton Stage 1 runbook
+
+Classification: CONFIRMED_CANON
+Sensitivity: public-safe
+
+What changed:
+- Added `knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md` as the operational checklist for using Skeleton v1 in real ChatGPT work.
+- Added the runbook to `START_HERE_FOR_CHATGPT.md` required startup files.
+- The runbook defines boot levels, command handling, read-before-write, post-write verification, recovery handling, private routing, runner task behavior, and failure defenses.
+
+Operating rule:
+- `CHATGPT_EXOSKELETON.md` defines the model.
+- `CHATGPT_EXOSKELETON_RUNBOOK.md` defines the behavior/checklist.
+- For serious Skeleton/protocol/memory work, use both.
+- Stage 1 is behavioral/procedural: boot level selection, read-before-write, post-write verification, classification before storage, private/public routing, runner-readable tasks, short handoffs, and periodic audits.
