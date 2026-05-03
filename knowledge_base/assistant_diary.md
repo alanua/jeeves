@@ -58,3 +58,26 @@ Reason:
 Operating rule:
 - Future compact memory text must include `CHATGPT_BRANCH_CONTINUITY_BOOT.md`, `WORKING_PROTOCOL.md`, and the Drive private memory hub.
 - No startup file should imply that `assistant_startup_prompt.md` alone is enough for Jeeves work; global boot files must be loaded first.
+
+## 2026-05-03 — Third/Fourth full audit pass
+
+Classification: CONFIRMED_CANON
+Sensitivity: public-safe
+
+What changed:
+- Another audit pass searched for remaining old boot formulas instead of only checking file existence.
+- `CHATGPT_BRANCH_CONTINUITY_BOOT.md` still had an older required sequence that omitted `assistant_diary.md` and did not list itself in the global startup set. It was corrected.
+- `knowledge_base/recovery_audit/2026-05-01_memory_overflow_branch.md` still had a historical compact-memory replacement saying to start from `assistant_startup_prompt.md`. It was corrected and marked as historical audit evidence where current boot files win if conflict exists.
+- Drive `Jeeves Private Memory - START HERE` was checked again; its top startup section now has the full optimized boot order.
+
+Current required boot set:
+- `knowledge_base/START_HERE_FOR_CHATGPT.md`
+- `knowledge_base/MEMORY_POLICY.md`
+- `knowledge_base/WORKING_PROTOCOL.md`
+- `knowledge_base/CHATGPT_BRANCH_CONTINUITY_BOOT.md`
+- `knowledge_base/assistant_diary.md`
+- for Jeeves/OpenClaw work: `knowledge_base/assistant_startup_prompt.md`
+- when private context is relevant: Drive private memory hub
+
+Operating rule:
+- Historical recovery/audit notes are not primary startup instructions. If any historical text conflicts with current boot files, current boot files win.
