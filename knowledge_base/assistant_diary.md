@@ -171,3 +171,22 @@ Operating rule:
 - `CHATGPT_EXOSKELETON_RUNBOOK.md` defines the behavior/checklist.
 - For serious Skeleton/protocol/memory work, use both.
 - Stage 1 is behavioral/procedural: boot level selection, read-before-write, post-write verification, classification before storage, private/public routing, runner-readable tasks, short handoffs, and periodic audits.
+
+## 2026-05-03 — Answer-before-read guardrail
+
+Classification: CONFIRMED_CANON
+Sensitivity: public-safe
+
+What changed:
+- Added a read-before-answer checklist to `CHATGPT_EXOSKELETON_RUNBOOK.md`.
+- Added the `answer-before-read` failure mode and defense.
+- Updated Skeleton Stage 1 criteria so status/canon answers about Skeleton, memory, runner, boot, or architecture must use external canon instead of unsupported internal memory.
+
+Reason:
+- The assistant answered a Skeleton status question from branch-local working context and mixed ChatGPT exoskeleton language with future Jeeves runtime language.
+- The existing `read-before-write` and boot rules were not enough to prevent confident status answers before reading current canon.
+
+Operating rule:
+- For status, architecture, memory, Skeleton, boot, runner, and canon questions, read the relevant external canon before making confident claims.
+- If an answer was given from unsupported internal memory, stop, correct it, identify the existing rule that was violated, and apply the rule instead of creating duplicate rules.
+- Each correction should improve future behavior by enforcing the existing canon path first.
