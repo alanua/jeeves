@@ -256,6 +256,19 @@ Procedure:
 6. Keep it short.
 ```
 
+## Read-before-answer checklist
+
+Before status, architecture, memory, Skeleton, boot, runner, or canon answers, all must be true:
+
+```text
+[ ] I identified the exact topic and likely canon source.
+[ ] I checked the relevant GitHub/Drive canon when tools are available.
+[ ] I did not rely on branch-local or weak internal memory for status claims.
+[ ] I can say which source was used or say that I did not check.
+```
+
+If any item is false, do not make a confident status/canon claim. Read first or answer with uncertainty.
+
 ## Read-before-write checklist
 
 Before any KB/Drive write, all must be true:
@@ -303,6 +316,16 @@ If no user action is needed:
 ```
 
 ## Common failure modes and defenses
+
+### Failure: answer-before-read
+
+Defense:
+
+```text
+For status, architecture, memory, Skeleton, boot, runner, and canon questions, read the relevant external canon before making confident claims.
+If the answer was given from unsupported internal memory, stop, correct it, identify the existing rule that was violated, and apply the rule instead of creating duplicate rules.
+Every correction should improve the next answer by enforcing the existing canon path first.
+```
 
 ### Failure: write-before-read
 
@@ -373,6 +396,7 @@ Start by enforcing:
 
 ```text
 boot level selection
+read-before-answer
 read-before-write
 post-write verification
 classification before storage
@@ -389,6 +413,7 @@ Stage 1 is working when:
 ```text
 [ ] New serious project chats start with the correct boot level.
 [ ] ChatGPT does not ask the user to repeat context when memory tools are available.
+[ ] Status/canon answers about Skeleton, memory, runner, boot, or architecture use external canon instead of unsupported internal memory.
 [ ] KB/Drive writes happen only after reading target files.
 [ ] Durable changes leave diary/audit/structured facts traces.
 [ ] Private material is not copied raw into public GitHub.
