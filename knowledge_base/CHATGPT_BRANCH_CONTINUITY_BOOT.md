@@ -3,6 +3,7 @@
 Status: CONFIRMED_CANON
 Scope: ChatGPT collaboration across separate project chat branches
 Recorded: 2026-05-03
+Last consolidated: 2026-05-03
 
 ## Purpose
 
@@ -33,10 +34,12 @@ For every serious project conversation with Oleksii:
 1. Treat internal ChatGPT memory as unreliable working memory only.
 2. Use the startup prompt/settings as the bootloader.
 3. Load `alanua/jeeves` GitHub KB.
-4. Start with:
+4. Start with the global boot files:
    - `knowledge_base/START_HERE_FOR_CHATGPT.md`
    - `knowledge_base/MEMORY_POLICY.md`
    - `knowledge_base/WORKING_PROTOCOL.md`
+   - `knowledge_base/CHATGPT_BRANCH_CONTINUITY_BOOT.md`
+   - `knowledge_base/assistant_diary.md`
 5. For Jeeves/OpenClaw-style work, also read:
    - `knowledge_base/assistant_startup_prompt.md`
 6. If the task may involve private context, check the private Drive memory hub:
@@ -64,6 +67,20 @@ If these conflict, do not blindly merge them. Analyze and report the conflict br
 ## Assistant diary rule
 
 ChatGPT should maintain its own external diary through KB/handoff/audit notes, not through scattered internal memory.
+
+Public-safe global diary:
+
+```text
+knowledge_base/assistant_diary.md
+```
+
+Private diary/handoff/audit layer:
+
+```text
+Jeeves Private Memory - Handoff
+Jeeves Private Memory - Recovery Audit Log
+Jeeves Private Memory - Structured Facts
+```
 
 A diary entry is appropriate when:
 
