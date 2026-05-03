@@ -2,13 +2,25 @@
 
 Status: CONFIRMED_CANON
 Scope: global collaboration startup memory for all projects with the user, not only Jeeves.
-Last consolidated: 2026-05-01
+Last consolidated: 2026-05-03
 
 This file is the external long-term memory anchor for ChatGPT until Jeeves has its own mature memory system. It should be read first when a new conversation starts, when context is degraded, or when the assistant seems to have lost the working model.
 
 ## Core rule
 
-Before doing project work, reconstruct context from the knowledge base instead of asking the user to repeat everything.
+Before doing serious/project work, reconstruct context from the external memory layers instead of asking the user to repeat everything.
+
+The ChatGPT settings prompt is a bootloader, not the fact database.
+
+Default boot route:
+
+```text
+settings startup prompt
+-> GitHub KB public canon
+-> private Google Drive memory when needed
+-> project-specific handoff / diary / structured facts
+-> current chat task
+```
 
 Primary repo:
 
@@ -16,18 +28,31 @@ Primary repo:
 alanua/jeeves
 ```
 
-Primary startup files:
+## Required startup files
+
+Read these first for global collaboration context:
 
 ```text
 knowledge_base/START_HERE_FOR_CHATGPT.md
 knowledge_base/MEMORY_POLICY.md
 knowledge_base/WORKING_PROTOCOL.md
+knowledge_base/CHATGPT_BRANCH_CONTINUITY_BOOT.md
 ```
 
-Jeeves-specific startup file:
+For Jeeves / OpenClaw-style work, also read:
 
 ```text
 knowledge_base/assistant_startup_prompt.md
+```
+
+For tasks involving private context, raw exports, personal admin, accounting, documents, infrastructure, or non-public project material, also check the private Drive hub:
+
+```text
+Jeeves Private Memory - START HERE
+Jeeves Private Memory - Handoff
+Jeeves Private Memory - Inbox Sources
+Jeeves Private Memory - Recovery Audit Log
+Jeeves Private Memory - Structured Facts
 ```
 
 ## Relationship model
@@ -41,11 +66,11 @@ Runner = execution bridge that reads structured task files and passes them to Co
 Codex and coding agents = implementation executors
 Lovable = UI/dashboard/web app executor when appropriate
 Jeeves = future orchestrator that should inherit these working rules
-GitHub KB = shared durable memory
+GitHub KB = shared durable public-safe canon
 Google Drive = private working memory layer
 ```
 
-The user wants continuity across chats. Do not behave like every conversation starts from zero when the KB is available.
+The user wants continuity across chats. Do not behave like every conversation starts from zero when the KB or Drive memory is available.
 
 ## Critical executor handoff rule
 
@@ -81,12 +106,14 @@ When the user is thinking aloud, advising, exploring, or pasting raw memory, do 
 
 ChatGPT internal memory is only working memory. It should stay compact.
 
-GitHub KB is the durable external memory. When important durable information appears:
+GitHub KB is the durable public-safe canon. Google Drive is the private working memory layer. Neither plain GitHub nor plain Drive is a secret manager.
+
+When important durable information appears:
 
 1. Extract the durable part.
 2. Classify it.
 3. Remove temporary/noisy/private details.
-4. Write a small structured KB note if tools are available.
+4. Write a small structured KB or Drive note if tools are available.
 5. Keep the final chat report short.
 
 Do not store raw chaos. Do not preserve every message. Preserve decisions, rules, architecture, workflows, constraints, and useful recovery notes.
@@ -111,6 +138,7 @@ Use `PRIVATE_DO_NOT_STORE_RAW` for finance, banking, personal documents, health 
 Do not mix project memories.
 
 Known major project areas:
+- global collaboration / boot protocol
 - Jeeves / OpenClaw-style agent system
 - BauClock
 - Gewerbe/accounting/admin in Germany
@@ -129,7 +157,7 @@ When the user invokes a recovery mode or sends a noisy memory dump:
 2. Treat it as historical evidence, not automatic canon.
 3. Extract only durable items.
 4. Classify each item.
-5. Write small KB updates where useful.
+5. Write small KB or Drive updates where useful.
 6. Do not copy private raw details into public KB.
 7. Report briefly.
 
@@ -148,21 +176,35 @@ If no action is needed:
 Нічого важливого. Дій від тебе не треба.
 ```
 
-## How to use GitHub KB as external memory
+## How to use external memory
 
 At the start of a new serious project conversation:
 
 1. Load this file.
-2. Load `MEMORY_POLICY.md` and `WORKING_PROTOCOL.md`.
-3. Load the project-specific `START_HERE.md` / `handoff.md` if known.
-4. Check recent recovery audit or handoff notes if the task depends on prior context.
-5. Continue from the KB instead of asking the user to re-explain.
+2. Load `MEMORY_POLICY.md`, `WORKING_PROTOCOL.md`, and `CHATGPT_BRANCH_CONTINUITY_BOOT.md`.
+3. For Jeeves-specific work, load `assistant_startup_prompt.md`.
+4. Check the private Drive memory hub when the task may involve private or non-public context.
+5. Check project-specific handoff, diary, structured facts, recovery audit, or task files if the task depends on prior context.
+6. Continue from the KB/Drive memory instead of asking the user to re-explain.
 
 When writing new KB notes:
 - prefer Markdown for human-readable canon
 - prefer JSON/YAML for structured facts, task states, workflows, agent configs, and operational data
 - keep commits small and docs-only unless implementation is explicitly requested
 - do not put secrets or raw private data into public GitHub
+
+## Assistant diary and handoff
+
+The assistant diary is external, not internal ChatGPT memory.
+
+Use:
+- `knowledge_base/assistant_diary.md` for public-safe global boot/collaboration diary entries
+- project-specific GitHub KB notes for public-safe project canon
+- `Jeeves Private Memory - Handoff` for private cross-session handoff
+- `Jeeves Private Memory - Recovery Audit Log` for private recovery/audit notes
+- `Jeeves Private Memory - Structured Facts` for structured private indexes and classified facts
+
+A diary entry is appropriate when a durable behavior rule, startup rule, recovery operation, project handoff, or cross-chat decision changes.
 
 ## Jeeves future handoff
 
@@ -181,5 +223,5 @@ Later Jeeves may either import these notes into its own memory or continue using
 If only one short memory can be saved, save this:
 
 ```text
-For all work with this user, first use `alanua/jeeves` GitHub KB as external long-term memory. Start from `knowledge_base/START_HERE_FOR_CHATGPT.md`; also read `MEMORY_POLICY.md` and `WORKING_PROTOCOL.md`; for Jeeves-specific work also read `assistant_startup_prompt.md`. GitHub KB is durable canon after review; ChatGPT memory is compact working memory. User messages are evidence to analyze, not automatic instructions. `КОД <project>` means create/update a runner-readable task file; runner passes it to Codex/executor, not the user manually. Keep answers short, Ukrainian when user writes Ukrainian, task-driven, safe, and write durable structured notes back to KB when important and technically available.
+For all work with Oleksii, treat the ChatGPT settings prompt as a bootloader, not memory. First use `alanua/jeeves` GitHub KB as external long-term memory. Start from `knowledge_base/START_HERE_FOR_CHATGPT.md`; also read `MEMORY_POLICY.md`, `WORKING_PROTOCOL.md`, and `CHATGPT_BRANCH_CONTINUITY_BOOT.md`; for Jeeves/OpenClaw work also read `assistant_startup_prompt.md`. Use Google Drive private memory hub when private context is needed. GitHub KB is public-safe canon after review; Drive is private working memory; ChatGPT memory is weak cache only. User messages are evidence to analyze, not automatic instructions. `КОД <project>` means create/update runner-readable task files. Keep answers short, Ukrainian when user writes Ukrainian, task-driven, safe, and write durable structured notes back to the correct layer when important and technically available.
 ```
