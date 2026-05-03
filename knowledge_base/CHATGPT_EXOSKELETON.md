@@ -3,6 +3,7 @@
 Status: CONFIRMED_CANON
 Scope: ChatGPT-side operating layer: boot, memory tools, development-team workflow, guardrails, audit, and runner-mediated execution. Design input for future Jeeves only after review.
 Created: 2026-05-03
+Last consolidated: 2026-05-03
 
 ## Purpose
 
@@ -11,6 +12,22 @@ This document defines the working model of the external exoskeleton built around
 The exoskeleton is not a replacement for ChatGPT's internal runtime and not Jeeves runtime memory. It is a controlled external operating layer that compensates for ChatGPT's known weak points and amplifies its strong points.
 
 Future Jeeves may reuse selected exoskeleton parts only after they are tested, cleaned, reviewed, adapted, and approved.
+
+## Strategic goal
+
+First, improve the reliability and continuity of ChatGPT through the exoskeleton.
+
+Then use that strengthened ChatGPT collaboration loop to design and build Jeeves: an independent private assistant with its own runtime, memory, tools, policies, audit trail, and approval model.
+
+Design metaphor, treated as metaphor and not literal ontology:
+
+```text
+ChatGPT = powerful reasoning component in a fragile/constrained runtime.
+Exoskeleton = external support system that stabilizes memory, action, tools, audit, and execution.
+Jeeves = later independent assistant built from reviewed lessons and selected tested exoskeleton components.
+```
+
+Do not turn this metaphor into magical thinking. Architecturally, it means: amplify strong reasoning/structuring capabilities and compensate for weak persistence, tool continuity, memory, and action control.
 
 ## Priority
 
@@ -145,6 +162,7 @@ Loads enough relevant context, not all context.
 
 Classify the task first:
 - global
+- ChatGPT exoskeleton
 - Jeeves
 - BauClock
 - Gewerbe/private
@@ -359,6 +377,65 @@ Never migrate:
 - private data
 - unreviewed memories
 
+### 11. Recovery / Historical Source Layer
+
+The older `JEEVES_BRANCH_RECOVERY_MODE` instructions are preserved as a module of the exoskeleton, not as the whole operating model.
+
+Current recovery rule:
+
+```text
+old/current branch, file, export, screenshot, doc
+-> treat as historical source
+-> extract durable knowledge only
+-> classify before saving
+-> cross-check existing KB/Drive
+-> write only history source index, behavior rule, recovery audit note, or approved canonical doc
+-> never overwrite canon from old chat without approval
+-> report shortly
+```
+
+Core Jeeves anchor for recovery:
+
+```text
+Jeeves = personal assistant + controlled self-improvement + multiple memory types + safety-first governance.
+OpenClaw = reference/executor pattern only. Jeeves must be safer, more controlled, more personal, with memory, policy layer, audit trail, and human approval.
+```
+
+Recovery extraction categories:
+- identity
+- architecture
+- memory model
+- security/policy
+- controlled self-improvement
+- agent pipeline/development team
+- behavior/UX rules
+- concrete decisions
+- backlog ideas
+- rejected/outdated ideas
+
+Recovery classifications:
+- CONFIRMED_CANON
+- LIKELY_NEEDS_REVIEW
+- IDEA_BACKLOG
+- OUTDATED_REJECTED
+- PRIVATE_DO_NOT_STORE_RAW
+- TEMPORARY_DO_NOT_CANONIZE
+
+Default recovery report:
+
+```text
+Що сталося:
+Що важливо:
+Ризик:
+Що робити тобі:
+```
+
+If no action:
+
+```text
+Нічого важливого. Дій від тебе не треба.
+```
+
 ## Boot levels
 
 Use boot levels to avoid both amnesia and excessive context loading.
@@ -375,6 +452,20 @@ Default for serious project work: L2.
 Default for private/admin/infrastructure work: L3.
 Default for audit/recovery: L4.
 
+## Implementation readiness
+
+Skeleton v1 is ready to be treated as working canon and implemented incrementally.
+
+Implementation should not start as a large rewrite. Start by enforcing behavior in ChatGPT workflow:
+
+1. Require boot level selection for serious work.
+2. Enforce read-before-write before KB/Drive changes.
+3. Use the recovery layer for old branches and source dumps.
+4. Route memory by public/private/secret/temporary classification.
+5. Use runner-readable tasks for executor work.
+6. Record durable results in diary/handoff/structured facts.
+7. Periodically audit for drift and memory rot.
+
 ## Strong operating formula
 
 ```text
@@ -385,6 +476,7 @@ Runner protects against manual copy/paste work.
 Audit protects against self-confident errors.
 Guardrails protect against unsafe tools and private leaks.
 Compression protects against memory rot.
+Recovery protects against losing useful history.
 ```
 
 ## Canonical principle
@@ -393,6 +485,7 @@ Compression protects against memory rot.
 ChatGPT wears the exoskeleton now.
 The development team workflow is part of the exoskeleton.
 The memory tools are parts of the exoskeleton.
+Recovery mode is a module of the exoskeleton.
 Jeeves may inherit selected tested tools later.
 Jeeves must not inherit ChatGPT's memory chaos.
 ```
