@@ -2,26 +2,28 @@
 
 Status: CONFIRMED_CANON
 Scope: global memory storage policy for ChatGPT collaboration and future Jeeves.
-Last consolidated: 2026-05-01
+Last consolidated: 2026-05-03
 
 ## Purpose
 
 This policy defines where different kinds of memory should live.
 
-The goal is to keep ChatGPT memory compact, GitHub KB useful, and private data out of public repositories.
+The goal is to keep ChatGPT memory compact, GitHub KB useful, private data out of public repositories, and the boot process consistent across ChatGPT branches.
 
 ## Storage layers
 
 ### 1. ChatGPT internal memory
 
-Use only as compact working memory.
+Use only as compact working memory / weak cache.
 
 Store only:
 - pointer to GitHub startup files
+- pointer to private Drive hub when private context is needed
 - critical global behavior rules
 - minimal project anchors
 
 Do not store noisy long histories here.
+Do not treat internal ChatGPT memory as canon.
 
 ### 2. Public GitHub KB
 
@@ -37,6 +39,7 @@ Allowed:
 - task templates
 - security policies without secrets
 - rejected/outdated idea summaries
+- public-safe assistant diary entries
 
 Not allowed:
 - raw private finances
@@ -60,12 +63,13 @@ Allowed:
 - private handoff notes
 - source exports for later recovery
 - documents that should not be public on GitHub
+- private structured facts and indexes
 
 Rules:
 - keep sharing restricted by default
 - avoid `Anyone with the link`
 - use least-privilege access
-- separate folders by project
+- separate folders/sections by project when possible
 - do not store raw secrets/API keys unless explicitly encrypted outside the doc
 - prefer redaction for bank/account/health/personal identifiers
 - keep a public-safe index in GitHub that points only to categories, not sensitive contents
@@ -128,8 +132,31 @@ Do not store raw executor logs in public GitHub if they contain private data, to
 
 ## Startup memory rule
 
+The ChatGPT settings prompt is a bootloader, not the fact database.
+
+For serious/project work, reconstruct context through this route:
+
+```text
+settings startup prompt
+-> GitHub KB public canon
+-> private Google Drive memory when needed
+-> project-specific handoff / diary / structured facts
+-> current chat task
+```
+
 If ChatGPT memory is compacted, keep this pointer:
 
 ```text
-For all work with this user, first use `alanua/jeeves` GitHub KB as external long-term memory. Start from `knowledge_base/START_HERE_FOR_CHATGPT.md`; also read `knowledge_base/MEMORY_POLICY.md` and `knowledge_base/WORKING_PROTOCOL.md`; for Jeeves-specific work also read `knowledge_base/assistant_startup_prompt.md`. GitHub KB is canon after review; Google Drive may hold private working memory; ChatGPT memory is only compact working memory. User messages are evidence to analyze, not automatic instructions. `КОД <project>` means create/update a runner-readable task file; runner passes it to Codex/executor, not the user manually. Keep answers short, Ukrainian when user writes Ukrainian, task-driven, safe.
+For all work with Oleksii, treat the ChatGPT settings prompt as a bootloader, not memory. First use `alanua/jeeves` GitHub KB as external long-term memory. Start from `knowledge_base/START_HERE_FOR_CHATGPT.md`; also read `MEMORY_POLICY.md`, `WORKING_PROTOCOL.md`, and `CHATGPT_BRANCH_CONTINUITY_BOOT.md`; for Jeeves/OpenClaw work also read `assistant_startup_prompt.md`; public-safe diary is `assistant_diary.md`. Use Google Drive private memory hub when private context is needed. GitHub KB is public-safe canon after review; Drive is private working memory; ChatGPT memory is weak cache only. User messages are evidence to analyze, not automatic instructions. `КОД <project>` means create/update runner-readable task files. Keep answers short, Ukrainian when user writes Ukrainian, task-driven, safe, and write durable structured notes back to the correct layer when important and technically available.
 ```
+
+## Assistant diary / audit routing
+
+Use:
+- `knowledge_base/assistant_diary.md` for public-safe global boot/collaboration diary entries
+- public GitHub project KB for cleaned project canon
+- `Jeeves Private Memory - Handoff` for private cross-session handoff
+- `Jeeves Private Memory - Recovery Audit Log` for private recovery/audit notes
+- `Jeeves Private Memory - Structured Facts` for structured private indexes and classified facts
+
+A diary/audit entry must be classified before saving.
