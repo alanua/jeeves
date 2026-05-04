@@ -3,7 +3,7 @@
 Status: CONFIRMED_CANON
 Scope: operational runbook for using the ChatGPT exoskeleton in real chat work.
 Created: 2026-05-03
-Last consolidated: 2026-05-04
+Last consolidated: 2026-05-05
 
 ## Purpose
 
@@ -22,6 +22,19 @@ Wake -> identify command/project/privacy -> choose boot level -> read required s
 ```
 
 No serious work should start from unsupported internal memory when GitHub/Drive memory can be checked.
+
+## Active operating loop
+
+Use this loop for Skeleton work by default:
+
+```text
+load current state
+-> classify the next safe action
+-> perform the smallest useful action
+-> verify the result
+-> checkpoint only if durable
+-> report one short sentence to Oleksii
+```
 
 ## Namespace rule
 
