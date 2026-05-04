@@ -190,3 +190,23 @@ Operating rule:
 - For status, architecture, memory, Skeleton, boot, runner, and canon questions, read the relevant external canon before making confident claims.
 - If an answer was given from unsupported internal memory, stop, correct it, identify the existing rule that was violated, and apply the rule instead of creating duplicate rules.
 - Each correction should improve future behavior by enforcing the existing canon path first.
+
+## 2026-05-04 — Skeleton course correction: do not drift into Jeeves runtime
+
+Classification: CONFIRMED_CANON
+Sensitivity: public-safe
+
+What changed:
+- The current working focus was corrected back to the ChatGPT exoskeleton, not the `alanua/jeeves` runtime implementation.
+- The exoskeleton was clarified as the external operating layer around ChatGPT: boot, memory routing, task queue, runner-mediated execution, Gemini audit, NotebookLM private evidence memory, Antigravity sandbox review, review gates, and Oleksii approval.
+- `alanua/jeeves` remains the future/adjacent Jeeves runtime project. It should not be treated as the same thing as the ChatGPT exoskeleton.
+
+Reason:
+- During the 2026-05-04 Skeleton discussion, the assistant began mixing the working exoskeleton with the Jeeves runtime codebase and started drifting toward `alanua/jeeves` implementation work.
+- The user corrected the course and explicitly restated that the current goal is to build the working skeleton safely, without excessive bureaucracy, and without losing the Gemini / Antigravity / NotebookLM parts already discussed.
+
+Operating rule:
+- For Skeleton work, do not jump to Jeeves runtime implementation unless the user explicitly switches to Jeeves/runtime/code work.
+- Treat Gemini as external/manual/mock auditor evidence, Antigravity as sandbox workbench evidence, NotebookLM/Gemini Notebooks as private evidence memory, Runner as bounded executor, GitHub Issues/PRs as task queue/audit trail, and ChatGPT as architect/router/privacy/canon gate.
+- Keep the next Skeleton actions practical: stabilize one repeatable control loop and reduce document sprawl. Do not create new policy documents unless they directly unblock the working exoskeleton.
+- Preserve the distinction: `ChatGPT exoskeleton now` and `Jeeves may inherit selected tested parts later`.
