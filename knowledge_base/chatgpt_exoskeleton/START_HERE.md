@@ -3,6 +3,7 @@
 Status: CONFIRMED_CANON
 Scope: namespace entrypoint for the ChatGPT Exoskeleton / Skeleton layer
 Created: 2026-05-04
+Last updated: 2026-05-04
 
 ## Purpose
 
@@ -21,6 +22,16 @@ Jeeves runtime = separate future assistant runtime and application code.
 
 The Skeleton may currently live in the same repository as Jeeves materials, but it must be treated as a separate layer.
 
+## Current state
+
+For the latest short handoff, read:
+
+```text
+knowledge_base/chatgpt_exoskeleton/CURRENT_STATE.md
+```
+
+Use that file to continue practical Skeleton Stage 1 work without re-deriving context from scratch.
+
 ## Canonical Skeleton files
 
 Current canonical Skeleton files are still kept at their historical paths for compatibility:
@@ -32,7 +43,14 @@ knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md
 
 This namespace file exists to prevent agents and ChatGPT branches from confusing those files with Jeeves runtime code.
 
-When the user says `СК`, `Skeleton`, or `ChatGPT Exoskeleton`, load this namespace first, then the two canonical Skeleton files above.
+When the user says `СК`, `Skeleton`, or `ChatGPT Exoskeleton`, load this namespace first, then `CURRENT_STATE.md`, then the two canonical Skeleton files above.
+
+## Practical Skeleton files
+
+```text
+knowledge_base/chatgpt_exoskeleton/CURRENT_STATE.md
+knowledge_base/chatgpt_exoskeleton/SKELETON_RUNNER_TASK_TEMPLATE.md
+```
 
 ## What belongs to Skeleton
 
@@ -73,6 +91,7 @@ do not enter Jeeves runtime/code unless Oleksii explicitly switches to Jeeves ru
 do not merge or close old runtime PRs as part of Skeleton cleanup.
 do not create new policy documents unless explicitly requested.
 prefer minimal docs-only namespace and reference cleanup.
+keep bureaucracy at the safe minimum and prefer practical work.
 ```
 
 ## Related namespace
