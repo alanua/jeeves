@@ -30,6 +30,7 @@ Completed:
 9. Read-only wording audit found stale compact startup text in assistant_startup_prompt.md.
 10. assistant_startup_prompt.md compact boot memory was synced with current global boot and namespace split.
 11. `+` command meaning was recorded in WORKING_PROTOCOL.md.
+12. Response compression rule was recorded in WORKING_PROTOCOL.md.
 ```
 
 Core active files:
@@ -80,6 +81,13 @@ It allows bounded GitHub/KB maintenance inside that task.
 High-risk or destructive actions still require an explicit named instruction from Oleksii.
 ```
 
+Response style:
+
+```text
+For normal progress reports, answer with one short human sentence: what changed, what matters, or the next step.
+Do not expose internal reasoning, long status blocks, or repeated safety explanations unless Oleksii asks.
+```
+
 ## Last validation
 
 Manual boot-path self-test:
@@ -106,12 +114,19 @@ WORKING_PROTOCOL.md now records `+` as accepted + permission for the next safe p
 Result: PASS after post-write verification
 ```
 
+Response style verification:
+
+```text
+WORKING_PROTOCOL.md now records one-short-human-sentence progress reports as the default.
+Result: PASS after post-write verification
+```
+
 Conclusion:
 
 ```text
 A future Skeleton branch can reconstruct the current СК state from namespace files without entering Jeeves runtime docs.
 Jeeves runtime docs are aligned for explicit runtime work.
-Fast `+` continuation is now part of the working protocol.
+Fast `+` continuation and compact reporting are now part of the working protocol.
 ```
 
 ## Next practical step
@@ -119,7 +134,7 @@ Fast `+` continuation is now part of the working protocol.
 Recommended next step:
 
 ```text
-Do a small live workflow drill using Skeleton rules in this chat.
+Continue Skeleton Stage 1 with compact one-sentence progress reports.
 ```
 
 Good first candidate:
