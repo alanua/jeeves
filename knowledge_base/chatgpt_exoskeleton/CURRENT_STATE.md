@@ -27,6 +27,9 @@ Completed:
 6. Minimal Skeleton runner-task template created.
 7. Boot consistency synced after namespace split.
 8. Manual `прокинься + СК` boot-path self-test passed without entering Jeeves runtime docs.
+9. Read-only wording audit found stale compact startup text in assistant_startup_prompt.md.
+10. assistant_startup_prompt.md compact boot memory was synced with current global boot and namespace split.
+11. `+` command meaning was recorded in WORKING_PROTOCOL.md.
 ```
 
 Core active files:
@@ -43,7 +46,11 @@ knowledge_base/chatgpt_exoskeleton/CURRENT_STATE.md
 knowledge_base/chatgpt_exoskeleton/SKELETON_RUNNER_TASK_TEMPLATE.md
 knowledge_base/CHATGPT_EXOSKELETON.md
 knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md
+knowledge_base/jeeves_runtime/START_HERE.md
+knowledge_base/assistant_startup_prompt.md
 ```
+
+For active Skeleton work, do not load Jeeves runtime docs unless Oleksii explicitly switches to Jeeves runtime work.
 
 ## Active GitHub queue
 
@@ -55,7 +62,7 @@ knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md
 Use #23 as the main practical working thread for Skeleton Stage 1.
 Use #22 as audit/check reference.
 
-## Current operating rule
+## Current operating rules
 
 ```text
 Бюрократія на безпечному мінімумі.
@@ -65,18 +72,12 @@ Use #22 as audit/check reference.
 Нові policy docs — тільки за прямою командою.
 ```
 
-## Safety boundaries
-
-Do not do these under Skeleton work unless Oleksii explicitly asks:
+`+` means:
 
 ```text
-Jeeves runtime/app code work
-merge or close PRs/issues
-deployments
-external model API integration
-secret/private configuration work
-broad rewrites
-new policy docs
+accepted + continue with the next safe practical step inside the current active task.
+It allows bounded GitHub/KB maintenance inside that task.
+High-risk or destructive actions still require an explicit named instruction from Oleksii.
 ```
 
 ## Last validation
@@ -90,10 +91,27 @@ Not read: jeeves_runtime/START_HERE.md, assistant_startup_prompt.md
 Result: PASS
 ```
 
+Follow-up wording audit:
+
+```text
+Found: stale compact startup text in assistant_startup_prompt.md
+Fixed: assistant_startup_prompt.md now includes current global boot, Skeleton namespace/model/runbook, and separate Jeeves runtime namespace
+Result: PASS after post-write verification
+```
+
+Plus command verification:
+
+```text
+WORKING_PROTOCOL.md now records `+` as accepted + permission for the next safe practical step within the active task.
+Result: PASS after post-write verification
+```
+
 Conclusion:
 
 ```text
 A future Skeleton branch can reconstruct the current СК state from namespace files without entering Jeeves runtime docs.
+Jeeves runtime docs are aligned for explicit runtime work.
+Fast `+` continuation is now part of the working protocol.
 ```
 
 ## Next practical step
@@ -101,22 +119,23 @@ A future Skeleton branch can reconstruct the current СК state from namespace f
 Recommended next step:
 
 ```text
-Use the Skeleton runner-task template on a real bounded Skeleton maintenance task.
+Do a small live workflow drill using Skeleton rules in this chat.
 ```
 
 Good first candidate:
 
 ```text
-Create one runner-readable Skeleton task to audit whether any remaining public KB files still use old wording that implies Skeleton work is Jeeves runtime work.
+Take one real next Skeleton maintenance action, run it through the loop:
+boot -> classify -> act -> verify -> checkpoint.
 ```
 
 Keep it narrow:
 
 ```text
-read-only audit first
 no runtime/code work
-no PR/merge/close
-short report in #23
+no PR state changes
+no new policy docs
+short report in #23 only if durable
 ```
 
 ## Short boot instruction for the next branch
