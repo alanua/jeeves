@@ -2,7 +2,7 @@
 
 Status: CONFIRMED_CANON
 Scope: global collaboration startup memory for all projects with the user, not only Jeeves.
-Last consolidated: 2026-05-03
+Last consolidated: 2026-05-04
 
 This file is the external long-term memory anchor for ChatGPT conversations.
 
@@ -58,6 +58,15 @@ Primary repo:
 alanua/jeeves
 ```
 
+Important namespace rule:
+
+```text
+The repository name is historical and can cause confusion.
+ChatGPT Exoskeleton / Skeleton is a separate ChatGPT-side layer.
+Jeeves runtime is a separate future runtime/code layer.
+Do not infer that Skeleton work is Jeeves runtime work just because both live in this repository.
+```
+
 Visible root boot file:
 
 ```text
@@ -74,13 +83,15 @@ knowledge_base/MEMORY_POLICY.md
 knowledge_base/WORKING_PROTOCOL.md
 knowledge_base/CHATGPT_BRANCH_CONTINUITY_BOOT.md
 knowledge_base/assistant_diary.md
+knowledge_base/chatgpt_exoskeleton/START_HERE.md
 knowledge_base/CHATGPT_EXOSKELETON.md
 knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md
 ```
 
-For Jeeves / OpenClaw-style work, also read:
+For Jeeves / OpenClaw-style runtime work, also read:
 
 ```text
+knowledge_base/jeeves_runtime/START_HERE.md
 knowledge_base/assistant_startup_prompt.md
 ```
 
@@ -148,8 +159,8 @@ TEMPORARY_DO_NOT_CANONIZE
 
 Known major project areas:
 - global collaboration / boot protocol
-- ChatGPT exoskeleton
-- Jeeves / OpenClaw-style agent system
+- ChatGPT exoskeleton / Skeleton (`knowledge_base/chatgpt_exoskeleton/START_HERE.md`)
+- Jeeves runtime / future assistant code (`knowledge_base/jeeves_runtime/START_HERE.md`)
 - BauClock
 - Gewerbe/accounting/admin in Germany
 - Lavalamp / WLED / ESP32
@@ -185,5 +196,5 @@ If no action is needed:
 ## Compact memory text to save inside ChatGPT
 
 ```text
-For all work with Oleksii, treat the ChatGPT settings prompt as a bootloader, not memory. Preferred wake command: `прокинься`. On `прокинься`, read `BOOTLOADER.md` and GitHub KB startup files: `START_HERE_FOR_CHATGPT.md`, `MEMORY_POLICY.md`, `WORKING_PROTOCOL.md`, `CHATGPT_BRANCH_CONTINUITY_BOOT.md`, `assistant_diary.md`, `CHATGPT_EXOSKELETON.md`, `CHATGPT_EXOSKELETON_RUNBOOK.md`; for Jeeves/OpenClaw work also read `assistant_startup_prompt.md`; use Drive private hub only when private context is needed. After wake, wait for Oleksii to name the active project. Old aliases remain valid: `СТ СК`, `СТ ДЖ`, `АУД СК`, `БЗ СК`. Keep answers short, human, Ukrainian when user writes Ukrainian, adapted to basic programming knowledge. If Oleksii asks to adjust behavior, save one cleaned rule after checking duplicates/conflicts. `КОД <project>` means create/update runner-readable task files.
+For all work with Oleksii, treat the ChatGPT settings prompt as a bootloader, not memory. Preferred wake command: `прокинься`. On `прокинься`, read `BOOTLOADER.md` and GitHub KB startup files: `START_HERE_FOR_CHATGPT.md`, `MEMORY_POLICY.md`, `WORKING_PROTOCOL.md`, `CHATGPT_BRANCH_CONTINUITY_BOOT.md`, `assistant_diary.md`, `chatgpt_exoskeleton/START_HERE.md`, `CHATGPT_EXOSKELETON.md`, `CHATGPT_EXOSKELETON_RUNBOOK.md`; for Jeeves runtime/OpenClaw work also read `jeeves_runtime/START_HERE.md` and `assistant_startup_prompt.md`; use Drive private hub only when private context is needed. Skeleton is the ChatGPT-side external layer; Jeeves runtime is separate future runtime/code even though both currently live in `alanua/jeeves`. After wake, wait for Oleksii to name the active project. Old aliases remain valid: `СТ СК`, `СТ ДЖ`, `АУД СК`, `БЗ СК`. Keep answers short, human, Ukrainian when user writes Ukrainian, adapted to basic programming knowledge. If Oleksii asks to adjust behavior, save one cleaned rule after checking duplicates/conflicts. `КОД <project>` means create/update runner-readable task files.
 ```
