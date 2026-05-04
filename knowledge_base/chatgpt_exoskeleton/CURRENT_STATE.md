@@ -26,6 +26,7 @@ Completed:
 5. GitHub queue labeled so current Skeleton work is separated from Jeeves runtime/historical runner noise.
 6. Minimal Skeleton runner-task template created.
 7. Boot consistency synced after namespace split.
+8. Manual `прокинься + СК` boot-path self-test passed without entering Jeeves runtime docs.
 ```
 
 Core active files:
@@ -78,18 +79,44 @@ broad rewrites
 new policy docs
 ```
 
+## Last validation
+
+Manual boot-path self-test:
+
+```text
+Input scenario: прокинься + СК
+Read: BOOTLOADER.md -> chatgpt_exoskeleton/START_HERE.md -> chatgpt_exoskeleton/CURRENT_STATE.md
+Not read: jeeves_runtime/START_HERE.md, assistant_startup_prompt.md
+Result: PASS
+```
+
+Conclusion:
+
+```text
+A future Skeleton branch can reconstruct the current СК state from namespace files without entering Jeeves runtime docs.
+```
+
 ## Next practical step
 
 Recommended next step:
 
 ```text
-Exercise the Skeleton runner-task template on one small real task or validation check.
+Use the Skeleton runner-task template on a real bounded Skeleton maintenance task.
 ```
 
 Good first candidate:
 
 ```text
-Create a bounded Skeleton task to verify that future `прокинься + СК` startup can reconstruct the correct state from the new namespace files without reading Jeeves runtime docs.
+Create one runner-readable Skeleton task to audit whether any remaining public KB files still use old wording that implies Skeleton work is Jeeves runtime work.
+```
+
+Keep it narrow:
+
+```text
+read-only audit first
+no runtime/code work
+no PR/merge/close
+short report in #23
 ```
 
 ## Short boot instruction for the next branch
