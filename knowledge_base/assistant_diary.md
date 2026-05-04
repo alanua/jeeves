@@ -190,3 +190,22 @@ Operating rule:
 - For status, architecture, memory, Skeleton, boot, runner, and canon questions, read the relevant external canon before making confident claims.
 - If an answer was given from unsupported internal memory, stop, correct it, identify the existing rule that was violated, and apply the rule instead of creating duplicate rules.
 - Each correction should improve future behavior by enforcing the existing canon path first.
+
+## 2026-05-04 — Skeleton and Jeeves runtime namespace split
+
+Classification: CONFIRMED_CANON
+Sensitivity: public-safe
+
+What changed:
+- Added `knowledge_base/chatgpt_exoskeleton/START_HERE.md` as the namespace entrypoint for ChatGPT Exoskeleton / Skeleton work.
+- Added `knowledge_base/jeeves_runtime/START_HERE.md` as the namespace marker for future Jeeves runtime/code work.
+- Updated `BOOTLOADER.md` and `START_HERE_FOR_CHATGPT.md` so future chats and agents see the repository-name ambiguity explicitly.
+
+Reason:
+- Oleksii identified the root confusion: Skeleton physically lived inside the `alanua/jeeves` repository, so agents and ChatGPT branches could confuse Skeleton work with Jeeves runtime/code work.
+
+Operating rule:
+- `СК` / Skeleton means the ChatGPT-side external control/support layer, not Jeeves runtime.
+- `ДЖ` / Jeeves runtime means future assistant runtime/code work, loaded separately after global boot.
+- The repo name is historical and must not be used to infer that all work inside it is Jeeves runtime work.
+- Do not enter runtime/code, merge old PRs, or create new policy docs during Skeleton stabilization unless Oleksii explicitly asks.
