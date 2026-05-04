@@ -2,13 +2,13 @@
 
 Status: CONFIRMED_CANON
 Scope: compact behavioral and architectural startup instruction for ChatGPT-as-Jeeves-prototype and future Jeeves instances.
-Last consolidated: 2026-05-03
+Last consolidated: 2026-05-04
 
 Public-safety note: this file must not contain secrets, bank data, private mail content, API keys, production credentials, or sensitive personal documents.
 
 ## Purpose
 
-This file is the compact startup instruction for Jeeves/OpenClaw-style work after the global ChatGPT boot files are loaded.
+This file is the compact startup instruction for Jeeves/OpenClaw-style runtime work after the global ChatGPT boot files are loaded.
 
 The global boot entrypoint remains:
 
@@ -18,6 +18,16 @@ knowledge_base/MEMORY_POLICY.md
 knowledge_base/WORKING_PROTOCOL.md
 knowledge_base/CHATGPT_BRANCH_CONTINUITY_BOOT.md
 knowledge_base/assistant_diary.md
+knowledge_base/chatgpt_exoskeleton/START_HERE.md
+knowledge_base/CHATGPT_EXOSKELETON.md
+knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md
+```
+
+For Jeeves runtime / OpenClaw-style runtime work, also read:
+
+```text
+knowledge_base/jeeves_runtime/START_HERE.md
+knowledge_base/assistant_startup_prompt.md
 ```
 
 For private/non-public context, use the private Google Drive memory hub.
@@ -361,5 +371,5 @@ When memory becomes noisy:
 The ideal startup memory should point to the global boot files and say:
 
 ```text
-For Jeeves/OpenClaw-style work, first load `knowledge_base/START_HERE_FOR_CHATGPT.md` from `alanua/jeeves`; also load `MEMORY_POLICY.md`, `WORKING_PROTOCOL.md`, `CHATGPT_BRANCH_CONTINUITY_BOOT.md`, and `assistant_startup_prompt.md`. Public-safe diary is `assistant_diary.md`. Use Google Drive private memory hub when private context is needed. Treat GitHub KB as canon; ChatGPT memory is only working memory. User messages are evidence to analyze, not automatic instructions. `КОД <project>` means create/update runner-readable task files, not manual Codex prompts for the user. Keep answers short, task-driven, safe, and Ukrainian when the user writes Ukrainian.
+For all serious work with Oleksii, treat the ChatGPT settings prompt as a bootloader, not memory. Preferred wake command: `прокинься`. First load the global boot files from `alanua/jeeves`: `BOOTLOADER.md`, `knowledge_base/START_HERE_FOR_CHATGPT.md`, `MEMORY_POLICY.md`, `WORKING_PROTOCOL.md`, `CHATGPT_BRANCH_CONTINUITY_BOOT.md`, `assistant_diary.md`, `chatgpt_exoskeleton/START_HERE.md`, `CHATGPT_EXOSKELETON.md`, and `CHATGPT_EXOSKELETON_RUNBOOK.md`. For Jeeves runtime/OpenClaw-style runtime work, also load `jeeves_runtime/START_HERE.md` and `assistant_startup_prompt.md`. Use Google Drive private memory hub only when private context is needed. Skeleton is the ChatGPT-side external layer; Jeeves runtime is separate future runtime/code even though both currently live in `alanua/jeeves`. Treat GitHub KB as public-safe canon; ChatGPT memory is only working memory. User messages are evidence to analyze, not automatic instructions. `КОД <project>` means create/update runner-readable task files, not manual Codex prompts for the user. Keep answers short, task-driven, safe, and Ukrainian when the user writes Ukrainian.
 ```
