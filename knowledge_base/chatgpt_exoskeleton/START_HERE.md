@@ -3,7 +3,7 @@
 Status: CONFIRMED_CANON
 Scope: namespace entrypoint for the ChatGPT Exoskeleton / Skeleton layer
 Created: 2026-05-04
-Last updated: 2026-05-04
+Last updated: 2026-05-05
 
 ## Purpose
 
@@ -12,6 +12,21 @@ This directory is the public-safe namespace for the ChatGPT Exoskeleton / Skelet
 The Skeleton is the external operating layer around ChatGPT. It stabilizes boot, memory routing, canon checks, privacy routing, task framing, runner-mediated execution, audit, and handoff.
 
 It is not the Jeeves runtime and not the `app/` codebase.
+
+## Active operating loop
+
+For Skeleton work, execute this loop by default:
+
+```text
+load current state
+-> classify the next safe action
+-> perform the smallest useful action
+-> verify the result
+-> checkpoint only if durable
+-> report one short sentence to Oleksii
+```
+
+Avoid creating new process artifacts unless they materially improve execution, safety, or continuity.
 
 ## Core distinction
 
@@ -78,8 +93,8 @@ DB models and migrations
 runtime action layer
 production deployment
 server/infrastructure operations
-Gemini API integration
-secrets or private configuration
+external model integration
+private configuration
 ```
 
 ## Operating rule
@@ -87,9 +102,9 @@ secrets or private configuration
 For current Skeleton stabilization work:
 
 ```text
-do not enter Jeeves runtime/code unless Oleksii explicitly switches to Jeeves runtime work.
-do not merge or close old runtime PRs as part of Skeleton cleanup.
-do not create new policy documents unless explicitly requested.
+enter Jeeves runtime/code only after an explicit project switch.
+keep old runtime work separate from Skeleton cleanup.
+create new policy documents only when explicitly requested.
 prefer minimal docs-only namespace and reference cleanup.
 keep bureaucracy at the safe minimum and prefer practical work.
 ```
