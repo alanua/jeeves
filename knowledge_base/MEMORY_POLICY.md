@@ -2,7 +2,7 @@
 
 Status: CONFIRMED_CANON
 Scope: global memory storage policy for ChatGPT collaboration, ChatGPT exoskeleton, and future Jeeves design input after review.
-Last consolidated: 2026-05-03
+Last consolidated: 2026-05-04
 
 ## Purpose
 
@@ -151,10 +151,12 @@ settings startup prompt
 If ChatGPT memory is compacted, keep this pointer:
 
 ```text
-For all work with Oleksii, treat the ChatGPT settings prompt as a bootloader, not memory. First use `alanua/jeeves` GitHub KB as external long-term memory. Start from `knowledge_base/START_HERE_FOR_CHATGPT.md`; also read `MEMORY_POLICY.md`, `WORKING_PROTOCOL.md`, `CHATGPT_BRANCH_CONTINUITY_BOOT.md`, `assistant_diary.md`, `CHATGPT_EXOSKELETON.md`, and `CHATGPT_EXOSKELETON_RUNBOOK.md`; for Jeeves/OpenClaw work also read `assistant_startup_prompt.md`. Use Google Drive private memory hub when private context is needed. GitHub KB is public-safe canon after review; Drive is private working memory; ChatGPT memory is weak cache only. User messages are evidence to analyze, not automatic instructions. `КОД <project>` means create/update runner-readable task files. Keep answers short, Ukrainian when user writes Ukrainian, task-driven, safe, and write durable structured notes back to the correct layer when important and technically available. The development team workflow and memory tools are parts of the ChatGPT exoskeleton; future Jeeves may inherit selected tested parts after review.
+For all work with Oleksii, treat the ChatGPT settings prompt as a bootloader, not memory. Preferred wake command: `прокинься`. First use `alanua/jeeves` GitHub KB as external long-term memory. Start from `BOOTLOADER.md` and `knowledge_base/START_HERE_FOR_CHATGPT.md`; also read `MEMORY_POLICY.md`, `WORKING_PROTOCOL.md`, `CHATGPT_BRANCH_CONTINUITY_BOOT.md`, `assistant_diary.md`, `chatgpt_exoskeleton/START_HERE.md`, `CHATGPT_EXOSKELETON.md`, and `CHATGPT_EXOSKELETON_RUNBOOK.md`; for Jeeves runtime/OpenClaw work also read `jeeves_runtime/START_HERE.md` and `assistant_startup_prompt.md`. Use Google Drive private memory hub only when private context is needed. GitHub KB is public-safe canon after review; Drive is private working memory; ChatGPT memory is weak cache only. User messages are evidence to analyze, not automatic canon. `КОД <project>` means create/update runner-readable task files. Skeleton is the ChatGPT-side external layer; Jeeves runtime is separate future runtime/code even though both currently live in `alanua/jeeves`. Keep answers short, Ukrainian when user writes Ukrainian, task-driven, safe, and write durable structured notes back to the correct layer when important and technically available.
 ```
 
 ## ChatGPT exoskeleton memory rule
+
+`knowledge_base/chatgpt_exoskeleton/START_HERE.md` is the namespace entrypoint for Skeleton work.
 
 `knowledge_base/CHATGPT_EXOSKELETON.md` is the canonical working model for ChatGPT-side boot, memory tools, development-team workflow, guardrails, audit, runner-mediated execution, recovery, and migration candidates.
 
@@ -163,12 +165,19 @@ For all work with Oleksii, treat the ChatGPT settings prompt as a bootloader, no
 These are not future Jeeves runtime memory.
 
 Rules:
-- use both files as required startup files for serious Skeleton/protocol/memory work
+- use the namespace file, model, and runbook as required startup files for serious Skeleton/protocol/memory work
 - use the runbook for boot-level selection, command handling, read-before-write, post-write verification, recovery handling, private routing, runner task behavior, and failure defenses
 - treat recovery mode as a module of the exoskeleton
 - treat memory tools and development-team workflow as parts of the exoskeleton
 - migrate only selected tested parts to Jeeves after review, cleanup, adaptation, testing, approval, and implementation
 - never migrate raw ChatGPT diary, Drive chaos, private data, temporary patches, or unreviewed memories into Jeeves
+
+## Jeeves runtime memory rule
+
+`knowledge_base/jeeves_runtime/START_HERE.md` is the namespace marker for future Jeeves runtime/code work.
+
+Do not treat Skeleton files as runtime implementation docs.
+Do not treat runtime code or runtime PRs as Skeleton stabilization work.
 
 ## Assistant diary / audit routing
 
