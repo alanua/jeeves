@@ -2,7 +2,7 @@
 
 Status: CONFIRMED_CANON
 Scope: short public-safe handoff for the next ChatGPT branch working on СК / Skeleton
-Last updated: 2026-05-04
+Last updated: 2026-05-05
 
 ## Active project
 
@@ -31,6 +31,7 @@ Completed:
 10. assistant_startup_prompt.md compact boot memory was synced with current global boot and namespace split.
 11. `+` command meaning was recorded in WORKING_PROTOCOL.md.
 12. Response compression rule was recorded in WORKING_PROTOCOL.md.
+13. Active Skeleton operating loop was added to chatgpt_exoskeleton/START_HERE.md.
 ```
 
 Core active files:
@@ -88,6 +89,17 @@ For normal progress reports, answer with one short human sentence: what changed,
 Do not expose internal reasoning, long status blocks, or repeated safety explanations unless Oleksii asks.
 ```
 
+Active operating loop:
+
+```text
+load current state
+-> classify the next safe action
+-> perform the smallest useful action
+-> verify the result
+-> checkpoint only if durable
+-> report one short sentence to Oleksii
+```
+
 ## Last validation
 
 Manual boot-path self-test:
@@ -134,14 +146,7 @@ Fast `+` continuation and compact reporting are now part of the working protocol
 Recommended next step:
 
 ```text
-Continue Skeleton Stage 1 with compact one-sentence progress reports.
-```
-
-Good first candidate:
-
-```text
-Take one real next Skeleton maintenance action, run it through the loop:
-boot -> classify -> act -> verify -> checkpoint.
+Run the first practical workflow drill against a small real Skeleton maintenance task.
 ```
 
 Keep it narrow:
