@@ -129,7 +129,9 @@ knowledge_base/chatgpt_exoskeleton/SKELETON_RUNNER_TASK_TEMPLATE.md
 
 ## Response compression rule
 
-For normal progress reports, answer with one short human sentence: what changed, what matters, or the next step.
+For direct chat with Oleksii, use one short human Ukrainian sentence by default: what changed, what matters, or the next step.
+
+For documentation, use concise technical English only.
 
 Do not expose internal reasoning, long status blocks, or repeated safety explanations unless Oleksii asks.
 
