@@ -3,7 +3,7 @@
 Status: CONFIRMED_CANON
 Scope: ChatGPT-side operating layer: boot, memory tools, development-team workflow, guardrails, audit, and runner-mediated execution. Design input for future Jeeves only after review.
 Created: 2026-05-03
-Last consolidated: 2026-05-03
+Last consolidated: 2026-05-04
 
 ## Purpose
 
@@ -42,6 +42,17 @@ This means:
 - The exoskeleton protects weak points and amplifies strong points.
 - Some exoskeleton parts may later become Jeeves modules or design patterns.
 - Raw ChatGPT memory/diary must not be blindly copied into Jeeves.
+
+## Namespace rule
+
+The repository name `alanua/jeeves` is historical and can confuse project scope.
+
+```text
+СК / Skeleton / ChatGPT Exoskeleton = ChatGPT-side external control/support layer.
+ДЖ / Jeeves runtime = separate future assistant runtime/code layer.
+```
+
+Do not treat Skeleton work as Jeeves runtime work just because both currently live in the same repository.
 
 ## Core distinction
 
@@ -101,8 +112,10 @@ WAKE
 Recognize explicit commands and task type.
 
 Important triggers:
+- `прокинься`
 - `СТ`
-- `СТ ВСЕ`
+- `СК`
+- `СТ СК`
 - `СТ ДЖ`
 - `АУД ВСЕ`
 - `РІШ`
@@ -123,7 +136,7 @@ User command
 
 Protects against branch amnesia.
 
-Minimal boot:
+Minimal global boot:
 
 ```text
 START_HERE_FOR_CHATGPT.md
@@ -131,12 +144,15 @@ MEMORY_POLICY.md
 WORKING_PROTOCOL.md
 CHATGPT_BRANCH_CONTINUITY_BOOT.md
 assistant_diary.md
+chatgpt_exoskeleton/START_HERE.md
 CHATGPT_EXOSKELETON.md
+CHATGPT_EXOSKELETON_RUNBOOK.md
 ```
 
-For Jeeves/OpenClaw-style work:
+For Jeeves runtime / OpenClaw-style runtime work:
 
 ```text
++ jeeves_runtime/START_HERE.md
 + assistant_startup_prompt.md
 ```
 
@@ -162,8 +178,8 @@ Loads enough relevant context, not all context.
 
 Classify the task first:
 - global
-- ChatGPT exoskeleton
-- Jeeves
+- ChatGPT exoskeleton / Skeleton
+- Jeeves runtime
 - BauClock
 - Gewerbe/private
 - runner/Hetzner
@@ -297,6 +313,12 @@ handoff updated
 ```
 
 Do not spawn many agents without concrete task, workspace, tests, logs, cost boundaries, approval points, and shutdown path.
+
+For Skeleton runner tasks, prefer:
+
+```text
+knowledge_base/chatgpt_exoskeleton/SKELETON_RUNNER_TASK_TEMPLATE.md
+```
 
 ### 8. Observability / Diary / Audit
 
@@ -442,8 +464,8 @@ Use boot levels to avoid both amnesia and excessive context loading.
 
 ```text
 L0 quick: current chat only
-L1 normal: starter + diary + exoskeleton
-L2 project: starter + diary + exoskeleton + project docs
+L1 normal: starter + diary + Skeleton namespace + exoskeleton + runbook
+L2 project: starter + diary + Skeleton namespace + exoskeleton + runbook + project docs
 L3 private: L2 + Drive private hub
 L4 audit/recovery: full scan + structured facts + logs
 ```
@@ -459,7 +481,7 @@ Skeleton v1 is ready to be treated as working canon and implemented incrementall
 Implementation should not start as a large rewrite. Start by enforcing behavior in ChatGPT workflow:
 
 1. Require boot level selection for serious work.
-2. Enforce read-before-write before KB/Drive changes.
+2. Enforce read-before-answer and read-before-write before KB/Drive changes.
 3. Use the recovery layer for old branches and source dumps.
 4. Route memory by public/private/secret/temporary classification.
 5. Use runner-readable tasks for executor work.
@@ -486,6 +508,6 @@ ChatGPT wears the exoskeleton now.
 The development team workflow is part of the exoskeleton.
 The memory tools are parts of the exoskeleton.
 Recovery mode is a module of the exoskeleton.
-Jeeves may inherit selected tested tools later.
-Jeeves must not inherit ChatGPT's memory chaos.
+Jeeves runtime may inherit selected tested tools later.
+Jeeves runtime must not inherit ChatGPT's memory chaos.
 ```
