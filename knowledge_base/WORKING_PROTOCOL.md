@@ -26,6 +26,7 @@ Old aliases remain valid, but `прокинься` is the preferred entrypoint.
 | Alias | Meaning | Action |
 |---|---|---|
 | `прокинься` | main wake command | Load global boot, Skeleton namespace, runbook, diary; wait for active project. |
+| `+` | accepted + permission | Continue the current active task with the next safe practical step. This is permission for bounded safe GitHub/KB actions within the active task. It is not permission for merge/close/delete/secrets/deploy/runtime work unless Oleksii explicitly names that action. |
 | `СТ` | startup | Old startup alias. |
 | `СК` | Skeleton / ChatGPT exoskeleton | Use Skeleton namespace + model + runbook. |
 | `СТ СК` | start Skeleton | Old alias for Skeleton startup. |
