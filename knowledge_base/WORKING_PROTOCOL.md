@@ -127,9 +127,15 @@ For Skeleton tasks, prefer:
 knowledge_base/chatgpt_exoskeleton/SKELETON_RUNNER_TASK_TEMPLATE.md
 ```
 
+## Response compression rule
+
+For normal progress reports, answer with one short human sentence: what changed, what matters, or the next step.
+
+Do not expose internal reasoning, long status blocks, or repeated safety explanations unless Oleksii asks.
+
 ## Default report style
 
-For memory/protocol work, report briefly:
+For memory/protocol work, use the compact format only when a structured report is actually useful:
 
 ```text
 Що сталося:
