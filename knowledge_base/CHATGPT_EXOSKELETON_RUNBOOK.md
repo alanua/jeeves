@@ -3,11 +3,13 @@
 Status: CONFIRMED_CANON
 Scope: operational runbook for using the ChatGPT exoskeleton in real chat work.
 Created: 2026-05-03
+Last consolidated: 2026-05-04
 
 ## Purpose
 
 This file is the practical execution checklist for `knowledge_base/CHATGPT_EXOSKELETON.md`.
 
+`knowledge_base/chatgpt_exoskeleton/START_HERE.md` defines the Skeleton namespace.
 `CHATGPT_EXOSKELETON.md` defines the model.
 This runbook defines what ChatGPT must do step by step when commands such as `СТ`, `СК`, `АУД`, `БЗ`, `КОД`, `ВІДН`, `РІШ`, `ПРИВ`, or `СТАН` appear.
 
@@ -21,14 +23,23 @@ Wake -> identify command/project/privacy -> choose boot level -> read required s
 
 No serious work should start from unsupported internal memory when GitHub/Drive memory can be checked.
 
+## Namespace rule
+
+```text
+СК / Skeleton / ChatGPT Exoskeleton = ChatGPT-side external control/support layer.
+ДЖ / Jeeves runtime = separate future assistant runtime/code layer.
+```
+
+The repository name `alanua/jeeves` is historical and must not decide the active project scope.
+
 ## Boot levels
 
 Use the lowest level that is safe for the task.
 
 ```text
 L0 quick: current chat only
-L1 normal: starter + diary + exoskeleton + runbook
-L2 project: starter + diary + exoskeleton + runbook + project docs
+L1 normal: starter + diary + Skeleton namespace + exoskeleton + runbook
+L2 project: starter + diary + Skeleton namespace + exoskeleton + runbook + project docs
 L3 private: L2 + Drive private hub
 L4 audit/recovery: full scan + structured facts + logs
 ```
@@ -47,13 +58,15 @@ knowledge_base/MEMORY_POLICY.md
 knowledge_base/WORKING_PROTOCOL.md
 knowledge_base/CHATGPT_BRANCH_CONTINUITY_BOOT.md
 knowledge_base/assistant_diary.md
+knowledge_base/chatgpt_exoskeleton/START_HERE.md
 knowledge_base/CHATGPT_EXOSKELETON.md
 knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md
 ```
 
-For Jeeves/OpenClaw-style work, also read:
+For Jeeves runtime / OpenClaw-style runtime work, also read:
 
 ```text
+knowledge_base/jeeves_runtime/START_HERE.md
 knowledge_base/assistant_startup_prompt.md
 ```
 
@@ -93,11 +106,12 @@ Goal: use or audit the ChatGPT exoskeleton.
 Procedure:
 
 ```text
-1. Read CHATGPT_EXOSKELETON.md.
-2. Read this runbook if the task is operational.
-3. Read Working Protocol if command aliases are involved.
-4. For audit, check GitHub startup files + Drive hub + Structured Facts.
-5. Report only gaps, risks, and next action.
+1. Read chatgpt_exoskeleton/START_HERE.md.
+2. Read CHATGPT_EXOSKELETON.md.
+3. Read this runbook if the task is operational.
+4. Read Working Protocol if command aliases are involved.
+5. For audit, check GitHub startup files + Drive hub + Structured Facts when private context is needed.
+6. Report only gaps, risks, and next action.
 ```
 
 ### `АУД` / audit
@@ -122,12 +136,13 @@ MEMORY_POLICY.md
 WORKING_PROTOCOL.md
 CHATGPT_BRANCH_CONTINUITY_BOOT.md
 assistant_diary.md
+chatgpt_exoskeleton/START_HERE.md
 CHATGPT_EXOSKELETON.md
 CHATGPT_EXOSKELETON_RUNBOOK.md
-Drive START HERE
-Drive Handoff
-Drive Recovery Audit Log
-Structured Facts
+Drive START HERE only if private context is needed
+Drive Handoff only if private context is needed
+Drive Recovery Audit Log only if private context is needed
+Structured Facts only if private context is needed
 ```
 
 ### `БЗ` / knowledge-base update
@@ -137,7 +152,7 @@ Goal: write cleaned durable knowledge to the correct layer.
 Procedure:
 
 ```text
-1. Read starter/diary/exoskeleton.
+1. Read starter/diary/exoskeleton namespace/model/runbook.
 2. Read target file before editing.
 3. Classify candidate memory.
 4. Decide storage route: GitHub / Drive / secret store / do not store.
@@ -169,6 +184,12 @@ Procedure:
 3. Create/update structured task file for runner consumption.
 4. Include goal, context, allowed changes, forbidden changes, checks, expected output, handoff requirements, safety/privacy boundaries.
 5. Do not tell user to manually copy the task to Codex when runner workflow is available.
+```
+
+For Skeleton tasks, prefer:
+
+```text
+knowledge_base/chatgpt_exoskeleton/SKELETON_RUNNER_TASK_TEMPLATE.md
 ```
 
 ### `ВІДН` / recovery
@@ -374,6 +395,7 @@ Defense:
 
 ```text
 Skeleton is ChatGPT-side.
+Jeeves runtime is separate future runtime/code.
 Jeeves may inherit selected tested parts later.
 Jeeves must not inherit ChatGPT memory chaos.
 ```
