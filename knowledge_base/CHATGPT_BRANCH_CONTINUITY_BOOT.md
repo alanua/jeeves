@@ -3,7 +3,7 @@
 Status: CONFIRMED_CANON
 Scope: ChatGPT collaboration across separate project chat branches
 Recorded: 2026-05-03
-Last consolidated: 2026-05-03
+Last consolidated: 2026-05-04
 
 ## Purpose
 
@@ -27,6 +27,17 @@ settings startup prompt
 -> current chat task
 ```
 
+## Namespace rule
+
+The repository name `alanua/jeeves` is historical and can confuse project scope.
+
+```text
+Skeleton / СК = ChatGPT-side external control/support layer.
+Jeeves runtime / ДЖ = separate future assistant runtime/code layer.
+```
+
+Do not infer runtime scope from the repository name.
+
 ## Required boot sequence
 
 For every serious project conversation with Oleksii:
@@ -40,9 +51,11 @@ For every serious project conversation with Oleksii:
    - `knowledge_base/WORKING_PROTOCOL.md`
    - `knowledge_base/CHATGPT_BRANCH_CONTINUITY_BOOT.md`
    - `knowledge_base/assistant_diary.md`
+   - `knowledge_base/chatgpt_exoskeleton/START_HERE.md`
    - `knowledge_base/CHATGPT_EXOSKELETON.md`
    - `knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md`
-5. For Jeeves/OpenClaw-style work, also read:
+5. For Jeeves runtime / OpenClaw-style runtime work, also read:
+   - `knowledge_base/jeeves_runtime/START_HERE.md`
    - `knowledge_base/assistant_startup_prompt.md`
 6. If the task may involve private context, check the private Drive memory hub:
    - `Jeeves Private Memory - START HERE`
@@ -60,8 +73,8 @@ Use boot levels from `CHATGPT_EXOSKELETON_RUNBOOK.md`:
 
 ```text
 L0 quick: current chat only
-L1 normal: starter + diary + exoskeleton + runbook
-L2 project: starter + diary + exoskeleton + runbook + project docs
+L1 normal: starter + diary + Skeleton namespace + exoskeleton + runbook
+L2 project: starter + diary + Skeleton namespace + exoskeleton + runbook + project docs
 L3 private: L2 + Drive private hub
 L4 audit/recovery: full scan + structured facts + logs
 ```
@@ -74,7 +87,7 @@ Default for audit/recovery: L4.
 
 ```text
 1. Current explicit user instruction in this chat, after safety/policy checks
-2. GitHub KB public-safe canon, ChatGPT exoskeleton, and runbook
+2. GitHub KB public-safe canon, ChatGPT exoskeleton namespace/model/runbook
 3. Private Google Drive memory for private working context
 4. Current chat context
 5. ChatGPT internal memory as weak cache only
@@ -113,6 +126,8 @@ A diary entry is appropriate when:
 A diary entry must be classified before saving and must not include raw private data in public GitHub.
 
 ## ChatGPT exoskeleton rule
+
+`knowledge_base/chatgpt_exoskeleton/START_HERE.md` is the namespace entrypoint for Skeleton work.
 
 `knowledge_base/CHATGPT_EXOSKELETON.md` is part of the required boot set.
 
