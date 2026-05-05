@@ -14,6 +14,7 @@ from tools.skeleton_core.checkpoint import render_checkpoint
 from tools.skeleton_core.github_queue import normalize_issue, normalize_pr, summarize_queue
 from tools.skeleton_core.handoff_pack import render_handoff_pack
 from tools.skeleton_core.models import EvidencePolicy, TaskPacket
+from tools.skeleton_core.pr_status import PRStatusInput, build_pr_status
 from tools.skeleton_core.queue_classifier import classify_queue_items
 from tools.skeleton_core.report import render_runner_report_from_trace
 from tools.skeleton_core.router import route_task
@@ -27,6 +28,7 @@ SUBCOMMANDS = {
     "classify-queue",
     "decide",
     "handoff-pack",
+    "pr-status",
     "queue-summary",
     "runner-report-from-trace",
     "task-from-text",
@@ -56,6 +58,11 @@ def load_queue_items(input_path: Path) -> list[dict[str, Any]]:
     if not isinstance(raw_items, list):
         raise ValueError("queue input must be a JSON list")
     return raw_items
+
+
+def load_pr_status_input(input_path: Path) -> PRStatusInput:
+    """Load public-safe PR status input from JSON."""
+    return PRStatusInput.model_validate_json(input_path.read_text(encoding="utf-8"))
 
 
 def build_queue_summary_payload(input_path: Path) -> dict[str, int]:
@@ -205,6 +212,17 @@ def _subcommand_parser() -> argparse.ArgumentParser:
         help="Repository root to use",
     )
 
+    pr_status_parser = subparsers.add_parser(
+        "pr-status",
+        help="Build a deterministic PR status packet from public-safe JSON",
+    )
+    pr_status_parser.add_argument(
+        "--input",
+        required=True,
+        type=Path,
+        help="Path to public-safe PR status JSON",
+    )
+
     queue_parser = subparsers.add_parser(
         "queue-summary",
         help="Summarize an offline queue JSON file",
@@ -310,6 +328,16 @@ def _run_handoff_pack(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_pr_status(args: argparse.Namespace) -> int:
+    try:
+        result = build_pr_status(load_pr_status_input(args.input))
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
+    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
+    return 0
+
+
 def _run_queue_summary(args: argparse.Namespace) -> int:
     print(
         json.dumps(build_queue_summary_payload(args.input), ensure_ascii=False, indent=2),
@@ -409,6 +437,8 @@ def main(argv: list[str] | None = None) -> int:
         return _run_classify_queue(args)
     if args.command == "handoff-pack":
         return _run_handoff_pack(args)
+    if args.command == "pr-status":
+        return _run_pr_status(args)
     if args.command == "queue-summary":
         return _run_queue_summary(args)
     if args.command == "runner-report-from-trace":
