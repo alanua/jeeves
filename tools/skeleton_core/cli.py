@@ -16,6 +16,7 @@ from tools.skeleton_core.report import render_runner_report_from_trace
 from tools.skeleton_core.router import route_task
 from tools.skeleton_core.templates import render_runner_issue
 from tools.skeleton_core.trace import TracePacket
+from tools.skeleton_core.work_packet import render_work_packet
 
 SUBCOMMANDS = {
     "decide",
@@ -23,6 +24,7 @@ SUBCOMMANDS = {
     "runner-report-from-trace",
     "task-from-text",
     "trace-packet",
+    "work-packet",
 }
 MAX_AUTO_TITLE_LENGTH = 80
 
@@ -190,6 +192,12 @@ def _subcommand_parser() -> argparse.ArgumentParser:
 
     trace_parser = subparsers.add_parser("trace-packet", help="Build a Skeleton trace packet")
     _add_trace_args(trace_parser)
+
+    work_packet_parser = subparsers.add_parser(
+        "work-packet",
+        help="Render a public-safe work packet from free-form task text",
+    )
+    _add_task_from_text_args(work_packet_parser)
     return parser
 
 
@@ -290,6 +298,23 @@ def _run_trace_packet(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_work_packet(args: argparse.Namespace) -> int:
+    try:
+        packet = build_task_from_text_packet(
+            text=args.text,
+            title=args.title,
+            project=args.project,
+            requested_by=args.requested_by,
+            evidence_policy=EvidencePolicy(args.evidence_policy),
+        )
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
+
+    print(render_work_packet(packet, route_task(packet)), flush=True)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     if args.command == "queue-summary":
@@ -300,6 +325,8 @@ def main(argv: list[str] | None = None) -> int:
         return _run_task_from_text(args)
     if args.command == "trace-packet":
         return _run_trace_packet(args)
+    if args.command == "work-packet":
+        return _run_work_packet(args)
     return _run_decide(args)
 
 
