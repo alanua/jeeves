@@ -1,7 +1,7 @@
 """Route Skeleton task packets to the safest available target."""
 
 from tools.skeleton_core.classifier import classify_task
-from tools.skeleton_core.models import RouteDecision, RouteTarget, RiskLevel, TaskPacket
+from tools.skeleton_core.models import RiskLevel, RouteDecision, RouteTarget, TaskPacket
 
 BLOCKED_RED_REASON = (
     "RED task detected by Skeleton tripwire. It is non-executable until Oleksii gives "
