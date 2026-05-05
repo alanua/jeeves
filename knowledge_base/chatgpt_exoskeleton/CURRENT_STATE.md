@@ -37,6 +37,7 @@ Completed:
 16. Queue-summary usability CLI was merged via #32 and verified on the runner.
 17. Oleksii confirmed: Externalizer v0 works and is accepted for active use.
 18. #33 was implemented and merged via #34 as the trace-packet CLI.
+19. #35 was implemented and merged via #36 as the task-from-text CLI.
 ```
 
 Core active files:
@@ -75,6 +76,7 @@ Closed/completed:
 #27 [agent-task-yellow] Implement Skeleton github_queue offline adapter -> merged via #31, merge SHA 3828a1e68864876d817861c9526a86e51aee884d
 #32 Externalizer v0 queue-summary CLI -> merged, merge SHA d6b9eec3591738ef388ae51a0b0bd5f08d4c7163
 #33 [agent-task-yellow] Add Externalizer v0 trace packet CLI -> merged via #34, merge SHA 2b96be29ad5e4b75155e8ecdac7ed371153f9189
+#35 [agent-task-yellow] Add Externalizer v0 task-from-text CLI -> merged via #36, merge SHA 620a3d19958bd281ba28db2c0f13085f44e59b1b
 ```
 
 Use #23 as the main practical working thread for Skeleton Stage 1.
@@ -126,6 +128,13 @@ python -m tools.skeleton_core.cli --title "Write docs" --body "Add markdown note
 python -m tools.skeleton_core.cli decide --title "Write docs" --body "Add markdown note"
 ```
 
+Task from text:
+
+```bash
+python -m tools.skeleton_core.cli task-from-text --text "Write docs note for Skeleton queue usage"
+python -m tools.skeleton_core.cli task-from-text --text "Use production token from .env"
+```
+
 Queue summary:
 
 ```bash
@@ -142,9 +151,11 @@ Current validated behavior:
 
 ```text
 - normal docs task -> YELLOW / RUNNER_YELLOW
+- code-like task -> ORANGE / RUNNER_ORANGE
 - RED trigger task -> BLOCKED_RED with blocked_reason
 - queue-summary counts Skeleton/runtime-noise/evidence-only/blocked items
 - trace-packet emits public-safe JSON checkpoint fields
+- task-from-text creates deterministic decision packets from free-form text without model calls
 ```
 
 ## Last validation
@@ -176,12 +187,19 @@ Trace-packet CLI:
 
 ```text
 #33 implemented and merged through #34.
-Merge SHA: 2b96be29ad5e4b75155e8ecdac7ed371153f9189.
+Runner validation before merge: PASS.
+```
+
+Task-from-text CLI:
+
+```text
+#35 implemented and merged through #36.
+Merge SHA: 620a3d19958bd281ba28db2c0f13085f44e59b1b.
 Runner validation before merge:
-- pytest: 89 passed
+- pytest: 93 passed
 - ruff check tools/skeleton_core tests/skeleton_core: passed
 - black --check tools/skeleton_core tests/skeleton_core: passed
-- trace-packet emitted expected public-safe JSON
+- RED task-from-text example routed to BLOCKED_RED with blocked_reason
 - git status --short: clean
 Result: PASS.
 ```
@@ -192,7 +210,7 @@ Conclusion:
 A future Skeleton branch can reconstruct the current СК state from namespace files without entering Jeeves runtime docs.
 Jeeves runtime docs are aligned for explicit runtime work.
 Fast `+` continuation and compact reporting are now part of the working protocol.
-Externalizer v0 has usable merged code on main: decision gate, queue-summary, and trace-packet.
+Externalizer v0 has usable merged code on main: decision gate, task-from-text, queue-summary, and trace-packet.
 ```
 
 ## Next practical step
@@ -200,13 +218,13 @@ Externalizer v0 has usable merged code on main: decision gate, queue-summary, an
 Recommended next step:
 
 ```text
-Use Externalizer v0 for the next Skeleton task and emit trace-packet checkpoints for completed slices.
+Use task-from-text for new Skeleton task intake, then trace-packet for completed checkpoints.
 ```
 
 Possible next implementation step:
 
 ```text
-Add `task-from-text` or `runner-report-from-trace` only after first active use shows what is missing.
+Add `runner-report-from-trace` only after first active use shows what is missing.
 ```
 
 Keep it narrow:
