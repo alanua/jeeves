@@ -38,6 +38,7 @@ Completed:
 17. Oleksii confirmed: Externalizer v0 works and is accepted for active use.
 18. #33 was implemented and merged via #34 as the trace-packet CLI.
 19. #35 was implemented and merged via #36 as the task-from-text CLI.
+20. #37 was implemented and merged via #38 as the runner-report-from-trace CLI.
 ```
 
 Core active files:
@@ -77,6 +78,7 @@ Closed/completed:
 #32 Externalizer v0 queue-summary CLI -> merged, merge SHA d6b9eec3591738ef388ae51a0b0bd5f08d4c7163
 #33 [agent-task-yellow] Add Externalizer v0 trace packet CLI -> merged via #34, merge SHA 2b96be29ad5e4b75155e8ecdac7ed371153f9189
 #35 [agent-task-yellow] Add Externalizer v0 task-from-text CLI -> merged via #36, merge SHA 620a3d19958bd281ba28db2c0f13085f44e59b1b
+#37 [agent-task-yellow] Add Externalizer v0 runner-report-from-trace CLI -> merged via #38, merge SHA a50248c16e7ba3e448542962f68b46a5e6e40197
 ```
 
 Use #23 as the main practical working thread for Skeleton Stage 1.
@@ -121,18 +123,12 @@ load current state
 
 ## Externalizer v0 usage
 
-Decision gate:
-
-```bash
-python -m tools.skeleton_core.cli --title "Write docs" --body "Add markdown note"
-python -m tools.skeleton_core.cli decide --title "Write docs" --body "Add markdown note"
-```
-
-Task from text:
+Task intake / decision:
 
 ```bash
 python -m tools.skeleton_core.cli task-from-text --text "Write docs note for Skeleton queue usage"
-python -m tools.skeleton_core.cli task-from-text --text "Use production token from .env"
+python -m tools.skeleton_core.cli --title "Write docs" --body "Add markdown note"
+python -m tools.skeleton_core.cli decide --title "Write docs" --body "Add markdown note"
 ```
 
 Queue summary:
@@ -147,6 +143,12 @@ Trace packet:
 python -m tools.skeleton_core.cli trace-packet --task-id "manual-001" --project skeleton --risk-level YELLOW --route-target RUNNER_YELLOW --result completed --next-safe-step review
 ```
 
+Runner report from trace:
+
+```bash
+python -m tools.skeleton_core.cli runner-report-from-trace --input tests/fixtures/trace_packet_sample.json
+```
+
 Current validated behavior:
 
 ```text
@@ -156,6 +158,7 @@ Current validated behavior:
 - queue-summary counts Skeleton/runtime-noise/evidence-only/blocked items
 - trace-packet emits public-safe JSON checkpoint fields
 - task-from-text creates deterministic decision packets from free-form text without model calls
+- runner-report-from-trace converts TracePacket JSON into the short public-safe runner report shape
 ```
 
 ## Last validation
@@ -194,12 +197,19 @@ Task-from-text CLI:
 
 ```text
 #35 implemented and merged through #36.
-Merge SHA: 620a3d19958bd281ba28db2c0f13085f44e59b1b.
+Runner validation before merge: PASS.
+```
+
+Runner-report-from-trace CLI:
+
+```text
+#37 implemented and merged through #38.
+Merge SHA: a50248c16e7ba3e448542962f68b46a5e6e40197.
 Runner validation before merge:
-- pytest: 93 passed
+- pytest: 97 passed
 - ruff check tools/skeleton_core tests/skeleton_core: passed
 - black --check tools/skeleton_core tests/skeleton_core: passed
-- RED task-from-text example routed to BLOCKED_RED with blocked_reason
+- runner-report-from-trace emitted expected report
 - git status --short: clean
 Result: PASS.
 ```
@@ -210,7 +220,7 @@ Conclusion:
 A future Skeleton branch can reconstruct the current СК state from namespace files without entering Jeeves runtime docs.
 Jeeves runtime docs are aligned for explicit runtime work.
 Fast `+` continuation and compact reporting are now part of the working protocol.
-Externalizer v0 has usable merged code on main: decision gate, task-from-text, queue-summary, and trace-packet.
+Externalizer v0 has usable merged code on main: task-from-text, decision gate, queue-summary, trace-packet, and runner-report-from-trace.
 ```
 
 ## Next practical step
@@ -218,13 +228,14 @@ Externalizer v0 has usable merged code on main: decision gate, task-from-text, q
 Recommended next step:
 
 ```text
-Use task-from-text for new Skeleton task intake, then trace-packet for completed checkpoints.
+Use the full minimal Externalizer v0 loop for new Skeleton slices:
+task-from-text -> decision/route -> trace-packet -> runner-report-from-trace.
 ```
 
 Possible next implementation step:
 
 ```text
-Add `runner-report-from-trace` only after first active use shows what is missing.
+Pause adding commands and use the current loop on real Skeleton work. Add more only when friction appears.
 ```
 
 Keep it narrow:
