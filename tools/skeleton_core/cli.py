@@ -76,11 +76,19 @@ def _add_trace_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--route-target", required=True, help="Route target")
     parser.add_argument("--result", required=True, help="Result status")
     parser.add_argument("--next-safe-step", required=True, help="Next safe step")
-    parser.add_argument("--sources-read", default="", help="Comma-separated public-safe sources read")
+    parser.add_argument(
+        "--sources-read",
+        default="",
+        help="Comma-separated public-safe sources read",
+    )
     parser.add_argument("--files-changed", default="", help="Comma-separated files changed")
     parser.add_argument("--commands-run", default="", help="Comma-separated commands run")
     parser.add_argument("--blocked-reason", default=None, help="Optional blocked reason")
-    parser.add_argument("--private-data-seen", action="store_true", help="Mark private data as seen")
+    parser.add_argument(
+        "--private-data-seen",
+        action="store_true",
+        help="Mark private data as seen",
+    )
     parser.add_argument(
         "--runtime-code-touched",
         action="store_true",
