@@ -12,11 +12,18 @@ from pydantic import ValidationError
 
 from tools.skeleton_core.github_queue import normalize_issue, normalize_pr, summarize_queue
 from tools.skeleton_core.models import EvidencePolicy, TaskPacket
+from tools.skeleton_core.report import render_runner_report_from_trace
 from tools.skeleton_core.router import route_task
 from tools.skeleton_core.templates import render_runner_issue
 from tools.skeleton_core.trace import TracePacket
 
-SUBCOMMANDS = {"decide", "queue-summary", "task-from-text", "trace-packet"}
+SUBCOMMANDS = {
+    "decide",
+    "queue-summary",
+    "runner-report-from-trace",
+    "task-from-text",
+    "trace-packet",
+}
 MAX_AUTO_TITLE_LENGTH = 80
 
 
@@ -49,6 +56,11 @@ def build_queue_summary_payload(input_path: Path) -> dict[str, int]:
 def build_trace_packet_payload(packet: TracePacket) -> dict[str, Any]:
     """Build the JSON-serializable trace packet payload."""
     return packet.model_dump(mode="json")
+
+
+def load_trace_packet(input_path: Path) -> TracePacket:
+    """Load and validate a TracePacket from a JSON file."""
+    return TracePacket.model_validate_json(input_path.read_text(encoding="utf-8"))
 
 
 def title_from_text(text: str, max_length: int = MAX_AUTO_TITLE_LENGTH) -> str:
@@ -159,6 +171,17 @@ def _subcommand_parser() -> argparse.ArgumentParser:
         help="Path to public-safe queue JSON",
     )
 
+    report_parser = subparsers.add_parser(
+        "runner-report-from-trace",
+        help="Render a short runner report from a TracePacket JSON file",
+    )
+    report_parser.add_argument(
+        "--input",
+        required=True,
+        type=Path,
+        help="Path to public-safe TracePacket JSON",
+    )
+
     task_from_text_parser = subparsers.add_parser(
         "task-from-text",
         help="Build a Skeleton decision packet from free-form text",
@@ -211,6 +234,17 @@ def _run_queue_summary(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_runner_report_from_trace(args: argparse.Namespace) -> int:
+    try:
+        packet = load_trace_packet(args.input)
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
+
+    print(render_runner_report_from_trace(packet), flush=True)
+    return 0
+
+
 def _run_task_from_text(args: argparse.Namespace) -> int:
     try:
         packet = build_task_from_text_packet(
@@ -260,6 +294,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     if args.command == "queue-summary":
         return _run_queue_summary(args)
+    if args.command == "runner-report-from-trace":
+        return _run_runner_report_from_trace(args)
     if args.command == "task-from-text":
         return _run_task_from_text(args)
     if args.command == "trace-packet":
