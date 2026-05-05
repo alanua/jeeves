@@ -28,8 +28,7 @@ def render_runner_issue(packet: TaskPacket, decision: RouteDecision) -> str:
     """Render a bounded runner issue body for a Skeleton task."""
     blocked_section = ""
     if decision.route_target == RouteTarget.BLOCKED_RED:
-        blocked_section = dedent(
-            f"""
+        blocked_section = dedent(f"""
             ## Blocked
 
             This task is blocked and not executable.
@@ -39,11 +38,9 @@ def render_runner_issue(packet: TaskPacket, decision: RouteDecision) -> str:
             ```text
             {decision.blocked_reason}
             ```
-            """
-        ).strip()
+            """).strip()
 
-    body = dedent(
-        f"""
+    body = dedent(f"""
         # [skeleton-task] {packet.title}
 
         ## Active project
@@ -103,7 +100,6 @@ def render_runner_issue(packet: TaskPacket, decision: RouteDecision) -> str:
         ```text
         {REQUIRED_RUNNER_REPORT_SHAPE}
         ```
-        """
-    ).strip()
+        """).strip()
 
     return body + "\n"
