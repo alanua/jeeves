@@ -17,6 +17,7 @@ Current work is the ChatGPT-side external control/support layer, not Jeeves runt
 Skeleton Stage 1 is complete enough for active use.
 Skeleton Stage 2+ is active as practical productivity growth.
 Externalizer v1 includes local offline `work-packet`, `validate-state`, `checkpoint`, `classify-queue`, `handoff-pack`, `pr-status`, and `job-log-summary` commands.
+Project-state layer exists as the intended public-safe mechanism for applying Skeleton to BauClock and other projects without mixing context with СК/Jeeves.
 Skeleton core has GitHub Actions CI validation.
 Gemini Adapter is a Stage 3 candidate only, with evidence-only mock tests recorded in #40. It is not implemented.
 
@@ -67,10 +68,24 @@ Do not add abstract policy or runtime behavior by default.
 #56 job-log-summary CLI -> merged, SHA aaad43ae5e3620012e3786988edda9c5bcb76ed8
 ```
 
+## Project-state layer
+
+```text
+knowledge_base/project_state/PROJECT_STATE_TEMPLATE.md
+knowledge_base/project_state/BAUCLOCK_PROJECT_STATE.md
+```
+
+Purpose:
+
+```text
+Use Skeleton tools for BauClock and other products while keeping each target product state separate from СК/Jeeves canon.
+```
+
 ## Active GitHub queue
 
 ```text
 #40 [skeleton] Stage 2 practical exoskeleton growth
+#57 [agent-task-yellow] Add generic project-state template
 ```
 
 Closed/completed Skeleton references:
@@ -143,6 +158,8 @@ knowledge_base/CHATGPT_EXOSKELETON.md
 knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md
 knowledge_base/jeeves_runtime/START_HERE.md
 knowledge_base/assistant_startup_prompt.md
+knowledge_base/project_state/PROJECT_STATE_TEMPLATE.md
+knowledge_base/project_state/BAUCLOCK_PROJECT_STATE.md
 tools/skeleton_core/
 .github/workflows/skeleton-core.yml
 ```
@@ -206,6 +223,13 @@ Job log summary:
 python -m tools.skeleton_core.cli job-log-summary --input tests/fixtures/job_log_black_failed.txt
 python -m tools.skeleton_core.cli job-log-summary --input tests/fixtures/job_log_tests_failed.txt
 python -m tools.skeleton_core.cli job-log-summary --input tests/fixtures/job_log_success.txt
+```
+
+Project state files:
+
+```text
+knowledge_base/project_state/PROJECT_STATE_TEMPLATE.md
+knowledge_base/project_state/BAUCLOCK_PROJECT_STATE.md
 ```
 
 State validation:
@@ -272,6 +296,7 @@ Current validated behavior:
 - handoff-pack emits compact branch/session handoff with validation and CURRENT_STATE excerpt
 - pr-status converts public-safe PR/CI/job-log exports into deterministic status packets
 - job-log-summary converts public-safe GitHub Actions log excerpts into deterministic diagnosis packets
+- project-state files keep target project context separate from СК/Jeeves canon
 - validate-state checks required Skeleton boot/current-state files and anchors
 - normal docs task -> YELLOW / RUNNER_YELLOW
 - code-like task -> ORANGE / RUNNER_ORANGE
@@ -302,6 +327,7 @@ Skeleton CI: #49/#50 PASS; PR CI run 25397481083 completed successfully.
 Handoff-pack CLI: #51/#52 PASS; CI run 25403326633, pytest 119 passed, ruff passed, black passed, validate-state passed.
 PR-status reader CLI: #53/#55 PASS; CI run 25405435005, pytest 126 passed, ruff passed, black passed, validate-state passed.
 Job-log-summary CLI: #56 PASS; CI run 25406576201, pytest 136 passed, ruff passed, black passed, validate-state passed.
+Project-state layer: #57 in progress, docs-only PR pending.
 Gemini Adapter mock evidence: six baseline mock tests recorded in #40 as evidence-only Stage 3 candidate.
 Queue/runner audits: #25 PASS; #24 PASS via #39; #22 PASS.
 Stage 1: #23 PASS / closed.
@@ -314,6 +340,7 @@ A future Skeleton branch can reconstruct and validate the current СК state fro
 Jeeves runtime docs are aligned for explicit runtime work.
 Fast `+` continuation and compact reporting are part of the working protocol.
 Externalizer has usable merged code on main: handoff-pack, pr-status, job-log-summary, validate-state, task-from-text, decision gate, work-packet, checkpoint, classify-queue, queue-summary, trace-packet, and runner-report-from-trace.
+Project-state layer is being added so Skeleton can support BauClock and other projects without context mixing.
 Skeleton Stage 2+ is now active through #40 and should grow around maximum practical productivity.
 Gemini/Antigravity/NotebookLM are external tool layers, not current Skeleton Core runtime.
 ```
@@ -323,13 +350,12 @@ Gemini/Antigravity/NotebookLM are external tool layers, not current Skeleton Cor
 Recommended next Stage 2+ step:
 
 ```text
-Add generic project-state template/layer so Skeleton can be used for BauClock and other projects without mixing context with СК/Jeeves.
+Finish #57 docs-only project-state PR and merge after CI.
 ```
 
 Candidate productivity areas:
 
 ```text
-project-state template/layer for BauClock and other repos
 one-command task lifecycle wrapper
 branch recovery pack
 Gemini Adapter mock-mode acceptance suite
