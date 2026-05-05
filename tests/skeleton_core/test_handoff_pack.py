@@ -57,9 +57,7 @@ def test_current_state_excerpt_is_capped() -> None:
 
 def test_render_handoff_pack_success(tmp_path: Path) -> None:
     _write_minimal_valid_state(tmp_path)
-    current_state_path = (
-        tmp_path / "knowledge_base" / "chatgpt_exoskeleton" / "CURRENT_STATE.md"
-    )
+    current_state_path = tmp_path / "knowledge_base" / "chatgpt_exoskeleton" / "CURRENT_STATE.md"
     current_state_path.write_text(
         """# State
 
