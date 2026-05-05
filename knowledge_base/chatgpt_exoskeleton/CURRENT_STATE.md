@@ -14,7 +14,9 @@ Current work is the ChatGPT-side external control/support layer, not Jeeves runt
 
 ## Current state
 
-Skeleton Stage 1 is in practical stabilization. Externalizer v0 minimal loop is merged and usable on `main`.
+Skeleton Stage 1 is complete enough for active use.
+Externalizer v0 minimal loop is merged and usable on `main`.
+Future work should use the current loop on real tasks and add new commands only when actual friction appears.
 
 Completed:
 
@@ -43,6 +45,7 @@ Completed:
 22. #24 queue hygiene inventory was completed as separate report issue #39 and closed.
 23. #39 queue hygiene inventory report was closed after completion.
 24. #22 ChatGPT Exoskeleton canon and queue separation audit was completed as a read-only report comment and closed.
+25. #23 Skeleton Stage 1 working exoskeleton stabilization was completed and closed.
 ```
 
 Core active files:
@@ -69,13 +72,15 @@ For active Skeleton work, do not load Jeeves runtime docs unless Oleksii explici
 ## Active GitHub queue
 
 ```text
-#23 [skeleton] Stage 1 working exoskeleton stabilization
+No open Skeleton Stage 1 task remains.
+Use the existing Skeleton/Externalizer loop on the next real task.
 ```
 
 Closed/completed Skeleton items:
 
 ```text
 #22 [agent-task] Audit ChatGPT Exoskeleton canon and queue separation -> completed as read-only report comment and closed
+#23 [skeleton] Stage 1 working exoskeleton stabilization -> completed and closed
 #24 [agent-task-green] Skeleton queue hygiene inventory -> completed via #39 and closed
 #25 [agent-task-green] Skeleton runner contour audit -> completed as report comment and closed
 #26 [agent-task-yellow] Implement minimal Skeleton core CLI -> merged via #29, merge SHA b5772bc20b102ff2847050ca083068c84e8a3f8d
@@ -87,10 +92,7 @@ Closed/completed Skeleton items:
 #39 [agent-report] Skeleton queue hygiene inventory completed -> closed
 ```
 
-Use #23 as the main practical working thread for Skeleton Stage 1.
-Use #22 as the canon/queue separation audit reference.
-Use #39 as the queue hygiene inventory report reference.
-Use #25 as the runner-contour report reference.
+Use #23, #22, #39, and #25 as references only.
 
 ## Current operating rules
 
@@ -178,6 +180,7 @@ Trace-packet CLI: #33/#34 PASS.
 Task-from-text CLI: #35/#36 PASS.
 Runner-report-from-trace CLI: #37/#38 PASS; merge SHA a50248c16e7ba3e448542962f68b46a5e6e40197.
 Queue/runner audits: #25 PASS; #24 PASS via #39; #22 PASS.
+Stage 1: #23 PASS / closed.
 ```
 
 Conclusion:
@@ -187,7 +190,7 @@ A future Skeleton branch can reconstruct the current СК state from namespace f
 Jeeves runtime docs are aligned for explicit runtime work.
 Fast `+` continuation and compact reporting are now part of the working protocol.
 Externalizer v0 has usable merged code on main: task-from-text, decision gate, queue-summary, trace-packet, and runner-report-from-trace.
-Current active queue is reduced to #23 as the practical Stage 1 thread.
+Skeleton Stage 1 is complete and should now be used on real work instead of expanded abstractly.
 ```
 
 ## Next practical step
@@ -195,24 +198,23 @@ Current active queue is reduced to #23 as the practical Stage 1 thread.
 Recommended next step:
 
 ```text
-Use the full minimal Externalizer v0 loop for new Skeleton slices:
+Use the full minimal Externalizer v0 loop for the next real task:
 task-from-text -> decision/route -> trace-packet -> runner-report-from-trace.
 ```
 
 Possible next implementation step:
 
 ```text
-Pause adding commands and use the current loop on real Skeleton work. Add more only when friction appears.
+Only add new Skeleton commands/tools after real workflow friction appears.
 ```
 
 Keep it narrow:
 
 ```text
-no Jeeves runtime/app changes
+no Jeeves runtime/app changes unless Oleksii explicitly switches to ДЖ/runtime
 no private infrastructure details in public GitHub
-no external service calls
+no external service calls unless explicitly authorized
 no deploy/server changes unless explicitly requested
-short report in #23 only if durable
 no issue/PR cleanup unless Oleksii explicitly asks
 ```
 
@@ -233,4 +235,4 @@ CHATGPT_EXOSKELETON.md
 CHATGPT_EXOSKELETON_RUNBOOK.md
 ```
 
-Then continue from #23 without asking Oleksii to repeat context.
+Then use Skeleton/Externalizer v0 on the current real task without asking Oleksii to repeat context.
