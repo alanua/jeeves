@@ -96,6 +96,10 @@ def render_handoff_pack(root: Path) -> str:
             "available_commands",
             _format_list(list(AVAILABLE_COMMANDS)),
             "next_recommended_step",
-            "Run validate-state, create a work-packet for the real task, then checkpoint durable results. Use classify-queue when queue hygiene is needed and CI as the default validation source.",
+            (
+                "Run validate-state, create a work-packet for the real task, "
+                "then checkpoint durable results. Use classify-queue when queue hygiene "
+                "is needed and CI as the default validation source."
+            ),
         ]
     )
