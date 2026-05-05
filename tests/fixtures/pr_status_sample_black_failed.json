@@ -1,0 +1,24 @@
+{
+  "pr_number": 52,
+  "title": "Externalizer v1 handoff-pack CLI",
+  "state": "open",
+  "mergeable": true,
+  "draft": false,
+  "head_sha": "6a7f86e06231c8c624bdf6796eb66f522b89d0fd",
+  "workflow_runs": [
+    {
+      "name": "Skeleton Core",
+      "status": "completed",
+      "conclusion": "failure"
+    }
+  ],
+  "jobs": [
+    {
+      "name": "Validate Skeleton core",
+      "status": "completed",
+      "conclusion": "failure",
+      "failed_step": "Run Black check"
+    }
+  ],
+  "log_excerpt": "would reformat /home/runner/work/jeeves/jeeves/tests/skeleton_core/test_handoff_pack.py\nwould reformat /home/runner/work/jeeves/jeeves/tools/skeleton_core/handoff_pack.py\nOh no! 2 files would be reformatted."
+}
