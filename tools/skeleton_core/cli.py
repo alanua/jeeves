@@ -10,6 +10,7 @@ from typing import Any
 
 from pydantic import ValidationError
 
+from tools.skeleton_core.checkpoint import render_checkpoint
 from tools.skeleton_core.github_queue import normalize_issue, normalize_pr, summarize_queue
 from tools.skeleton_core.models import EvidencePolicy, TaskPacket
 from tools.skeleton_core.report import render_runner_report_from_trace
@@ -20,6 +21,7 @@ from tools.skeleton_core.trace import TracePacket
 from tools.skeleton_core.work_packet import render_work_packet
 
 SUBCOMMANDS = {
+    "checkpoint",
     "decide",
     "queue-summary",
     "runner-report-from-trace",
@@ -161,6 +163,12 @@ def _subcommand_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Skeleton Externalizer CLI.")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
+    checkpoint_parser = subparsers.add_parser(
+        "checkpoint",
+        help="Build a Skeleton checkpoint bundle",
+    )
+    _add_trace_args(checkpoint_parser)
+
     decide_parser = subparsers.add_parser("decide", help="Build a Skeleton task decision packet")
     _add_decide_args(decide_parser)
 
@@ -266,6 +274,24 @@ def _run_runner_report_from_trace(args: argparse.Namespace) -> int:
     return 0
 
 
+def _trace_packet_from_args(args: argparse.Namespace) -> TracePacket:
+    return TracePacket(
+        task_id=args.task_id,
+        project=args.project,
+        risk_level=args.risk_level,
+        route_target=args.route_target,
+        result=args.result,
+        next_safe_step=args.next_safe_step,
+        sources_read=_split_csv(args.sources_read),
+        files_changed=_split_csv(args.files_changed),
+        commands_run=_split_csv(args.commands_run),
+        blocked_reason=args.blocked_reason,
+        private_data_seen=args.private_data_seen,
+        runtime_code_touched=args.runtime_code_touched,
+        external_services_called=args.external_services_called,
+    )
+
+
 def _run_task_from_text(args: argparse.Namespace) -> int:
     try:
         packet = build_task_from_text_packet(
@@ -285,21 +311,7 @@ def _run_task_from_text(args: argparse.Namespace) -> int:
 
 def _run_trace_packet(args: argparse.Namespace) -> int:
     try:
-        packet = TracePacket(
-            task_id=args.task_id,
-            project=args.project,
-            risk_level=args.risk_level,
-            route_target=args.route_target,
-            result=args.result,
-            next_safe_step=args.next_safe_step,
-            sources_read=_split_csv(args.sources_read),
-            files_changed=_split_csv(args.files_changed),
-            commands_run=_split_csv(args.commands_run),
-            blocked_reason=args.blocked_reason,
-            private_data_seen=args.private_data_seen,
-            runtime_code_touched=args.runtime_code_touched,
-            external_services_called=args.external_services_called,
-        )
+        packet = _trace_packet_from_args(args)
     except ValidationError as exc:
         print(exc.json(), flush=True)
         return 2
@@ -308,6 +320,17 @@ def _run_trace_packet(args: argparse.Namespace) -> int:
         json.dumps(build_trace_packet_payload(packet), ensure_ascii=False, indent=2),
         flush=True,
     )
+    return 0
+
+
+def _run_checkpoint(args: argparse.Namespace) -> int:
+    try:
+        packet = _trace_packet_from_args(args)
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
+
+    print(render_checkpoint(packet), flush=True)
     return 0
 
 
@@ -336,6 +359,8 @@ def _run_work_packet(args: argparse.Namespace) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
+    if args.command == "checkpoint":
+        return _run_checkpoint(args)
     if args.command == "queue-summary":
         return _run_queue_summary(args)
     if args.command == "runner-report-from-trace":
