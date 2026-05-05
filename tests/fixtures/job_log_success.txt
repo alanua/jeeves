@@ -1,0 +1,10 @@
+Run tests
+python -m pytest -q
+126 passed in 0.71s
+Run Ruff
+All checks passed!
+Run Black check
+All done! ✨ 🍰 ✨
+30 files would be left unchanged.
+Validate Skeleton state
+"ok": true
