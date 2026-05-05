@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -13,6 +14,8 @@ from tools.skeleton_core.github_queue import normalize_issue, normalize_pr, summ
 from tools.skeleton_core.models import EvidencePolicy, TaskPacket
 from tools.skeleton_core.router import route_task
 from tools.skeleton_core.templates import render_runner_issue
+
+SUBCOMMANDS = {"decide", "queue-summary"}
 
 
 def build_decision_payload(packet: TaskPacket) -> dict[str, Any]:
@@ -54,18 +57,32 @@ def _add_decide_args(parser: argparse.ArgumentParser) -> None:
     )
 
 
-def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+def _subcommand_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Skeleton Externalizer v0 CLI.")
-    subparsers = parser.add_subparsers(dest="command")
+    subparsers = parser.add_subparsers(dest="command", required=True)
 
     decide_parser = subparsers.add_parser("decide", help="Build a Skeleton task decision packet")
     _add_decide_args(decide_parser)
 
     queue_parser = subparsers.add_parser("queue-summary", help="Summarize an offline queue JSON file")
     queue_parser.add_argument("--input", required=True, type=Path, help="Path to public-safe queue JSON")
+    return parser
 
+
+def _legacy_decide_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Build a Skeleton task decision packet.")
     _add_decide_args(parser)
-    return parser.parse_args(argv)
+    return parser
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    effective_argv = sys.argv[1:] if argv is None else argv
+    if effective_argv and effective_argv[0] in SUBCOMMANDS:
+        return _subcommand_parser().parse_args(effective_argv)
+
+    args = _legacy_decide_parser().parse_args(effective_argv)
+    args.command = "decide"
+    return args
 
 
 def _run_decide(args: argparse.Namespace) -> int:
