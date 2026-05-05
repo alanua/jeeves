@@ -16,7 +16,7 @@ Current work is the ChatGPT-side external control/support layer, not Jeeves runt
 
 Skeleton Stage 1 is complete enough for active use.
 Skeleton Stage 2 is active as practical exoskeleton growth.
-Externalizer v1 now includes local offline `work-packet`, `validate-state`, and `checkpoint` commands.
+Externalizer v1 now includes local offline `work-packet`, `validate-state`, `checkpoint`, and `classify-queue` commands.
 
 Current rule:
 
@@ -58,6 +58,7 @@ Do not add abstract policy or runtime behavior by default.
 #41/#42 work-packet CLI -> merged, SHA cc31a1fcef4a470cd0247bbed86236f3d0cb0150
 #43/#44 validate-state CLI -> merged, SHA d8a7442a26410966547d4837e4d3fabf752fc56f
 #45/#46 checkpoint CLI -> merged, SHA df2a0c087ebc361d61eb36e488daed6703fe0d1a
+#47/#48 classify-queue CLI -> merged, SHA a775775278268746493d3c31a6f3952816718bd1
 ```
 
 ## Active GitHub queue
@@ -80,6 +81,8 @@ Closed/completed Skeleton references:
 #44 validate-state CLI PR
 #45 checkpoint CLI task
 #46 checkpoint CLI PR
+#47 classify-queue CLI task
+#48 classify-queue CLI PR
 ```
 
 ## Core active files
@@ -167,6 +170,12 @@ Checkpoint bundle:
 python -m tools.skeleton_core.cli checkpoint --task-id manual-001 --project skeleton --risk-level YELLOW --route-target RUNNER_YELLOW --result completed --next-safe-step review
 ```
 
+Queue classification:
+
+```bash
+python -m tools.skeleton_core.cli classify-queue --input tests/fixtures/github_queue_sample.json
+```
+
 Queue summary:
 
 ```bash
@@ -195,6 +204,7 @@ Current validated behavior:
 - task-from-text creates deterministic decision packets from free-form text without model calls
 - work-packet converts free-form text into a public-safe task/issue packet
 - checkpoint emits TracePacket JSON and public-safe runner report text in one output
+- classify-queue emits per-item queue classification and summary counts
 - queue-summary counts Skeleton/runtime-noise/evidence-only/blocked items
 - trace-packet emits public-safe JSON checkpoint fields
 - runner-report-from-trace converts TracePacket JSON into short public-safe runner report shape
@@ -212,6 +222,7 @@ Runner-report-from-trace CLI: #37/#38 PASS.
 Work-packet CLI: #41/#42 PASS; validation: 105 tests passed, ruff passed, black passed, git clean.
 Validate-state CLI: #43/#44 PASS; validation: 109 tests passed, ruff passed, black passed, validate-state ok=true, git clean.
 Checkpoint CLI: #45/#46 PASS; validation: 111 tests passed, ruff passed, black passed, validate-state ok=true, git clean.
+Classify-queue CLI: #47/#48 PASS; validation: 114 tests passed, ruff passed, black passed, validate-state ok=true, git clean.
 Queue/runner audits: #25 PASS; #24 PASS via #39; #22 PASS.
 Stage 1: #23 PASS / closed.
 ```
@@ -222,23 +233,19 @@ Conclusion:
 A future Skeleton branch can reconstruct and validate the current СК state from namespace files without entering Jeeves runtime docs.
 Jeeves runtime docs are aligned for explicit runtime work.
 Fast `+` continuation and compact reporting are part of the working protocol.
-Externalizer has usable merged code on main: validate-state, task-from-text, decision gate, work-packet, checkpoint, queue-summary, trace-packet, and runner-report-from-trace.
+Externalizer has usable merged code on main: validate-state, task-from-text, decision gate, work-packet, checkpoint, classify-queue, queue-summary, trace-packet, and runner-report-from-trace.
 Skeleton Stage 2 is now active through #40 and should grow around real work only.
 ```
 
 ## Next practical step
 
-Recommended next Stage 2 slice:
+Recommended next Stage 2 step:
 
 ```text
-Use `validate-state`, `work-packet`, and `checkpoint` on the next real Skeleton task and observe friction before adding another command.
+Use `validate-state`, `work-packet`, `checkpoint`, and `classify-queue` on the next real Skeleton task and observe friction before adding another command.
 ```
 
-Candidate Stage 2 slice if friction appears:
-
-```text
-queue classifier on exported GitHub JSON
-```
+Candidate Stage 2 work should now be selected only from observed friction, not from abstract backlog.
 
 Keep it narrow:
 
