@@ -154,15 +154,9 @@ def _add_trace_args(parser: argparse.ArgumentParser) -> None:
         default="",
         help="Comma-separated public-safe sources read",
     )
-    parser.add_argument(
-        "--files-changed", default="", help="Comma-separated files changed"
-    )
-    parser.add_argument(
-        "--commands-run", default="", help="Comma-separated commands run"
-    )
-    parser.add_argument(
-        "--blocked-reason", default=None, help="Optional blocked reason"
-    )
+    parser.add_argument("--files-changed", default="", help="Comma-separated files changed")
+    parser.add_argument("--commands-run", default="", help="Comma-separated commands run")
+    parser.add_argument("--blocked-reason", default=None, help="Optional blocked reason")
     parser.add_argument(
         "--private-data-seen",
         action="store_true",
@@ -272,9 +266,7 @@ def _subcommand_parser() -> argparse.ArgumentParser:
 
 
 def _legacy_decide_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="Build a Skeleton task decision packet."
-    )
+    parser = argparse.ArgumentParser(description="Build a Skeleton task decision packet.")
     _add_decide_args(parser)
     return parser
 
@@ -336,9 +328,7 @@ def _run_handoff_pack(args: argparse.Namespace) -> int:
 
 def _run_queue_summary(args: argparse.Namespace) -> int:
     print(
-        json.dumps(
-            build_queue_summary_payload(args.input), ensure_ascii=False, indent=2
-        ),
+        json.dumps(build_queue_summary_payload(args.input), ensure_ascii=False, indent=2),
         flush=True,
     )
     return 0
