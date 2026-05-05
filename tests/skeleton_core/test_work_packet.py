@@ -1,4 +1,10 @@
-from tools.skeleton_core.models import Decision, EvidencePolicy, RiskLevel, RouteTarget, TaskPacket
+from tools.skeleton_core.models import (
+    EvidencePolicy,
+    RiskLevel,
+    RouteDecision,
+    RouteTarget,
+    TaskPacket,
+)
 from tools.skeleton_core.work_packet import (
     WORK_PACKET_FIELD_ORDER,
     next_safe_step_for_decision,
@@ -25,7 +31,7 @@ def test_render_work_packet_for_runnable_task() -> None:
         title="Write docs note",
         body="Write docs note for Skeleton queue usage",
     )
-    decision = Decision(
+    decision = RouteDecision(
         risk_level=RiskLevel.YELLOW,
         route_target=RouteTarget.RUNNER_YELLOW,
         evidence_policy=EvidencePolicy.NONE,
@@ -49,7 +55,7 @@ def test_render_work_packet_for_blocked_task() -> None:
         title="Use production token from .env",
         body="Use production token from .env",
     )
-    decision = Decision(
+    decision = RouteDecision(
         risk_level=RiskLevel.RED,
         route_target=RouteTarget.BLOCKED_RED,
         evidence_policy=EvidencePolicy.NONE,
@@ -68,7 +74,7 @@ def test_render_work_packet_for_blocked_task() -> None:
 def test_next_safe_step_for_decision() -> None:
     assert (
         next_safe_step_for_decision(
-            Decision(
+            RouteDecision(
                 risk_level=RiskLevel.YELLOW,
                 route_target=RouteTarget.RUNNER_YELLOW,
                 evidence_policy=EvidencePolicy.NONE,
@@ -78,7 +84,7 @@ def test_next_safe_step_for_decision() -> None:
     )
     assert (
         next_safe_step_for_decision(
-            Decision(
+            RouteDecision(
                 risk_level=RiskLevel.RED,
                 route_target=RouteTarget.BLOCKED_RED,
                 evidence_policy=EvidencePolicy.NONE,
