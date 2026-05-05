@@ -42,6 +42,7 @@ Completed:
 21. #25 runner contour audit was completed as a read-only report comment and closed.
 22. #24 queue hygiene inventory was completed as separate report issue #39 and closed.
 23. #39 queue hygiene inventory report was closed after completion.
+24. #22 ChatGPT Exoskeleton canon and queue separation audit was completed as a read-only report comment and closed.
 ```
 
 Core active files:
@@ -68,13 +69,13 @@ For active Skeleton work, do not load Jeeves runtime docs unless Oleksii explici
 ## Active GitHub queue
 
 ```text
-#22 [agent-task] Audit ChatGPT Exoskeleton canon and queue separation
 #23 [skeleton] Stage 1 working exoskeleton stabilization
 ```
 
 Closed/completed Skeleton items:
 
 ```text
+#22 [agent-task] Audit ChatGPT Exoskeleton canon and queue separation -> completed as read-only report comment and closed
 #24 [agent-task-green] Skeleton queue hygiene inventory -> completed via #39 and closed
 #25 [agent-task-green] Skeleton runner contour audit -> completed as report comment and closed
 #26 [agent-task-yellow] Implement minimal Skeleton core CLI -> merged via #29, merge SHA b5772bc20b102ff2847050ca083068c84e8a3f8d
@@ -87,7 +88,7 @@ Closed/completed Skeleton items:
 ```
 
 Use #23 as the main practical working thread for Skeleton Stage 1.
-Use #22 as audit/check reference.
+Use #22 as the canon/queue separation audit reference.
 Use #39 as the queue hygiene inventory report reference.
 Use #25 as the runner-contour report reference.
 
@@ -176,7 +177,7 @@ Queue-summary CLI: #32 PASS and accepted for active use by Oleksii.
 Trace-packet CLI: #33/#34 PASS.
 Task-from-text CLI: #35/#36 PASS.
 Runner-report-from-trace CLI: #37/#38 PASS; merge SHA a50248c16e7ba3e448542962f68b46a5e6e40197.
-Queue/runner audits: #25 PASS; #24 PASS via #39.
+Queue/runner audits: #25 PASS; #24 PASS via #39; #22 PASS.
 ```
 
 Conclusion:
@@ -186,7 +187,7 @@ A future Skeleton branch can reconstruct the current СК state from namespace f
 Jeeves runtime docs are aligned for explicit runtime work.
 Fast `+` continuation and compact reporting are now part of the working protocol.
 Externalizer v0 has usable merged code on main: task-from-text, decision gate, queue-summary, trace-packet, and runner-report-from-trace.
-Current active queue is reduced to #23 as the practical Stage 1 thread, with #22/#39/#25 as references.
+Current active queue is reduced to #23 as the practical Stage 1 thread.
 ```
 
 ## Next practical step
