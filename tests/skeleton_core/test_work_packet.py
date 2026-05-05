@@ -45,28 +45,28 @@ def test_render_work_packet_for_runnable_task() -> None:
     assert "evidence_policy\nNONE" in work_packet
     assert "blocked_reason\nnone" in work_packet
     assert "goal\nWrite docs note for Skeleton queue usage" in work_packet
-    assert "runner_issue_body\n# YELLOW — Write docs note" in work_packet
+    assert "runner_issue_body\n# [skeleton-task] Write docs note" in work_packet
     assert "required runner report shape" in work_packet.casefold()
     assert work_packet.endswith("next_safe_step\ncreate GitHub issue")
 
 
 def test_render_work_packet_for_blocked_task() -> None:
     packet = TaskPacket(
-        title="Use production token from .env",
-        body="Use production token from .env",
+        title="Review private document",
+        body="Review private document",
     )
     decision = RouteDecision(
         risk_level=RiskLevel.RED,
         route_target=RouteTarget.BLOCKED_RED,
         evidence_policy=EvidencePolicy.NONE,
-        blocked_reason="Contains secret or credential access request.",
+        blocked_reason="RED task detected by Skeleton tripwire.",
     )
 
     work_packet = render_work_packet(packet, decision)
 
     assert "risk_level\nRED" in work_packet
     assert "route_target\nBLOCKED_RED" in work_packet
-    assert "blocked_reason\nContains secret or credential access request." in work_packet
+    assert "blocked_reason\nRED task detected by Skeleton tripwire." in work_packet
     assert "not executable" in work_packet
     assert work_packet.endswith("next_safe_step\nwait for Oleksii")
 
