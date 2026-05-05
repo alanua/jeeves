@@ -9,8 +9,16 @@ def test_pr_status_ready_to_merge() -> None:
             state="open",
             mergeable=True,
             draft=False,
-            workflow_runs=[{"name": "Skeleton Core", "status": "completed", "conclusion": "success"}],
-            jobs=[{"name": "Validate Skeleton core", "status": "completed", "conclusion": "success"}],
+            workflow_runs=[
+                {"name": "Skeleton Core", "status": "completed", "conclusion": "success"}
+            ],
+            jobs=[
+                {
+                    "name": "Validate Skeleton core",
+                    "status": "completed",
+                    "conclusion": "success",
+                }
+            ],
         )
     )
 
@@ -42,7 +50,9 @@ def test_pr_status_waiting_for_ci() -> None:
             state="open",
             mergeable=True,
             draft=False,
-            workflow_runs=[{"name": "Skeleton Core", "status": "in_progress", "conclusion": None}],
+            workflow_runs=[
+                {"name": "Skeleton Core", "status": "in_progress", "conclusion": None}
+            ],
         )
     )
 
@@ -58,7 +68,9 @@ def test_pr_status_black_failure_from_log_excerpt() -> None:
             state="open",
             mergeable=True,
             draft=False,
-            workflow_runs=[{"name": "Skeleton Core", "status": "completed", "conclusion": "failure"}],
+            workflow_runs=[
+                {"name": "Skeleton Core", "status": "completed", "conclusion": "failure"}
+            ],
             jobs=[
                 {
                     "name": "Validate Skeleton core",
