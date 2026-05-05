@@ -11,7 +11,11 @@ from typing import Any
 from pydantic import ValidationError
 
 from tools.skeleton_core.checkpoint import render_checkpoint
-from tools.skeleton_core.github_queue import normalize_issue, normalize_pr, summarize_queue
+from tools.skeleton_core.github_queue import (
+    normalize_issue,
+    normalize_pr,
+    summarize_queue,
+)
 from tools.skeleton_core.handoff_pack import render_handoff_pack
 from tools.skeleton_core.models import EvidencePolicy, TaskPacket
 from tools.skeleton_core.queue_classifier import classify_queue_items
@@ -150,9 +154,15 @@ def _add_trace_args(parser: argparse.ArgumentParser) -> None:
         default="",
         help="Comma-separated public-safe sources read",
     )
-    parser.add_argument("--files-changed", default="", help="Comma-separated files changed")
-    parser.add_argument("--commands-run", default="", help="Comma-separated commands run")
-    parser.add_argument("--blocked-reason", default=None, help="Optional blocked reason")
+    parser.add_argument(
+        "--files-changed", default="", help="Comma-separated files changed"
+    )
+    parser.add_argument(
+        "--commands-run", default="", help="Comma-separated commands run"
+    )
+    parser.add_argument(
+        "--blocked-reason", default=None, help="Optional blocked reason"
+    )
     parser.add_argument(
         "--private-data-seen",
         action="store_true",
@@ -191,7 +201,9 @@ def _subcommand_parser() -> argparse.ArgumentParser:
         help="Path to public-safe queue JSON",
     )
 
-    decide_parser = subparsers.add_parser("decide", help="Build a Skeleton task decision packet")
+    decide_parser = subparsers.add_parser(
+        "decide", help="Build a Skeleton task decision packet"
+    )
     _add_decide_args(decide_parser)
 
     handoff_pack_parser = subparsers.add_parser(
@@ -233,7 +245,9 @@ def _subcommand_parser() -> argparse.ArgumentParser:
     )
     _add_task_from_text_args(task_from_text_parser)
 
-    trace_parser = subparsers.add_parser("trace-packet", help="Build a Skeleton trace packet")
+    trace_parser = subparsers.add_parser(
+        "trace-packet", help="Build a Skeleton trace packet"
+    )
     _add_trace_args(trace_parser)
 
     validate_state_parser = subparsers.add_parser(
@@ -256,7 +270,9 @@ def _subcommand_parser() -> argparse.ArgumentParser:
 
 
 def _legacy_decide_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Build a Skeleton task decision packet.")
+    parser = argparse.ArgumentParser(
+        description="Build a Skeleton task decision packet."
+    )
     _add_decide_args(parser)
     return parser
 
@@ -284,7 +300,10 @@ def _run_decide(args: argparse.Namespace) -> int:
         print(exc.json(), flush=True)
         return 2
 
-    print(json.dumps(build_decision_payload(packet), ensure_ascii=False, indent=2), flush=True)
+    print(
+        json.dumps(build_decision_payload(packet), ensure_ascii=False, indent=2),
+        flush=True,
+    )
     return 0
 
 
@@ -301,7 +320,10 @@ def _run_checkpoint(args: argparse.Namespace) -> int:
 
 def _run_classify_queue(args: argparse.Namespace) -> int:
     result = classify_queue_items(load_queue_items(args.input))
-    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
+    print(
+        json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2),
+        flush=True,
+    )
     return 0
 
 
@@ -312,7 +334,9 @@ def _run_handoff_pack(args: argparse.Namespace) -> int:
 
 def _run_queue_summary(args: argparse.Namespace) -> int:
     print(
-        json.dumps(build_queue_summary_payload(args.input), ensure_ascii=False, indent=2),
+        json.dumps(
+            build_queue_summary_payload(args.input), ensure_ascii=False, indent=2
+        ),
         flush=True,
     )
     return 0
@@ -360,7 +384,10 @@ def _run_task_from_text(args: argparse.Namespace) -> int:
         print(exc.json(), flush=True)
         return 2
 
-    print(json.dumps(build_decision_payload(packet), ensure_ascii=False, indent=2), flush=True)
+    print(
+        json.dumps(build_decision_payload(packet), ensure_ascii=False, indent=2),
+        flush=True,
+    )
     return 0
 
 
@@ -380,7 +407,10 @@ def _run_trace_packet(args: argparse.Namespace) -> int:
 
 def _run_validate_state(args: argparse.Namespace) -> int:
     result = validate_state(args.root)
-    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
+    print(
+        json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2),
+        flush=True,
+    )
     return 0 if result.ok else 1
 
 
