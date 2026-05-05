@@ -50,9 +50,7 @@ def test_pr_status_waiting_for_ci() -> None:
             state="open",
             mergeable=True,
             draft=False,
-            workflow_runs=[
-                {"name": "Skeleton Core", "status": "in_progress", "conclusion": None}
-            ],
+            workflow_runs=[{"name": "Skeleton Core", "status": "in_progress", "conclusion": None}],
         )
     )
 
