@@ -1,7 +1,13 @@
 import pytest
 from pydantic import ValidationError
 
-from tools.skeleton_core.models import EvidencePolicy, RouteDecision, RouteTarget, RiskLevel, TaskPacket
+from tools.skeleton_core.models import (
+    EvidencePolicy,
+    RouteDecision,
+    RouteTarget,
+    RiskLevel,
+    TaskPacket,
+)
 
 
 def test_task_packet_defaults() -> None:
