@@ -76,7 +76,8 @@ def render_runner_issue(packet: TaskPacket, decision: RouteDecision) -> str:
         {decision.evidence_policy}
         ```
 
-        Evidence is never canon by default. This task packet records evidence policy only; it does not authorize external service calls.
+        Evidence is never canon by default. This task packet records evidence policy only; it
+        does not authorize external service calls.
 
         ## Original task body
 
@@ -94,7 +95,8 @@ def render_runner_issue(packet: TaskPacket, decision: RouteDecision) -> str:
 
         ## Expected output
 
-        Return a short public-safe runner report. Do not include secrets, private infrastructure details, or raw private material.
+        Return a short public-safe runner report. Do not include secrets, private infrastructure
+        details, or raw private material.
 
         ## Required runner report shape
 
