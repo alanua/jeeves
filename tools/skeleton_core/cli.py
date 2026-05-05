@@ -13,6 +13,7 @@ from pydantic import ValidationError
 from tools.skeleton_core.checkpoint import render_checkpoint
 from tools.skeleton_core.github_queue import normalize_issue, normalize_pr, summarize_queue
 from tools.skeleton_core.models import EvidencePolicy, TaskPacket
+from tools.skeleton_core.queue_classifier import classify_queue_items
 from tools.skeleton_core.report import render_runner_report_from_trace
 from tools.skeleton_core.router import route_task
 from tools.skeleton_core.state_validator import validate_state
@@ -22,6 +23,7 @@ from tools.skeleton_core.work_packet import render_work_packet
 
 SUBCOMMANDS = {
     "checkpoint",
+    "classify-queue",
     "decide",
     "queue-summary",
     "runner-report-from-trace",
@@ -46,11 +48,18 @@ def build_decision_payload(packet: TaskPacket) -> dict[str, Any]:
     }
 
 
+def load_queue_items(input_path: Path) -> list[dict[str, Any]]:
+    """Load raw offline public-safe queue items from JSON."""
+    raw_items = json.loads(input_path.read_text(encoding="utf-8"))
+    if not isinstance(raw_items, list):
+        raise ValueError("queue input must be a JSON list")
+    return raw_items
+
+
 def build_queue_summary_payload(input_path: Path) -> dict[str, int]:
     """Build summary counts from an offline public-safe queue fixture."""
-    raw_items = json.loads(input_path.read_text(encoding="utf-8"))
     items = []
-    for raw in raw_items:
+    for raw in load_queue_items(input_path):
         kind = str(raw.get("kind", "issue")).casefold()
         if kind == "pr":
             items.append(normalize_pr(raw))
@@ -169,6 +178,17 @@ def _subcommand_parser() -> argparse.ArgumentParser:
     )
     _add_trace_args(checkpoint_parser)
 
+    classify_queue_parser = subparsers.add_parser(
+        "classify-queue",
+        help="Classify offline queue JSON items",
+    )
+    classify_queue_parser.add_argument(
+        "--input",
+        required=True,
+        type=Path,
+        help="Path to public-safe queue JSON",
+    )
+
     decide_parser = subparsers.add_parser("decide", help="Build a Skeleton task decision packet")
     _add_decide_args(decide_parser)
 
@@ -255,6 +275,23 @@ def _run_decide(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_checkpoint(args: argparse.Namespace) -> int:
+    try:
+        packet = _trace_packet_from_args(args)
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
+
+    print(render_checkpoint(packet), flush=True)
+    return 0
+
+
+def _run_classify_queue(args: argparse.Namespace) -> int:
+    result = classify_queue_items(load_queue_items(args.input))
+    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
+    return 0
+
+
 def _run_queue_summary(args: argparse.Namespace) -> int:
     print(
         json.dumps(build_queue_summary_payload(args.input), ensure_ascii=False, indent=2),
@@ -323,17 +360,6 @@ def _run_trace_packet(args: argparse.Namespace) -> int:
     return 0
 
 
-def _run_checkpoint(args: argparse.Namespace) -> int:
-    try:
-        packet = _trace_packet_from_args(args)
-    except ValidationError as exc:
-        print(exc.json(), flush=True)
-        return 2
-
-    print(render_checkpoint(packet), flush=True)
-    return 0
-
-
 def _run_validate_state(args: argparse.Namespace) -> int:
     result = validate_state(args.root)
     print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
@@ -361,6 +387,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     if args.command == "checkpoint":
         return _run_checkpoint(args)
+    if args.command == "classify-queue":
+        return _run_classify_queue(args)
     if args.command == "queue-summary":
         return _run_queue_summary(args)
     if args.command == "runner-report-from-trace":
