@@ -81,7 +81,11 @@ def _add_trace_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--commands-run", default="", help="Comma-separated commands run")
     parser.add_argument("--blocked-reason", default=None, help="Optional blocked reason")
     parser.add_argument("--private-data-seen", action="store_true", help="Mark private data as seen")
-    parser.add_argument("--runtime-code-touched", action="store_true", help="Mark runtime code as touched")
+    parser.add_argument(
+        "--runtime-code-touched",
+        action="store_true",
+        help="Mark runtime code as touched",
+    )
     parser.add_argument(
         "--external-services-called",
         action="store_true",
@@ -174,7 +178,10 @@ def _run_trace_packet(args: argparse.Namespace) -> int:
         print(exc.json(), flush=True)
         return 2
 
-    print(json.dumps(build_trace_packet_payload(packet), ensure_ascii=False, indent=2), flush=True)
+    print(
+        json.dumps(build_trace_packet_payload(packet), ensure_ascii=False, indent=2),
+        flush=True,
+    )
     return 0
 
 
