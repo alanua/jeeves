@@ -56,6 +56,14 @@ def _normalized_item(raw: dict[str, Any]) -> Any:
     return normalize_issue(raw)
 
 
+def _classification_for_item(normalized: Any) -> str:
+    summary = summarize_queue([normalized])
+    for classification in QUEUE_CLASSIFICATIONS:
+        if summary.get(classification, 0) > 0:
+            return classification
+    return "UNKNOWN_NEEDS_REVIEW"
+
+
 def _classification_reason(classification: str, title: str, labels: list[str]) -> str:
     label_text = ", ".join(labels) if labels else "no labels"
     if classification == "ACTIVE_SKELETON":
@@ -77,7 +85,7 @@ def classify_queue_items(raw_items: list[dict[str, Any]]) -> QueueClassification
 
     for raw, normalized in zip(raw_items, normalized_items, strict=True):
         labels = _raw_labels(raw)
-        classification = normalized.classification.value
+        classification = _classification_for_item(normalized)
         classified_items.append(
             ClassifiedQueueItem(
                 kind=str(raw.get("kind", "issue")).casefold(),
