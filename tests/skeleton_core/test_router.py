@@ -1,4 +1,4 @@
-from tools.skeleton_core.models import EvidencePolicy, RouteTarget, RiskLevel, TaskPacket
+from tools.skeleton_core.models import EvidencePolicy, RiskLevel, RouteTarget, TaskPacket
 from tools.skeleton_core.router import route_task
 
 
