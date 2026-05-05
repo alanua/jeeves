@@ -35,9 +35,7 @@ def _format_list(values: list[str]) -> str:
 def _format_missing_anchors(result: StateValidationResult) -> str:
     if not result.missing_anchors:
         return "- none"
-    return "\n".join(
-        f"- {missing.path}: {missing.anchor}" for missing in result.missing_anchors
-    )
+    return "\n".join(f"- {missing.path}: {missing.anchor}" for missing in result.missing_anchors)
 
 
 def _extract_heading_section(content: str, heading: str) -> str:
