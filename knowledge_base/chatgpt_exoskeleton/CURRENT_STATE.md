@@ -14,7 +14,7 @@ Current work is the ChatGPT-side external control/support layer, not Jeeves runt
 
 ## Current state
 
-Skeleton Stage 1 is now in practical stabilization.
+Skeleton Stage 1 is in practical stabilization. Externalizer v0 minimal loop is merged and usable on `main`.
 
 Completed:
 
@@ -39,6 +39,9 @@ Completed:
 18. #33 was implemented and merged via #34 as the trace-packet CLI.
 19. #35 was implemented and merged via #36 as the task-from-text CLI.
 20. #37 was implemented and merged via #38 as the runner-report-from-trace CLI.
+21. #25 runner contour audit was completed as a read-only report comment and closed.
+22. #24 queue hygiene inventory was completed as separate report issue #39 and closed.
+23. #39 queue hygiene inventory report was closed after completion.
 ```
 
 Core active files:
@@ -67,23 +70,26 @@ For active Skeleton work, do not load Jeeves runtime docs unless Oleksii explici
 ```text
 #22 [agent-task] Audit ChatGPT Exoskeleton canon and queue separation
 #23 [skeleton] Stage 1 working exoskeleton stabilization
-#25 [agent-task-green] Skeleton runner contour audit
 ```
 
-Closed/completed:
+Closed/completed Skeleton items:
 
 ```text
+#24 [agent-task-green] Skeleton queue hygiene inventory -> completed via #39 and closed
+#25 [agent-task-green] Skeleton runner contour audit -> completed as report comment and closed
 #26 [agent-task-yellow] Implement minimal Skeleton core CLI -> merged via #29, merge SHA b5772bc20b102ff2847050ca083068c84e8a3f8d
 #27 [agent-task-yellow] Implement Skeleton github_queue offline adapter -> merged via #31, merge SHA 3828a1e68864876d817861c9526a86e51aee884d
 #32 Externalizer v0 queue-summary CLI -> merged, merge SHA d6b9eec3591738ef388ae51a0b0bd5f08d4c7163
 #33 [agent-task-yellow] Add Externalizer v0 trace packet CLI -> merged via #34, merge SHA 2b96be29ad5e4b75155e8ecdac7ed371153f9189
 #35 [agent-task-yellow] Add Externalizer v0 task-from-text CLI -> merged via #36, merge SHA 620a3d19958bd281ba28db2c0f13085f44e59b1b
 #37 [agent-task-yellow] Add Externalizer v0 runner-report-from-trace CLI -> merged via #38, merge SHA a50248c16e7ba3e448542962f68b46a5e6e40197
+#39 [agent-report] Skeleton queue hygiene inventory completed -> closed
 ```
 
 Use #23 as the main practical working thread for Skeleton Stage 1.
 Use #22 as audit/check reference.
-Use #25 as the runner-contour reference.
+Use #39 as the queue hygiene inventory report reference.
+Use #25 as the runner-contour report reference.
 
 ## Current operating rules
 
@@ -163,55 +169,14 @@ Current validated behavior:
 
 ## Last validation
 
-Externalizer v0 decision gate:
-
 ```text
-#26 implemented and merged through #29.
-Runner validation before merge: PASS.
-```
-
-Externalizer v0 offline queue adapter:
-
-```text
-#27 implemented and merged through #31.
-Runner validation before merge: PASS.
-```
-
-Queue-summary CLI:
-
-```text
-#32 merged.
-Runner validation before merge: PASS.
-Oleksii confirmed: checked, works, use it.
-Result: PASS / accepted for active use.
-```
-
-Trace-packet CLI:
-
-```text
-#33 implemented and merged through #34.
-Runner validation before merge: PASS.
-```
-
-Task-from-text CLI:
-
-```text
-#35 implemented and merged through #36.
-Runner validation before merge: PASS.
-```
-
-Runner-report-from-trace CLI:
-
-```text
-#37 implemented and merged through #38.
-Merge SHA: a50248c16e7ba3e448542962f68b46a5e6e40197.
-Runner validation before merge:
-- pytest: 97 passed
-- ruff check tools/skeleton_core tests/skeleton_core: passed
-- black --check tools/skeleton_core tests/skeleton_core: passed
-- runner-report-from-trace emitted expected report
-- git status --short: clean
-Result: PASS.
+Decision gate: #26/#29 PASS.
+Offline queue adapter: #27/#31 PASS.
+Queue-summary CLI: #32 PASS and accepted for active use by Oleksii.
+Trace-packet CLI: #33/#34 PASS.
+Task-from-text CLI: #35/#36 PASS.
+Runner-report-from-trace CLI: #37/#38 PASS; merge SHA a50248c16e7ba3e448542962f68b46a5e6e40197.
+Queue/runner audits: #25 PASS; #24 PASS via #39.
 ```
 
 Conclusion:
@@ -221,6 +186,7 @@ A future Skeleton branch can reconstruct the current СК state from namespace f
 Jeeves runtime docs are aligned for explicit runtime work.
 Fast `+` continuation and compact reporting are now part of the working protocol.
 Externalizer v0 has usable merged code on main: task-from-text, decision gate, queue-summary, trace-packet, and runner-report-from-trace.
+Current active queue is reduced to #23 as the practical Stage 1 thread, with #22/#39/#25 as references.
 ```
 
 ## Next practical step
@@ -246,6 +212,7 @@ no private infrastructure details in public GitHub
 no external service calls
 no deploy/server changes unless explicitly requested
 short report in #23 only if durable
+no issue/PR cleanup unless Oleksii explicitly asks
 ```
 
 ## Short boot instruction for the next branch
