@@ -14,6 +14,7 @@ from tools.skeleton_core.github_queue import normalize_issue, normalize_pr, summ
 from tools.skeleton_core.models import EvidencePolicy, TaskPacket
 from tools.skeleton_core.report import render_runner_report_from_trace
 from tools.skeleton_core.router import route_task
+from tools.skeleton_core.state_validator import validate_state
 from tools.skeleton_core.templates import render_runner_issue
 from tools.skeleton_core.trace import TracePacket
 from tools.skeleton_core.work_packet import render_work_packet
@@ -24,6 +25,7 @@ SUBCOMMANDS = {
     "runner-report-from-trace",
     "task-from-text",
     "trace-packet",
+    "validate-state",
     "work-packet",
 }
 MAX_AUTO_TITLE_LENGTH = 80
@@ -156,7 +158,7 @@ def _add_trace_args(parser: argparse.ArgumentParser) -> None:
 
 
 def _subcommand_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Skeleton Externalizer v0 CLI.")
+    parser = argparse.ArgumentParser(description="Skeleton Externalizer CLI.")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     decide_parser = subparsers.add_parser("decide", help="Build a Skeleton task decision packet")
@@ -192,6 +194,17 @@ def _subcommand_parser() -> argparse.ArgumentParser:
 
     trace_parser = subparsers.add_parser("trace-packet", help="Build a Skeleton trace packet")
     _add_trace_args(trace_parser)
+
+    validate_state_parser = subparsers.add_parser(
+        "validate-state",
+        help="Validate Skeleton boot and current-state files",
+    )
+    validate_state_parser.add_argument(
+        "--root",
+        default=Path("."),
+        type=Path,
+        help="Repository root to validate",
+    )
 
     work_packet_parser = subparsers.add_parser(
         "work-packet",
@@ -298,6 +311,12 @@ def _run_trace_packet(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_validate_state(args: argparse.Namespace) -> int:
+    result = validate_state(args.root)
+    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
+    return 0 if result.ok else 1
+
+
 def _run_work_packet(args: argparse.Namespace) -> int:
     try:
         packet = build_task_from_text_packet(
@@ -325,6 +344,8 @@ def main(argv: list[str] | None = None) -> int:
         return _run_task_from_text(args)
     if args.command == "trace-packet":
         return _run_trace_packet(args)
+    if args.command == "validate-state":
+        return _run_validate_state(args)
     if args.command == "work-packet":
         return _run_work_packet(args)
     return _run_decide(args)
