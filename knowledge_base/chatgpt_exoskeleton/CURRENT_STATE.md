@@ -32,12 +32,11 @@ Completed:
 11. `+` command meaning was recorded in WORKING_PROTOCOL.md.
 12. Response compression rule was recorded in WORKING_PROTOCOL.md.
 13. Active Skeleton operating loop was added to chatgpt_exoskeleton/START_HERE.md.
-14. #26 was refined into the first Externalizer v0 decision-gate task.
-15. #27 was aligned with #26 for queue classification and evidence-only handling.
-16. #26 was implemented and merged via #29 as the first Externalizer v0 code slice: `tools/skeleton_core` CLI decision gate.
-17. #27 was implemented and merged via #31 as the offline GitHub queue adapter.
-18. Queue-summary usability CLI was merged via #32 and verified on the runner.
-19. Oleksii confirmed: Externalizer v0 works and is accepted for active use.
+14. #26 was implemented and merged via #29 as the first Externalizer v0 code slice: `tools/skeleton_core` CLI decision gate.
+15. #27 was implemented and merged via #31 as the offline GitHub queue adapter.
+16. Queue-summary usability CLI was merged via #32 and verified on the runner.
+17. Oleksii confirmed: Externalizer v0 works and is accepted for active use.
+18. #33 was implemented and merged via #34 as the trace-packet CLI.
 ```
 
 Core active files:
@@ -75,6 +74,7 @@ Closed/completed:
 #26 [agent-task-yellow] Implement minimal Skeleton core CLI -> merged via #29, merge SHA b5772bc20b102ff2847050ca083068c84e8a3f8d
 #27 [agent-task-yellow] Implement Skeleton github_queue offline adapter -> merged via #31, merge SHA 3828a1e68864876d817861c9526a86e51aee884d
 #32 Externalizer v0 queue-summary CLI -> merged, merge SHA d6b9eec3591738ef388ae51a0b0bd5f08d4c7163
+#33 [agent-task-yellow] Add Externalizer v0 trace packet CLI -> merged via #34, merge SHA 2b96be29ad5e4b75155e8ecdac7ed371153f9189
 ```
 
 Use #23 as the main practical working thread for Skeleton Stage 1.
@@ -132,12 +132,19 @@ Queue summary:
 python -m tools.skeleton_core.cli queue-summary --input tests/fixtures/github_queue_sample.json
 ```
 
+Trace packet:
+
+```bash
+python -m tools.skeleton_core.cli trace-packet --task-id "manual-001" --project skeleton --risk-level YELLOW --route-target RUNNER_YELLOW --result completed --next-safe-step review
+```
+
 Current validated behavior:
 
 ```text
 - normal docs task -> YELLOW / RUNNER_YELLOW
 - RED trigger task -> BLOCKED_RED with blocked_reason
 - queue-summary counts Skeleton/runtime-noise/evidence-only/blocked items
+- trace-packet emits public-safe JSON checkpoint fields
 ```
 
 ## Last validation
@@ -165,13 +172,27 @@ Oleksii confirmed: checked, works, use it.
 Result: PASS / accepted for active use.
 ```
 
+Trace-packet CLI:
+
+```text
+#33 implemented and merged through #34.
+Merge SHA: 2b96be29ad5e4b75155e8ecdac7ed371153f9189.
+Runner validation before merge:
+- pytest: 89 passed
+- ruff check tools/skeleton_core tests/skeleton_core: passed
+- black --check tools/skeleton_core tests/skeleton_core: passed
+- trace-packet emitted expected public-safe JSON
+- git status --short: clean
+Result: PASS.
+```
+
 Conclusion:
 
 ```text
 A future Skeleton branch can reconstruct the current СК state from namespace files without entering Jeeves runtime docs.
 Jeeves runtime docs are aligned for explicit runtime work.
 Fast `+` continuation and compact reporting are now part of the working protocol.
-Externalizer v0 has usable merged code on main.
+Externalizer v0 has usable merged code on main: decision gate, queue-summary, and trace-packet.
 ```
 
 ## Next practical step
@@ -179,13 +200,13 @@ Externalizer v0 has usable merged code on main.
 Recommended next step:
 
 ```text
-Use Externalizer v0 for the next Skeleton task instead of manually deciding route/queue state in chat.
+Use Externalizer v0 for the next Skeleton task and emit trace-packet checkpoints for completed slices.
 ```
 
 Possible next implementation step:
 
 ```text
-Add a small `trace` or `task-from-text` slice only after first active use shows what is missing.
+Add `task-from-text` or `runner-report-from-trace` only after first active use shows what is missing.
 ```
 
 Keep it narrow:
