@@ -13,6 +13,7 @@ from pydantic import ValidationError
 from tools.skeleton_core.checkpoint import render_checkpoint
 from tools.skeleton_core.github_queue import normalize_issue, normalize_pr, summarize_queue
 from tools.skeleton_core.handoff_pack import render_handoff_pack
+from tools.skeleton_core.job_log_summary import summarize_job_log
 from tools.skeleton_core.models import EvidencePolicy, TaskPacket
 from tools.skeleton_core.pr_status import PRStatusInput, build_pr_status
 from tools.skeleton_core.queue_classifier import classify_queue_items
@@ -28,6 +29,7 @@ SUBCOMMANDS = {
     "classify-queue",
     "decide",
     "handoff-pack",
+    "job-log-summary",
     "pr-status",
     "queue-summary",
     "runner-report-from-trace",
@@ -212,6 +214,17 @@ def _subcommand_parser() -> argparse.ArgumentParser:
         help="Repository root to use",
     )
 
+    job_log_parser = subparsers.add_parser(
+        "job-log-summary",
+        help="Summarize a public-safe GitHub Actions job log excerpt",
+    )
+    job_log_parser.add_argument(
+        "--input",
+        required=True,
+        type=Path,
+        help="Path to public-safe job log text",
+    )
+
     pr_status_parser = subparsers.add_parser(
         "pr-status",
         help="Build a deterministic PR status packet from public-safe JSON",
@@ -328,6 +341,12 @@ def _run_handoff_pack(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_job_log_summary(args: argparse.Namespace) -> int:
+    result = summarize_job_log(args.input.read_text(encoding="utf-8"))
+    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
+    return 0
+
+
 def _run_pr_status(args: argparse.Namespace) -> int:
     try:
         result = build_pr_status(load_pr_status_input(args.input))
@@ -437,6 +456,8 @@ def main(argv: list[str] | None = None) -> int:
         return _run_classify_queue(args)
     if args.command == "handoff-pack":
         return _run_handoff_pack(args)
+    if args.command == "job-log-summary":
+        return _run_job_log_summary(args)
     if args.command == "pr-status":
         return _run_pr_status(args)
     if args.command == "queue-summary":
