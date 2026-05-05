@@ -115,10 +115,7 @@ def _labels(raw: dict[str, Any]) -> list[str]:
     labels = raw.get("labels") or []
     normalized: list[str] = []
     for label in labels:
-        if isinstance(label, dict):
-            name = label.get("name")
-        else:
-            name = label
+        name = label.get("name") if isinstance(label, dict) else label
         if name:
             normalized.append(str(name))
     return normalized
