@@ -1,0 +1,5 @@
+Run Black check
+python -m black --check tools/skeleton_core tests/skeleton_core
+would reformat /home/runner/work/jeeves/jeeves/tests/skeleton_core/test_pr_status.py
+Oh no! 1 file would be reformatted, 30 files would be left unchanged.
+##[error]Process completed with exit code 1.
