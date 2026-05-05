@@ -72,7 +72,10 @@ def _black_summary(lines: list[str]) -> JobLogSummary | None:
         if "would reformat" in line.casefold():
             evidence.append(line)
             affected_files.append(line.split("would reformat", 1)[1].strip())
-        elif "files would be reformatted" in line.casefold() or "file would be reformatted" in line.casefold():
+        elif (
+            "files would be reformatted" in line.casefold()
+            or "file would be reformatted" in line.casefold()
+        ):
             evidence.append(line)
 
     if not evidence:
@@ -96,7 +99,8 @@ def _ruff_summary(lines: list[str]) -> JobLogSummary | None:
         for line in lines
         if re.match(r"^[A-Z][0-9]{3}\b", line)
         or "ruff failed" in line.casefold()
-        or "Found " in line and "error" in line.casefold()
+        or "Found " in line
+        and "error" in line.casefold()
     ]
     if not evidence:
         return None
@@ -148,7 +152,9 @@ def _pytest_summary(lines: list[str]) -> JobLogSummary | None:
 
 
 def _validate_state_summary(lines: list[str]) -> JobLogSummary | None:
-    has_validate_context = any("validate-state" in line or "Validate Skeleton state" in line for line in lines)
+    has_validate_context = any(
+        "validate-state" in line or "Validate Skeleton state" in line for line in lines
+    )
     evidence = [
         line
         for line in lines
@@ -210,7 +216,9 @@ def summarize_job_log(log_text: str) -> JobLogSummary:
     failure_lines = [
         line
         for line in lines
-        if "##[error]" in line or "Process completed with exit code" in line or "error" in line.casefold()
+        if "##[error]" in line
+        or "Process completed with exit code" in line
+        or "error" in line.casefold()
     ]
     if failure_lines:
         return JobLogSummary(
