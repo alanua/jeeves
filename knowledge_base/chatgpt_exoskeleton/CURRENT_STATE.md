@@ -16,7 +16,7 @@ Current work is the ChatGPT-side external control/support layer, not Jeeves runt
 
 Skeleton Stage 1 is complete enough for active use.
 Skeleton Stage 2+ is active as practical productivity growth.
-Externalizer v1 includes local offline `work-packet`, `validate-state`, `checkpoint`, `classify-queue`, and `handoff-pack` commands.
+Externalizer v1 includes local offline `work-packet`, `validate-state`, `checkpoint`, `classify-queue`, `handoff-pack`, and `pr-status` commands.
 Skeleton core has GitHub Actions CI validation.
 Gemini Adapter is a Stage 3 candidate only, with evidence-only mock tests recorded in #40. It is not implemented.
 
@@ -63,6 +63,7 @@ Do not add abstract policy or runtime behavior by default.
 #47/#48 classify-queue CLI -> merged, SHA a775775278268746493d3c31a6f3952816718bd1
 #49/#50 Skeleton core CI workflow -> merged, SHA 1442bf1064212e17b58cd5eac59b88df99774340
 #51/#52 handoff-pack CLI -> merged, SHA 6325d6f72ca0500802602403c5706a7a92968e36
+#53/#55 pr-status reader CLI -> merged, SHA e17bfffea60734db76b91011ff135b1ebf460064
 ```
 
 ## Active GitHub queue
@@ -91,6 +92,8 @@ Closed/completed Skeleton references:
 #50 Skeleton CI PR
 #51 handoff-pack CLI task
 #52 handoff-pack CLI PR
+#53 pr-status reader task
+#55 pr-status reader PR
 ```
 
 ## Gemini Adapter evidence-only candidate
@@ -188,6 +191,13 @@ Handoff pack:
 python -m tools.skeleton_core.cli handoff-pack
 ```
 
+PR status reader:
+
+```bash
+python -m tools.skeleton_core.cli pr-status --input tests/fixtures/pr_status_sample_green.json
+python -m tools.skeleton_core.cli pr-status --input tests/fixtures/pr_status_sample_black_failed.json
+```
+
 State validation:
 
 ```bash
@@ -250,6 +260,7 @@ Current validated behavior:
 ```text
 - GitHub Actions validates Skeleton core PRs/pushes without Hetzner screenshots
 - handoff-pack emits compact branch/session handoff with validation and CURRENT_STATE excerpt
+- pr-status converts public-safe PR/CI/job-log exports into deterministic status packets
 - validate-state checks required Skeleton boot/current-state files and anchors
 - normal docs task -> YELLOW / RUNNER_YELLOW
 - code-like task -> ORANGE / RUNNER_ORANGE
@@ -278,6 +289,7 @@ Checkpoint CLI: #45/#46 PASS; validation: 111 tests passed, ruff passed, black p
 Classify-queue CLI: #47/#48 PASS; validation: 114 tests passed, ruff passed, black passed, validate-state ok=true, git clean.
 Skeleton CI: #49/#50 PASS; PR CI run 25397481083 completed successfully.
 Handoff-pack CLI: #51/#52 PASS; CI run 25403326633, pytest 119 passed, ruff passed, black passed, validate-state passed.
+PR-status reader CLI: #53/#55 PASS; CI run 25405435005, pytest 126 passed, ruff passed, black passed, validate-state passed.
 Gemini Adapter mock evidence: six baseline mock tests recorded in #40 as evidence-only Stage 3 candidate.
 Queue/runner audits: #25 PASS; #24 PASS via #39; #22 PASS.
 Stage 1: #23 PASS / closed.
@@ -289,7 +301,7 @@ Conclusion:
 A future Skeleton branch can reconstruct and validate the current СК state from namespace files without entering Jeeves runtime docs.
 Jeeves runtime docs are aligned for explicit runtime work.
 Fast `+` continuation and compact reporting are part of the working protocol.
-Externalizer has usable merged code on main: handoff-pack, validate-state, task-from-text, decision gate, work-packet, checkpoint, classify-queue, queue-summary, trace-packet, and runner-report-from-trace.
+Externalizer has usable merged code on main: handoff-pack, pr-status, validate-state, task-from-text, decision gate, work-packet, checkpoint, classify-queue, queue-summary, trace-packet, and runner-report-from-trace.
 Skeleton Stage 2+ is now active through #40 and should grow around maximum practical productivity.
 Gemini/Antigravity/NotebookLM are external tool layers, not current Skeleton Core runtime.
 ```
@@ -299,13 +311,12 @@ Gemini/Antigravity/NotebookLM are external tool layers, not current Skeleton Cor
 Recommended next Stage 2+ step:
 
 ```text
-Add PR status reader / review summarizer for GitHub PR + CI status + job-log diagnosis.
+Add job-log summarizer for public-safe GitHub Actions log excerpts.
 ```
 
 Candidate productivity areas:
 
 ```text
-PR status reader / review summarizer
 job-log summarizer
 one-command task lifecycle wrapper
 branch recovery pack
