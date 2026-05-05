@@ -20,15 +20,15 @@ REQUIRED_STATE_FILES = (
 )
 
 REQUIRED_ANCHORS = {
-    "knowledge_base/chatgpt_exoskeleton/CURRENT_STATE.md": (
+    "knowledge_base/chatgpt_exoskeleton/CURRENT_STATE.md": [
         "СК / ChatGPT Exoskeleton",
         "Externalizer",
-    ),
-    "knowledge_base/CHATGPT_EXOSKELETON.md": ("CHATGPT_EXOSKELETON_RUNBOOK.md",),
-    "knowledge_base/CHATGPT_BRANCH_CONTINUITY_BOOT.md": (
+    ],
+    "knowledge_base/CHATGPT_EXOSKELETON.md": ["CHATGPT_EXOSKELETON_RUNBOOK.md"],
+    "knowledge_base/CHATGPT_BRANCH_CONTINUITY_BOOT.md": [
         "CHATGPT_EXOSKELETON_RUNBOOK.md",
-    ),
-    "knowledge_base/WORKING_PROTOCOL.md": ("+",),
+    ],
+    "knowledge_base/WORKING_PROTOCOL.md": ["+"],
 }
 
 
