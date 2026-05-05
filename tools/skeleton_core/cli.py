@@ -14,8 +14,9 @@ from tools.skeleton_core.github_queue import normalize_issue, normalize_pr, summ
 from tools.skeleton_core.models import EvidencePolicy, TaskPacket
 from tools.skeleton_core.router import route_task
 from tools.skeleton_core.templates import render_runner_issue
+from tools.skeleton_core.trace import TracePacket
 
-SUBCOMMANDS = {"decide", "queue-summary"}
+SUBCOMMANDS = {"decide", "queue-summary", "trace-packet"}
 
 
 def build_decision_payload(packet: TaskPacket) -> dict[str, Any]:
@@ -44,6 +45,17 @@ def build_queue_summary_payload(input_path: Path) -> dict[str, int]:
     return summarize_queue(items)
 
 
+def build_trace_packet_payload(packet: TracePacket) -> dict[str, Any]:
+    """Build the JSON-serializable trace packet payload."""
+    return packet.model_dump(mode="json")
+
+
+def _split_csv(value: str | None) -> list[str]:
+    if not value:
+        return []
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
 def _add_decide_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--title", required=True, help="Task title")
     parser.add_argument("--body", required=True, help="Task body")
@@ -54,6 +66,38 @@ def _add_decide_args(parser: argparse.ArgumentParser) -> None:
         choices=[policy.value for policy in EvidencePolicy],
         default=EvidencePolicy.NONE.value,
         help="Allowed evidence policy to record without calling external services",
+    )
+
+
+def _add_trace_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--task-id", required=True, help="Trace task id")
+    parser.add_argument("--project", default="skeleton", help="Project name")
+    parser.add_argument("--risk-level", required=True, help="Risk level")
+    parser.add_argument("--route-target", required=True, help="Route target")
+    parser.add_argument("--result", required=True, help="Result status")
+    parser.add_argument("--next-safe-step", required=True, help="Next safe step")
+    parser.add_argument(
+        "--sources-read",
+        default="",
+        help="Comma-separated public-safe sources read",
+    )
+    parser.add_argument("--files-changed", default="", help="Comma-separated files changed")
+    parser.add_argument("--commands-run", default="", help="Comma-separated commands run")
+    parser.add_argument("--blocked-reason", default=None, help="Optional blocked reason")
+    parser.add_argument(
+        "--private-data-seen",
+        action="store_true",
+        help="Mark private data as seen",
+    )
+    parser.add_argument(
+        "--runtime-code-touched",
+        action="store_true",
+        help="Mark runtime code as touched",
+    )
+    parser.add_argument(
+        "--external-services-called",
+        action="store_true",
+        help="Mark external services as called",
     )
 
 
@@ -74,6 +118,9 @@ def _subcommand_parser() -> argparse.ArgumentParser:
         type=Path,
         help="Path to public-safe queue JSON",
     )
+
+    trace_parser = subparsers.add_parser("trace-packet", help="Build a Skeleton trace packet")
+    _add_trace_args(trace_parser)
     return parser
 
 
@@ -118,10 +165,40 @@ def _run_queue_summary(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_trace_packet(args: argparse.Namespace) -> int:
+    try:
+        packet = TracePacket(
+            task_id=args.task_id,
+            project=args.project,
+            risk_level=args.risk_level,
+            route_target=args.route_target,
+            result=args.result,
+            next_safe_step=args.next_safe_step,
+            sources_read=_split_csv(args.sources_read),
+            files_changed=_split_csv(args.files_changed),
+            commands_run=_split_csv(args.commands_run),
+            blocked_reason=args.blocked_reason,
+            private_data_seen=args.private_data_seen,
+            runtime_code_touched=args.runtime_code_touched,
+            external_services_called=args.external_services_called,
+        )
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
+
+    print(
+        json.dumps(build_trace_packet_payload(packet), ensure_ascii=False, indent=2),
+        flush=True,
+    )
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     if args.command == "queue-summary":
         return _run_queue_summary(args)
+    if args.command == "trace-packet":
+        return _run_trace_packet(args)
     return _run_decide(args)
 
 

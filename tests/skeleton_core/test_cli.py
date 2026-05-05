@@ -77,6 +77,49 @@ def test_cli_queue_summary(capsys) -> None:
     assert payload["UNKNOWN_NEEDS_REVIEW"] == 0
 
 
+def test_cli_trace_packet(capsys) -> None:
+    exit_code = main(
+        [
+            "trace-packet",
+            "--task-id",
+            "manual-001",
+            "--project",
+            "skeleton",
+            "--risk-level",
+            "YELLOW",
+            "--route-target",
+            "RUNNER_YELLOW",
+            "--result",
+            "completed",
+            "--next-safe-step",
+            "review",
+            "--sources-read",
+            "issue #33,CURRENT_STATE.md",
+            "--files-changed",
+            "tools/skeleton_core/trace.py",
+            "--commands-run",
+            "python -m pytest -q",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert exit_code == 0
+    assert payload["task_id"] == "manual-001"
+    assert payload["project"] == "skeleton"
+    assert payload["risk_level"] == "YELLOW"
+    assert payload["route_target"] == "RUNNER_YELLOW"
+    assert payload["result"] == "completed"
+    assert payload["next_safe_step"] == "review"
+    assert payload["sources_read"] == ["issue #33", "CURRENT_STATE.md"]
+    assert payload["files_changed"] == ["tools/skeleton_core/trace.py"]
+    assert payload["commands_run"] == ["python -m pytest -q"]
+    assert payload["private_data_seen"] is False
+    assert payload["runtime_code_touched"] is False
+    assert payload["external_services_called"] is False
+
+
 def test_cli_returns_2_for_invalid_packet(capsys) -> None:
     exit_code = main(["--title", "", "--body", "Body"])
 
