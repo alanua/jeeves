@@ -15,13 +15,14 @@ Current work is the ChatGPT-side external control/support layer, not Jeeves runt
 ## Current state
 
 Skeleton Stage 1 is complete enough for active use.
-Skeleton Stage 2 is active as practical exoskeleton growth.
-Externalizer v1 now includes local offline `work-packet`, `validate-state`, `checkpoint`, and `classify-queue` commands.
+Skeleton Stage 2+ is active as practical productivity growth.
+Externalizer v1 includes local offline `work-packet`, `validate-state`, `checkpoint`, and `classify-queue` commands.
+Skeleton core now has GitHub Actions CI validation.
 
 Current rule:
 
 ```text
-Grow the Skeleton only where real workflow friction appears.
+Grow the Skeleton for maximum practical productivity, but only where it reduces repeated work or validation friction.
 Do not add abstract policy or runtime behavior by default.
 ```
 
@@ -59,6 +60,7 @@ Do not add abstract policy or runtime behavior by default.
 #43/#44 validate-state CLI -> merged, SHA d8a7442a26410966547d4837e4d3fabf752fc56f
 #45/#46 checkpoint CLI -> merged, SHA df2a0c087ebc361d61eb36e488daed6703fe0d1a
 #47/#48 classify-queue CLI -> merged, SHA a775775278268746493d3c31a6f3952816718bd1
+#49/#50 Skeleton core CI workflow -> merged, SHA 1442bf1064212e17b58cd5eac59b88df99774340
 ```
 
 ## Active GitHub queue
@@ -83,6 +85,8 @@ Closed/completed Skeleton references:
 #46 checkpoint CLI PR
 #47 classify-queue CLI task
 #48 classify-queue CLI PR
+#49 Skeleton CI task
+#50 Skeleton CI PR
 ```
 
 ## Core active files
@@ -102,6 +106,7 @@ knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md
 knowledge_base/jeeves_runtime/START_HERE.md
 knowledge_base/assistant_startup_prompt.md
 tools/skeleton_core/
+.github/workflows/skeleton-core.yml
 ```
 
 For active Skeleton work, do not load Jeeves runtime docs unless Oleksii explicitly switches to Jeeves runtime work.
@@ -194,9 +199,17 @@ Runner report from trace:
 python -m tools.skeleton_core.cli runner-report-from-trace --input tests/fixtures/trace_packet_sample.json
 ```
 
+CI validation:
+
+```text
+GitHub Actions workflow: .github/workflows/skeleton-core.yml
+Checks: install, pytest, ruff, black, validate-state
+```
+
 Current validated behavior:
 
 ```text
+- GitHub Actions validates Skeleton core PRs/pushes without Hetzner screenshots
 - validate-state checks required Skeleton boot/current-state files and anchors
 - normal docs task -> YELLOW / RUNNER_YELLOW
 - code-like task -> ORANGE / RUNNER_ORANGE
@@ -223,6 +236,7 @@ Work-packet CLI: #41/#42 PASS; validation: 105 tests passed, ruff passed, black 
 Validate-state CLI: #43/#44 PASS; validation: 109 tests passed, ruff passed, black passed, validate-state ok=true, git clean.
 Checkpoint CLI: #45/#46 PASS; validation: 111 tests passed, ruff passed, black passed, validate-state ok=true, git clean.
 Classify-queue CLI: #47/#48 PASS; validation: 114 tests passed, ruff passed, black passed, validate-state ok=true, git clean.
+Skeleton CI: #49/#50 PASS; PR CI run 25397481083 completed successfully.
 Queue/runner audits: #25 PASS; #24 PASS via #39; #22 PASS.
 Stage 1: #23 PASS / closed.
 ```
@@ -234,18 +248,25 @@ A future Skeleton branch can reconstruct and validate the current СК state fro
 Jeeves runtime docs are aligned for explicit runtime work.
 Fast `+` continuation and compact reporting are part of the working protocol.
 Externalizer has usable merged code on main: validate-state, task-from-text, decision gate, work-packet, checkpoint, classify-queue, queue-summary, trace-packet, and runner-report-from-trace.
-Skeleton Stage 2 is now active through #40 and should grow around real work only.
+Skeleton Stage 2+ is now active through #40 and should grow around maximum practical productivity.
 ```
 
 ## Next practical step
 
-Recommended next Stage 2 step:
+Recommended next Stage 2+ step:
 
 ```text
-Use `validate-state`, `work-packet`, `checkpoint`, and `classify-queue` on the next real Skeleton task and observe friction before adding another command.
+Use CI as the default validation source for future Skeleton PRs.
+Only add the next tool when CI/tooling reveals repeated friction.
 ```
 
-Candidate Stage 2 work should now be selected only from observed friction, not from abstract backlog.
+Candidate productivity areas:
+
+```text
+PR status reader / review summarizer
+one-command task lifecycle wrapper
+branch handoff/recovery pack
+```
 
 Keep it narrow:
 
