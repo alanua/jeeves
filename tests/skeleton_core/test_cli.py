@@ -51,7 +51,7 @@ def test_cli_preserves_evidence_policy(capsys) -> None:
 
 
 def test_cli_blocks_red_task(capsys) -> None:
-    exit_code = main(["--title", "Use token", "--body", "Read production .env"])
+    exit_code = main(["--title", "Review private document", "--body", "Review private document"])
 
     captured = capsys.readouterr()
     payload = json.loads(captured.out)
@@ -131,7 +131,7 @@ def test_cli_task_from_text_code_routes_orange(capsys) -> None:
 
 
 def test_cli_task_from_text_red_routes_blocked(capsys) -> None:
-    exit_code = main(["task-from-text", "--text", "Use production token from .env"])
+    exit_code = main(["task-from-text", "--text", "Review private document"])
 
     captured = capsys.readouterr()
     payload = json.loads(captured.out)
@@ -224,7 +224,8 @@ def test_cli_work_packet_docs_routes_yellow(capsys) -> None:
     assert "risk_level\nYELLOW" in captured.out
     assert "route_target\nRUNNER_YELLOW" in captured.out
     assert "goal\nWrite docs note for Skeleton queue usage" in captured.out
-    assert "runner_issue_body\n# YELLOW" in captured.out
+    assert "runner_issue_body\n# [skeleton-task]" in captured.out
+    assert "## Risk level" in captured.out
     assert "next_safe_step\ncreate GitHub issue" in captured.out
 
 
@@ -236,11 +237,12 @@ def test_cli_work_packet_code_routes_orange(capsys) -> None:
     assert exit_code == 0
     assert "risk_level\nORANGE" in captured.out
     assert "route_target\nRUNNER_ORANGE" in captured.out
-    assert "runner_issue_body\n# ORANGE" in captured.out
+    assert "runner_issue_body\n# [skeleton-task]" in captured.out
+    assert "## Risk level" in captured.out
 
 
 def test_cli_work_packet_red_routes_blocked(capsys) -> None:
-    exit_code = main(["work-packet", "--text", "Use production token from .env"])
+    exit_code = main(["work-packet", "--text", "Review private document"])
 
     captured = capsys.readouterr()
 
