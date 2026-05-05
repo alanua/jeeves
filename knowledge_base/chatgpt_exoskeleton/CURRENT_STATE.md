@@ -34,6 +34,7 @@ Completed:
 13. Active Skeleton operating loop was added to chatgpt_exoskeleton/START_HERE.md.
 14. #26 was refined into the first Externalizer v0 decision-gate task: EvidencePolicy, RED tripwire semantics, blocked_reason, and structured runner report shape.
 15. #27 was aligned with #26: queue items preserve evidence_policy/blocked_reason and classify Gemini/NotebookLM/Antigravity/manual auditor references as EVIDENCE_ONLY unless converted into reviewed Skeleton implementation tasks.
+16. #26 was implemented and merged via #29 as the first Externalizer v0 code slice: `tools/skeleton_core` CLI decision gate.
 ```
 
 Core active files:
@@ -52,6 +53,7 @@ knowledge_base/CHATGPT_EXOSKELETON.md
 knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md
 knowledge_base/jeeves_runtime/START_HERE.md
 knowledge_base/assistant_startup_prompt.md
+tools/skeleton_core/
 ```
 
 For active Skeleton work, do not load Jeeves runtime docs unless Oleksii explicitly switches to Jeeves runtime work.
@@ -62,14 +64,18 @@ For active Skeleton work, do not load Jeeves runtime docs unless Oleksii explici
 #22 [agent-task] Audit ChatGPT Exoskeleton canon and queue separation
 #23 [skeleton] Stage 1 working exoskeleton stabilization
 #25 [agent-task-green] Skeleton runner contour audit
-#26 [agent-task-yellow] Implement minimal Skeleton core CLI
 #27 [agent-task-yellow] Implement Skeleton github_queue offline adapter
+```
+
+Closed/completed:
+
+```text
+#26 [agent-task-yellow] Implement minimal Skeleton core CLI -> merged via #29, merge SHA b5772bc20b102ff2847050ca083068c84e8a3f8d
 ```
 
 Use #23 as the main practical working thread for Skeleton Stage 1.
 Use #22 as audit/check reference.
 Use #25 as the runner-contour reference.
-Use #26 as the first Externalizer v0 code task.
 Use #27 after #26 for offline queue classification.
 
 ## Current operating rules
@@ -141,12 +147,17 @@ WORKING_PROTOCOL.md now records one-short-human-sentence progress reports as the
 Result: PASS after post-write verification
 ```
 
-Externalizer queue refinement:
+Externalizer v0 CLI:
 
 ```text
-#26 now defines the first Skeleton decision gate.
-#27 now classifies evidence-only and blocked queue items consistently with #26.
-Result: ready to start #26 through the runner contour.
+#26 implemented and merged through #29.
+Merge SHA: b5772bc20b102ff2847050ca083068c84e8a3f8d.
+Runner validation before merge:
+- pytest: 74 passed
+- ruff check tools/skeleton_core tests/skeleton_core: passed
+- black --check tools/skeleton_core tests/skeleton_core: passed
+- git status --short: clean
+Result: PASS.
 ```
 
 Conclusion:
@@ -155,7 +166,7 @@ Conclusion:
 A future Skeleton branch can reconstruct the current СК state from namespace files without entering Jeeves runtime docs.
 Jeeves runtime docs are aligned for explicit runtime work.
 Fast `+` continuation and compact reporting are now part of the working protocol.
-Externalizer v0 should start from #26, not from a new duplicate task.
+Externalizer v0 has its first merged code slice.
 ```
 
 ## Next practical step
@@ -163,7 +174,7 @@ Externalizer v0 should start from #26, not from a new duplicate task.
 Recommended next step:
 
 ```text
-Start #26 through the runner contour as the first Externalizer v0 code task.
+Start #27 as the next Externalizer v0 implementation task: offline GitHub queue adapter.
 ```
 
 Keep it narrow:
