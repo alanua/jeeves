@@ -16,7 +16,7 @@ Current work is the ChatGPT-side external control/support layer, not Jeeves runt
 
 Skeleton Stage 1 is complete enough for active use.
 Skeleton Stage 2 is active as practical exoskeleton growth.
-Externalizer v1 now includes a local offline `work-packet` command.
+Externalizer v1 now includes local offline `work-packet` and `validate-state` commands.
 
 Current rule:
 
@@ -56,6 +56,7 @@ Do not add abstract policy or runtime behavior by default.
 #35/#36 task-from-text CLI -> merged, SHA 620a3d19958bd281ba28db2c0f13085f44e59b1b
 #37/#38 runner-report-from-trace CLI -> merged, SHA a50248c16e7ba3e448542962f68b46a5e6e40197
 #41/#42 work-packet CLI -> merged, SHA cc31a1fcef4a470cd0247bbed86236f3d0cb0150
+#43/#44 validate-state CLI -> merged, SHA d8a7442a26410966547d4837e4d3fabf752fc56f
 ```
 
 ## Active GitHub queue
@@ -74,6 +75,8 @@ Closed/completed Skeleton references:
 #39 queue hygiene inventory report
 #41 work-packet CLI task
 #42 work-packet CLI PR
+#43 validate-state CLI task
+#44 validate-state CLI PR
 ```
 
 ## Core active files
@@ -135,6 +138,12 @@ load current state
 
 ## Externalizer usage
 
+State validation:
+
+```bash
+python -m tools.skeleton_core.cli validate-state
+```
+
 Task intake / decision:
 
 ```bash
@@ -170,6 +179,7 @@ python -m tools.skeleton_core.cli runner-report-from-trace --input tests/fixture
 Current validated behavior:
 
 ```text
+- validate-state checks required Skeleton boot/current-state files and anchors
 - normal docs task -> YELLOW / RUNNER_YELLOW
 - code-like task -> ORANGE / RUNNER_ORANGE
 - RED trigger task -> BLOCKED_RED with blocked_reason
@@ -190,6 +200,7 @@ Trace-packet CLI: #33/#34 PASS.
 Task-from-text CLI: #35/#36 PASS.
 Runner-report-from-trace CLI: #37/#38 PASS.
 Work-packet CLI: #41/#42 PASS; validation: 105 tests passed, ruff passed, black passed, git clean.
+Validate-state CLI: #43/#44 PASS; validation: 109 tests passed, ruff passed, black passed, validate-state ok=true, git clean.
 Queue/runner audits: #25 PASS; #24 PASS via #39; #22 PASS.
 Stage 1: #23 PASS / closed.
 ```
@@ -197,10 +208,10 @@ Stage 1: #23 PASS / closed.
 Conclusion:
 
 ```text
-A future Skeleton branch can reconstruct the current СК state from namespace files without entering Jeeves runtime docs.
+A future Skeleton branch can reconstruct and validate the current СК state from namespace files without entering Jeeves runtime docs.
 Jeeves runtime docs are aligned for explicit runtime work.
 Fast `+` continuation and compact reporting are part of the working protocol.
-Externalizer has usable merged code on main: task-from-text, decision gate, work-packet, queue-summary, trace-packet, and runner-report-from-trace.
+Externalizer has usable merged code on main: validate-state, task-from-text, decision gate, work-packet, queue-summary, trace-packet, and runner-report-from-trace.
 Skeleton Stage 2 is now active through #40 and should grow around real work only.
 ```
 
@@ -209,14 +220,13 @@ Skeleton Stage 2 is now active through #40 and should grow around real work only
 Recommended next Stage 2 slice:
 
 ```text
-Use `work-packet` on the next real Skeleton task and observe friction before adding another command.
+Use `validate-state` and `work-packet` on the next real Skeleton task and observe friction before adding another command.
 ```
 
 Candidate Stage 2 slices if friction appears:
 
 ```text
 checkpoint bundle
-current-state validator
 queue classifier on exported GitHub JSON
 ```
 
@@ -227,7 +237,6 @@ no Jeeves runtime/app changes unless Oleksii explicitly switches to ДЖ/runtime
 no private infrastructure details in public GitHub
 no external service calls unless explicitly authorized
 no deploy/server changes unless explicitly requested
-no issue/PR cleanup unless Oleksii explicitly asks
 ```
 
 ## Short boot instruction for the next branch
