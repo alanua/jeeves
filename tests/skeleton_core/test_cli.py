@@ -18,6 +18,18 @@ def test_cli_outputs_decision_json(capsys) -> None:
     assert "required runner report shape" in payload["runner_issue_body"].casefold()
 
 
+def test_cli_outputs_decision_json_with_subcommand(capsys) -> None:
+    exit_code = main(["decide", "--title", "Write docs", "--body", "Add markdown note"])
+
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert exit_code == 0
+    assert payload["task"]["title"] == "Write docs"
+    assert payload["risk_level"] == "YELLOW"
+    assert payload["route_target"] == "RUNNER_YELLOW"
+
+
 def test_cli_preserves_evidence_policy(capsys) -> None:
     exit_code = main(
         [
@@ -49,6 +61,20 @@ def test_cli_blocks_red_task(capsys) -> None:
     assert payload["route_target"] == "BLOCKED_RED"
     assert payload["blocked_reason"] is not None
     assert "not executable" in payload["runner_issue_body"]
+
+
+def test_cli_queue_summary(capsys) -> None:
+    exit_code = main(["queue-summary", "--input", "tests/fixtures/github_queue_sample.json"])
+
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert exit_code == 0
+    assert payload["ACTIVE_SKELETON"] == 1
+    assert payload["JEEVES_RUNTIME_NOISE_FOR_NOW"] == 1
+    assert payload["EVIDENCE_ONLY"] == 1
+    assert payload["BLOCKED_WAITING_FOR_OLEKSII"] == 1
+    assert payload["UNKNOWN_NEEDS_REVIEW"] == 0
 
 
 def test_cli_returns_2_for_invalid_packet(capsys) -> None:
