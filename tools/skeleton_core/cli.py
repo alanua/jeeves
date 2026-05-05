@@ -16,7 +16,8 @@ from tools.skeleton_core.router import route_task
 from tools.skeleton_core.templates import render_runner_issue
 from tools.skeleton_core.trace import TracePacket
 
-SUBCOMMANDS = {"decide", "queue-summary", "trace-packet"}
+SUBCOMMANDS = {"decide", "queue-summary", "task-from-text", "trace-packet"}
+MAX_AUTO_TITLE_LENGTH = 80
 
 
 def build_decision_payload(packet: TaskPacket) -> dict[str, Any]:
@@ -50,6 +51,32 @@ def build_trace_packet_payload(packet: TracePacket) -> dict[str, Any]:
     return packet.model_dump(mode="json")
 
 
+def title_from_text(text: str, max_length: int = MAX_AUTO_TITLE_LENGTH) -> str:
+    """Create a short deterministic title from free-form task text."""
+    normalized = " ".join(text.split())
+    if len(normalized) <= max_length:
+        return normalized
+    return normalized[: max_length - 1].rstrip() + "…"
+
+
+def build_task_from_text_packet(
+    *,
+    text: str,
+    title: str | None,
+    project: str,
+    requested_by: str,
+    evidence_policy: EvidencePolicy,
+) -> TaskPacket:
+    """Build a TaskPacket from free-form text without model calls."""
+    return TaskPacket(
+        title=title or title_from_text(text),
+        body=text,
+        project=project,
+        requested_by=requested_by,
+        evidence_policy=evidence_policy,
+    )
+
+
 def _split_csv(value: str | None) -> list[str]:
     if not value:
         return []
@@ -59,6 +86,19 @@ def _split_csv(value: str | None) -> list[str]:
 def _add_decide_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--title", required=True, help="Task title")
     parser.add_argument("--body", required=True, help="Task body")
+    parser.add_argument("--project", default="skeleton", help="Project name")
+    parser.add_argument("--requested-by", default="oleksii", help="Requester name")
+    parser.add_argument(
+        "--evidence-policy",
+        choices=[policy.value for policy in EvidencePolicy],
+        default=EvidencePolicy.NONE.value,
+        help="Allowed evidence policy to record without calling external services",
+    )
+
+
+def _add_task_from_text_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--text", required=True, help="Free-form task text")
+    parser.add_argument("--title", default=None, help="Optional title override")
     parser.add_argument("--project", default="skeleton", help="Project name")
     parser.add_argument("--requested-by", default="oleksii", help="Requester name")
     parser.add_argument(
@@ -119,6 +159,12 @@ def _subcommand_parser() -> argparse.ArgumentParser:
         help="Path to public-safe queue JSON",
     )
 
+    task_from_text_parser = subparsers.add_parser(
+        "task-from-text",
+        help="Build a Skeleton decision packet from free-form text",
+    )
+    _add_task_from_text_args(task_from_text_parser)
+
     trace_parser = subparsers.add_parser("trace-packet", help="Build a Skeleton trace packet")
     _add_trace_args(trace_parser)
     return parser
@@ -165,6 +211,23 @@ def _run_queue_summary(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_task_from_text(args: argparse.Namespace) -> int:
+    try:
+        packet = build_task_from_text_packet(
+            text=args.text,
+            title=args.title,
+            project=args.project,
+            requested_by=args.requested_by,
+            evidence_policy=EvidencePolicy(args.evidence_policy),
+        )
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
+
+    print(json.dumps(build_decision_payload(packet), ensure_ascii=False, indent=2), flush=True)
+    return 0
+
+
 def _run_trace_packet(args: argparse.Namespace) -> int:
     try:
         packet = TracePacket(
@@ -197,6 +260,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     if args.command == "queue-summary":
         return _run_queue_summary(args)
+    if args.command == "task-from-text":
+        return _run_task_from_text(args)
     if args.command == "trace-packet":
         return _run_trace_packet(args)
     return _run_decide(args)

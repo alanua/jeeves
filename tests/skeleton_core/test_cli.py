@@ -77,6 +77,69 @@ def test_cli_queue_summary(capsys) -> None:
     assert payload["UNKNOWN_NEEDS_REVIEW"] == 0
 
 
+def test_cli_task_from_text_docs_routes_yellow(capsys) -> None:
+    exit_code = main(
+        [
+            "task-from-text",
+            "--text",
+            "Write docs note for Skeleton queue usage",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert exit_code == 0
+    assert payload["task"]["title"] == "Write docs note for Skeleton queue usage"
+    assert payload["task"]["body"] == "Write docs note for Skeleton queue usage"
+    assert payload["risk_level"] == "YELLOW"
+    assert payload["route_target"] == "RUNNER_YELLOW"
+
+
+def test_cli_task_from_text_code_routes_orange(capsys) -> None:
+    exit_code = main(["task-from-text", "--text", "Implement CLI test package"])
+
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert exit_code == 0
+    assert payload["risk_level"] == "ORANGE"
+    assert payload["route_target"] == "RUNNER_ORANGE"
+
+
+def test_cli_task_from_text_red_routes_blocked(capsys) -> None:
+    exit_code = main(["task-from-text", "--text", "Use production token from .env"])
+
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert exit_code == 0
+    assert payload["risk_level"] == "RED"
+    assert payload["route_target"] == "BLOCKED_RED"
+    assert payload["blocked_reason"] is not None
+
+
+def test_cli_task_from_text_preserves_title_and_evidence_policy(capsys) -> None:
+    exit_code = main(
+        [
+            "task-from-text",
+            "--text",
+            "Write docs note",
+            "--title",
+            "Manual title",
+            "--evidence-policy",
+            "MANUAL_EVIDENCE_ALLOWED",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert exit_code == 0
+    assert payload["task"]["title"] == "Manual title"
+    assert payload["evidence_policy"] == "MANUAL_EVIDENCE_ALLOWED"
+
+
 def test_cli_trace_packet(capsys) -> None:
     exit_code = main(
         [
