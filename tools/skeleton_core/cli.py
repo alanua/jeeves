@@ -111,7 +111,10 @@ def _run_decide(args: argparse.Namespace) -> int:
 
 
 def _run_queue_summary(args: argparse.Namespace) -> int:
-    print(json.dumps(build_queue_summary_payload(args.input), ensure_ascii=False, indent=2), flush=True)
+    print(
+        json.dumps(build_queue_summary_payload(args.input), ensure_ascii=False, indent=2),
+        flush=True,
+    )
     return 0
 
 
