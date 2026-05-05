@@ -202,7 +202,8 @@ def _subcommand_parser() -> argparse.ArgumentParser:
     )
 
     decide_parser = subparsers.add_parser(
-        "decide", help="Build a Skeleton task decision packet"
+        "decide",
+        help="Build a Skeleton task decision packet",
     )
     _add_decide_args(decide_parser)
 
@@ -246,7 +247,8 @@ def _subcommand_parser() -> argparse.ArgumentParser:
     _add_task_from_text_args(task_from_text_parser)
 
     trace_parser = subparsers.add_parser(
-        "trace-packet", help="Build a Skeleton trace packet"
+        "trace-packet",
+        help="Build a Skeleton trace packet",
     )
     _add_trace_args(trace_parser)
 
