@@ -3,9 +3,9 @@ from pydantic import ValidationError
 
 from tools.skeleton_core.models import (
     EvidencePolicy,
+    RiskLevel,
     RouteDecision,
     RouteTarget,
-    RiskLevel,
     TaskPacket,
 )
 
