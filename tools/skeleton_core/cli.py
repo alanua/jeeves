@@ -64,8 +64,16 @@ def _subcommand_parser() -> argparse.ArgumentParser:
     decide_parser = subparsers.add_parser("decide", help="Build a Skeleton task decision packet")
     _add_decide_args(decide_parser)
 
-    queue_parser = subparsers.add_parser("queue-summary", help="Summarize an offline queue JSON file")
-    queue_parser.add_argument("--input", required=True, type=Path, help="Path to public-safe queue JSON")
+    queue_parser = subparsers.add_parser(
+        "queue-summary",
+        help="Summarize an offline queue JSON file",
+    )
+    queue_parser.add_argument(
+        "--input",
+        required=True,
+        type=Path,
+        help="Path to public-safe queue JSON",
+    )
     return parser
 
 
