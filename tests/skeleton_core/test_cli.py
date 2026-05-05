@@ -206,6 +206,73 @@ def test_cli_trace_packet(capsys) -> None:
     assert payload["external_services_called"] is False
 
 
+def test_cli_work_packet_docs_routes_yellow(capsys) -> None:
+    exit_code = main(
+        [
+            "work-packet",
+            "--text",
+            "Write docs note for Skeleton queue usage",
+        ]
+    )
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert captured.out.startswith(
+        "title\nWrite docs note for Skeleton queue usage\nproject\nskeleton"
+    )
+    assert "risk_level\nYELLOW" in captured.out
+    assert "route_target\nRUNNER_YELLOW" in captured.out
+    assert "goal\nWrite docs note for Skeleton queue usage" in captured.out
+    assert "runner_issue_body\n# YELLOW" in captured.out
+    assert "next_safe_step\ncreate GitHub issue" in captured.out
+
+
+def test_cli_work_packet_code_routes_orange(capsys) -> None:
+    exit_code = main(["work-packet", "--text", "Implement CLI test package"])
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "risk_level\nORANGE" in captured.out
+    assert "route_target\nRUNNER_ORANGE" in captured.out
+    assert "runner_issue_body\n# ORANGE" in captured.out
+
+
+def test_cli_work_packet_red_routes_blocked(capsys) -> None:
+    exit_code = main(["work-packet", "--text", "Use production token from .env"])
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "risk_level\nRED" in captured.out
+    assert "route_target\nBLOCKED_RED" in captured.out
+    assert "blocked_reason\n" in captured.out
+    assert "not executable" in captured.out
+    assert "next_safe_step\nwait for Oleksii" in captured.out
+
+
+def test_cli_work_packet_preserves_title_and_evidence_policy(capsys) -> None:
+    exit_code = main(
+        [
+            "work-packet",
+            "--text",
+            "Write docs note",
+            "--title",
+            "Manual title",
+            "--evidence-policy",
+            "MANUAL_EVIDENCE_ALLOWED",
+        ]
+    )
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert captured.out.startswith("title\nManual title\nproject\nskeleton")
+    assert "evidence_policy\nMANUAL_EVIDENCE_ALLOWED" in captured.out
+    assert "MANUAL_EVIDENCE_ALLOWED" in captured.out
+
+
 def test_cli_returns_2_for_invalid_packet(capsys) -> None:
     exit_code = main(["--title", "", "--body", "Body"])
 
