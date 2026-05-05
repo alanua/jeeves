@@ -32,9 +32,12 @@ Completed:
 11. `+` command meaning was recorded in WORKING_PROTOCOL.md.
 12. Response compression rule was recorded in WORKING_PROTOCOL.md.
 13. Active Skeleton operating loop was added to chatgpt_exoskeleton/START_HERE.md.
-14. #26 was refined into the first Externalizer v0 decision-gate task: EvidencePolicy, RED tripwire semantics, blocked_reason, and structured runner report shape.
-15. #27 was aligned with #26: queue items preserve evidence_policy/blocked_reason and classify Gemini/NotebookLM/Antigravity/manual auditor references as EVIDENCE_ONLY unless converted into reviewed Skeleton implementation tasks.
+14. #26 was refined into the first Externalizer v0 decision-gate task.
+15. #27 was aligned with #26 for queue classification and evidence-only handling.
 16. #26 was implemented and merged via #29 as the first Externalizer v0 code slice: `tools/skeleton_core` CLI decision gate.
+17. #27 was implemented and merged via #31 as the offline GitHub queue adapter.
+18. Queue-summary usability CLI was merged via #32 and verified on the runner.
+19. Oleksii confirmed: Externalizer v0 works and is accepted for active use.
 ```
 
 Core active files:
@@ -64,19 +67,19 @@ For active Skeleton work, do not load Jeeves runtime docs unless Oleksii explici
 #22 [agent-task] Audit ChatGPT Exoskeleton canon and queue separation
 #23 [skeleton] Stage 1 working exoskeleton stabilization
 #25 [agent-task-green] Skeleton runner contour audit
-#27 [agent-task-yellow] Implement Skeleton github_queue offline adapter
 ```
 
 Closed/completed:
 
 ```text
 #26 [agent-task-yellow] Implement minimal Skeleton core CLI -> merged via #29, merge SHA b5772bc20b102ff2847050ca083068c84e8a3f8d
+#27 [agent-task-yellow] Implement Skeleton github_queue offline adapter -> merged via #31, merge SHA 3828a1e68864876d817861c9526a86e51aee884d
+#32 Externalizer v0 queue-summary CLI -> merged, merge SHA d6b9eec3591738ef388ae51a0b0bd5f08d4c7163
 ```
 
 Use #23 as the main practical working thread for Skeleton Stage 1.
 Use #22 as audit/check reference.
 Use #25 as the runner-contour reference.
-Use #27 after #26 for offline queue classification.
 
 ## Current operating rules
 
@@ -114,50 +117,52 @@ load current state
 -> report one short sentence to Oleksii
 ```
 
+## Externalizer v0 usage
+
+Decision gate:
+
+```bash
+python -m tools.skeleton_core.cli --title "Write docs" --body "Add markdown note"
+python -m tools.skeleton_core.cli decide --title "Write docs" --body "Add markdown note"
+```
+
+Queue summary:
+
+```bash
+python -m tools.skeleton_core.cli queue-summary --input tests/fixtures/github_queue_sample.json
+```
+
+Current validated behavior:
+
+```text
+- normal docs task -> YELLOW / RUNNER_YELLOW
+- RED trigger task -> BLOCKED_RED with blocked_reason
+- queue-summary counts Skeleton/runtime-noise/evidence-only/blocked items
+```
+
 ## Last validation
 
-Manual boot-path self-test:
-
-```text
-Input scenario: прокинься + СК
-Read: BOOTLOADER.md -> chatgpt_exoskeleton/START_HERE.md -> chatgpt_exoskeleton/CURRENT_STATE.md
-Not read: jeeves_runtime/START_HERE.md, assistant_startup_prompt.md
-Result: PASS
-```
-
-Follow-up wording audit:
-
-```text
-Found: stale compact startup text in assistant_startup_prompt.md
-Fixed: assistant_startup_prompt.md now includes current global boot, Skeleton namespace/model/runbook, and separate Jeeves runtime namespace
-Result: PASS after post-write verification
-```
-
-Plus command verification:
-
-```text
-WORKING_PROTOCOL.md now records `+` as accepted + permission for the next safe practical step within the active task.
-Result: PASS after post-write verification
-```
-
-Response style verification:
-
-```text
-WORKING_PROTOCOL.md now records one-short-human-sentence progress reports as the default.
-Result: PASS after post-write verification
-```
-
-Externalizer v0 CLI:
+Externalizer v0 decision gate:
 
 ```text
 #26 implemented and merged through #29.
-Merge SHA: b5772bc20b102ff2847050ca083068c84e8a3f8d.
-Runner validation before merge:
-- pytest: 74 passed
-- ruff check tools/skeleton_core tests/skeleton_core: passed
-- black --check tools/skeleton_core tests/skeleton_core: passed
-- git status --short: clean
-Result: PASS.
+Runner validation before merge: PASS.
+```
+
+Externalizer v0 offline queue adapter:
+
+```text
+#27 implemented and merged through #31.
+Runner validation before merge: PASS.
+```
+
+Queue-summary CLI:
+
+```text
+#32 merged.
+Runner validation before merge: PASS.
+Oleksii confirmed: checked, works, use it.
+Result: PASS / accepted for active use.
 ```
 
 Conclusion:
@@ -166,7 +171,7 @@ Conclusion:
 A future Skeleton branch can reconstruct the current СК state from namespace files without entering Jeeves runtime docs.
 Jeeves runtime docs are aligned for explicit runtime work.
 Fast `+` continuation and compact reporting are now part of the working protocol.
-Externalizer v0 has its first merged code slice.
+Externalizer v0 has usable merged code on main.
 ```
 
 ## Next practical step
@@ -174,7 +179,13 @@ Externalizer v0 has its first merged code slice.
 Recommended next step:
 
 ```text
-Start #27 as the next Externalizer v0 implementation task: offline GitHub queue adapter.
+Use Externalizer v0 for the next Skeleton task instead of manually deciding route/queue state in chat.
+```
+
+Possible next implementation step:
+
+```text
+Add a small `trace` or `task-from-text` slice only after first active use shows what is missing.
 ```
 
 Keep it narrow:
@@ -182,9 +193,8 @@ Keep it narrow:
 ```text
 no Jeeves runtime/app changes
 no private infrastructure details in public GitHub
-no external API calls
-no Gemini/NotebookLM/Antigravity calls
-no deploy or server changes
+no external service calls
+no deploy/server changes unless explicitly requested
 short report in #23 only if durable
 ```
 
