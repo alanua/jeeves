@@ -1,0 +1,19 @@
+{
+  "task_id": "issue-35",
+  "project": "skeleton",
+  "risk_level": "ORANGE",
+  "route_target": "RUNNER_ORANGE",
+  "result": "merged",
+  "next_safe_step": "use task-from-text for new Skeleton intake",
+  "sources_read": ["issue #35", "PR #36"],
+  "files_changed": ["tools/skeleton_core/cli.py", "tests/skeleton_core/test_cli.py"],
+  "commands_run": [
+    "python -m pytest -q",
+    "python -m ruff check tools/skeleton_core tests/skeleton_core",
+    "python -m black --check tools/skeleton_core tests/skeleton_core"
+  ],
+  "blocked_reason": null,
+  "private_data_seen": false,
+  "runtime_code_touched": false,
+  "external_services_called": false
+}
