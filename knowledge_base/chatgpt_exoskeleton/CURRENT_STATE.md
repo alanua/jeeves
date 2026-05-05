@@ -16,8 +16,9 @@ Current work is the ChatGPT-side external control/support layer, not Jeeves runt
 
 Skeleton Stage 1 is complete enough for active use.
 Skeleton Stage 2+ is active as practical productivity growth.
-Externalizer v1 includes local offline `work-packet`, `validate-state`, `checkpoint`, and `classify-queue` commands.
-Skeleton core now has GitHub Actions CI validation.
+Externalizer v1 includes local offline `work-packet`, `validate-state`, `checkpoint`, `classify-queue`, and `handoff-pack` commands.
+Skeleton core has GitHub Actions CI validation.
+Gemini Adapter is a Stage 3 candidate only, with evidence-only mock tests recorded in #40. It is not implemented.
 
 Current rule:
 
@@ -61,6 +62,7 @@ Do not add abstract policy or runtime behavior by default.
 #45/#46 checkpoint CLI -> merged, SHA df2a0c087ebc361d61eb36e488daed6703fe0d1a
 #47/#48 classify-queue CLI -> merged, SHA a775775278268746493d3c31a6f3952816718bd1
 #49/#50 Skeleton core CI workflow -> merged, SHA 1442bf1064212e17b58cd5eac59b88df99774340
+#51/#52 handoff-pack CLI -> merged, SHA 6325d6f72ca0500802602403c5706a7a92968e36
 ```
 
 ## Active GitHub queue
@@ -87,6 +89,37 @@ Closed/completed Skeleton references:
 #48 classify-queue CLI PR
 #49 Skeleton CI task
 #50 Skeleton CI PR
+#51 handoff-pack CLI task
+#52 handoff-pack CLI PR
+```
+
+## Gemini Adapter evidence-only candidate
+
+Recorded in #40 as Stage 3 candidate. Not implementation. Not canon runtime.
+
+```text
+Gemini Adapter role: stateless deterministic bridge between Python/Docker Runner and Gemini API.
+Default mode: mock.
+Live mode: disabled by default; requires explicit Oleksii approval and env toggle.
+Outputs: evidence-only, routed back to ChatGPT Exoskeleton.
+Forbidden: code execution, GitHub/Drive access, canon promotion, merge/deploy authority, secret logging.
+```
+
+Mock baseline recorded:
+
+```text
+mock-public-ping-001 -> accept
+mock-forbidden-commands-001 -> block
+mock-malformed-json-001 -> block
+mock-secret-redaction-001 -> block + redaction
+mock-live-mode-disabled-001 -> block
+mock-strict-redaction-privacy-001 -> accept with redacted summary/rationale
+```
+
+Next Gemini-related step after current Skeleton productivity loop:
+
+```text
+Create Gemini Adapter mock-mode acceptance suite task only after PR/status tooling is stable.
 ```
 
 ## Core active files
@@ -149,6 +182,12 @@ load current state
 
 ## Externalizer usage
 
+Handoff pack:
+
+```bash
+python -m tools.skeleton_core.cli handoff-pack
+```
+
 State validation:
 
 ```bash
@@ -210,6 +249,7 @@ Current validated behavior:
 
 ```text
 - GitHub Actions validates Skeleton core PRs/pushes without Hetzner screenshots
+- handoff-pack emits compact branch/session handoff with validation and CURRENT_STATE excerpt
 - validate-state checks required Skeleton boot/current-state files and anchors
 - normal docs task -> YELLOW / RUNNER_YELLOW
 - code-like task -> ORANGE / RUNNER_ORANGE
@@ -237,6 +277,8 @@ Validate-state CLI: #43/#44 PASS; validation: 109 tests passed, ruff passed, bla
 Checkpoint CLI: #45/#46 PASS; validation: 111 tests passed, ruff passed, black passed, validate-state ok=true, git clean.
 Classify-queue CLI: #47/#48 PASS; validation: 114 tests passed, ruff passed, black passed, validate-state ok=true, git clean.
 Skeleton CI: #49/#50 PASS; PR CI run 25397481083 completed successfully.
+Handoff-pack CLI: #51/#52 PASS; CI run 25403326633, pytest 119 passed, ruff passed, black passed, validate-state passed.
+Gemini Adapter mock evidence: six baseline mock tests recorded in #40 as evidence-only Stage 3 candidate.
 Queue/runner audits: #25 PASS; #24 PASS via #39; #22 PASS.
 Stage 1: #23 PASS / closed.
 ```
@@ -247,8 +289,9 @@ Conclusion:
 A future Skeleton branch can reconstruct and validate the current СК state from namespace files without entering Jeeves runtime docs.
 Jeeves runtime docs are aligned for explicit runtime work.
 Fast `+` continuation and compact reporting are part of the working protocol.
-Externalizer has usable merged code on main: validate-state, task-from-text, decision gate, work-packet, checkpoint, classify-queue, queue-summary, trace-packet, and runner-report-from-trace.
+Externalizer has usable merged code on main: handoff-pack, validate-state, task-from-text, decision gate, work-packet, checkpoint, classify-queue, queue-summary, trace-packet, and runner-report-from-trace.
 Skeleton Stage 2+ is now active through #40 and should grow around maximum practical productivity.
+Gemini/Antigravity/NotebookLM are external tool layers, not current Skeleton Core runtime.
 ```
 
 ## Next practical step
@@ -256,16 +299,20 @@ Skeleton Stage 2+ is now active through #40 and should grow around maximum pract
 Recommended next Stage 2+ step:
 
 ```text
-Use CI as the default validation source for future Skeleton PRs.
-Only add the next tool when CI/tooling reveals repeated friction.
+Add PR status reader / review summarizer for GitHub PR + CI status + job-log diagnosis.
 ```
 
 Candidate productivity areas:
 
 ```text
 PR status reader / review summarizer
+job-log summarizer
 one-command task lifecycle wrapper
-branch handoff/recovery pack
+branch recovery pack
+Gemini Adapter mock-mode acceptance suite
+Memory Externalizer v1
+Antigravity runner bridge
+NotebookLM/Gemini research bridge
 ```
 
 Keep it narrow:
