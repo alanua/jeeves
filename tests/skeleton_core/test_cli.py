@@ -100,6 +100,19 @@ def test_cli_runner_report_from_trace(capsys) -> None:
     assert "next_safe_step\nuse task-from-text for new Skeleton intake" in captured.out
 
 
+def test_cli_validate_state_current_repo(capsys) -> None:
+    exit_code = main(["validate-state"])
+
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert exit_code == 0
+    assert payload["ok"] is True
+    assert payload["missing_files"] == []
+    assert payload["missing_anchors"] == []
+    assert "knowledge_base/chatgpt_exoskeleton/CURRENT_STATE.md" in payload["checked_files"]
+
+
 def test_cli_task_from_text_docs_routes_yellow(capsys) -> None:
     exit_code = main(
         [
