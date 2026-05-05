@@ -1,0 +1,8 @@
+Run tests
+python -m pytest -q
+=================================== FAILURES ===================================
+FAILED tests/skeleton_core/test_job_log_summary.py::test_detects_pytest_failure - AssertionError
+assert 'actual' == 'expected'
+=========================== short test summary info ===========================
+FAILED tests/skeleton_core/test_job_log_summary.py::test_detects_pytest_failure
+##[error]Process completed with exit code 1.
