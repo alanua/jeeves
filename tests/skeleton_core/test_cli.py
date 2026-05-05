@@ -77,6 +77,29 @@ def test_cli_queue_summary(capsys) -> None:
     assert payload["UNKNOWN_NEEDS_REVIEW"] == 0
 
 
+def test_cli_runner_report_from_trace(capsys) -> None:
+    exit_code = main(
+        [
+            "runner-report-from-trace",
+            "--input",
+            "tests/fixtures/trace_packet_sample.json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "changed_files\n- tools/skeleton_core/cli.py" in captured.out
+    assert "commands_run\n- python -m pytest -q" in captured.out
+    assert "test_result\nreported in commands_run" in captured.out
+    assert "lint_result\nreported in commands_run" in captured.out
+    assert "format_result\nreported in commands_run" in captured.out
+    assert "private_data_seen: no" in captured.out
+    assert "runtime_code_touched: no" in captured.out
+    assert "external_services_called: no" in captured.out
+    assert "next_safe_step\nuse task-from-text for new Skeleton intake" in captured.out
+
+
 def test_cli_task_from_text_docs_routes_yellow(capsys) -> None:
     exit_code = main(
         [
