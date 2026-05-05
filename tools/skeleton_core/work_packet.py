@@ -1,6 +1,6 @@
 """Public-safe work packet rendering for Skeleton tasks."""
 
-from tools.skeleton_core.models import Decision, RouteTarget, TaskPacket
+from tools.skeleton_core.models import RouteDecision, RouteTarget, TaskPacket
 from tools.skeleton_core.templates import render_runner_issue
 
 WORK_PACKET_FIELD_ORDER = (
@@ -16,14 +16,14 @@ WORK_PACKET_FIELD_ORDER = (
 )
 
 
-def next_safe_step_for_decision(decision: Decision) -> str:
+def next_safe_step_for_decision(decision: RouteDecision) -> str:
     """Return the next safe human-facing step for a routed task."""
     if decision.route_target == RouteTarget.BLOCKED_RED:
         return "wait for Oleksii"
     return "create GitHub issue"
 
 
-def render_work_packet(packet: TaskPacket, decision: Decision) -> str:
+def render_work_packet(packet: TaskPacket, decision: RouteDecision) -> str:
     """Render a standard public-safe work packet for a routed task."""
     return "\n".join(
         [
