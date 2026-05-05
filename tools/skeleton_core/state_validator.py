@@ -24,9 +24,7 @@ REQUIRED_ANCHORS = {
         "СК / ChatGPT Exoskeleton",
         "Externalizer",
     ),
-    "knowledge_base/CHATGPT_EXOSKELETON.md": (
-        "CHATGPT_EXOSKELETON_RUNBOOK.md",
-    ),
+    "knowledge_base/CHATGPT_EXOSKELETON.md": ("CHATGPT_EXOSKELETON_RUNBOOK.md",),
     "knowledge_base/CHATGPT_BRANCH_CONTINUITY_BOOT.md": (
         "CHATGPT_EXOSKELETON_RUNBOOK.md",
     ),
