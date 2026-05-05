@@ -12,6 +12,7 @@ from pydantic import ValidationError
 
 from tools.skeleton_core.checkpoint import render_checkpoint
 from tools.skeleton_core.github_queue import normalize_issue, normalize_pr, summarize_queue
+from tools.skeleton_core.handoff_pack import render_handoff_pack
 from tools.skeleton_core.models import EvidencePolicy, TaskPacket
 from tools.skeleton_core.queue_classifier import classify_queue_items
 from tools.skeleton_core.report import render_runner_report_from_trace
@@ -25,6 +26,7 @@ SUBCOMMANDS = {
     "checkpoint",
     "classify-queue",
     "decide",
+    "handoff-pack",
     "queue-summary",
     "runner-report-from-trace",
     "task-from-text",
@@ -192,6 +194,17 @@ def _subcommand_parser() -> argparse.ArgumentParser:
     decide_parser = subparsers.add_parser("decide", help="Build a Skeleton task decision packet")
     _add_decide_args(decide_parser)
 
+    handoff_pack_parser = subparsers.add_parser(
+        "handoff-pack",
+        help="Render a compact Skeleton handoff packet",
+    )
+    handoff_pack_parser.add_argument(
+        "--root",
+        default=Path("."),
+        type=Path,
+        help="Repository root to use",
+    )
+
     queue_parser = subparsers.add_parser(
         "queue-summary",
         help="Summarize an offline queue JSON file",
@@ -292,6 +305,11 @@ def _run_classify_queue(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_handoff_pack(args: argparse.Namespace) -> int:
+    print(render_handoff_pack(args.root), flush=True)
+    return 0
+
+
 def _run_queue_summary(args: argparse.Namespace) -> int:
     print(
         json.dumps(build_queue_summary_payload(args.input), ensure_ascii=False, indent=2),
@@ -389,6 +407,8 @@ def main(argv: list[str] | None = None) -> int:
         return _run_checkpoint(args)
     if args.command == "classify-queue":
         return _run_classify_queue(args)
+    if args.command == "handoff-pack":
+        return _run_handoff_pack(args)
     if args.command == "queue-summary":
         return _run_queue_summary(args)
     if args.command == "runner-report-from-trace":
