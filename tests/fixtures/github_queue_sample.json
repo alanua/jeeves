@@ -1,0 +1,48 @@
+[
+  {
+    "kind": "issue",
+    "number": 101,
+    "title": "Implement Skeleton runner contour task packet",
+    "body": "Add TaskPacket and RouteDecision support for ChatGPT Exoskeleton.",
+    "labels": ["skeleton", "agent:task"],
+    "state": "open",
+    "risk_level": "ORANGE",
+    "route_target": "RUNNER_ORANGE",
+    "evidence_policy": "NONE",
+    "source_repo": "alanua/jeeves",
+    "url": "https://example.invalid/issue/101"
+  },
+  {
+    "kind": "issue",
+    "number": 102,
+    "title": "Refactor FastAPI /ask orchestrator",
+    "body": "Change app/api and app/orchestration runtime behavior.",
+    "labels": ["runtime"],
+    "state": "open",
+    "source_repo": "alanua/jeeves",
+    "url": "https://example.invalid/issue/102"
+  },
+  {
+    "kind": "issue",
+    "number": 103,
+    "title": "Gemini audit notes",
+    "body": "Manual external auditor evidence only from Gemini and Antigravity sandbox workbench.",
+    "labels": ["evidence"],
+    "state": "open",
+    "source_repo": "alanua/jeeves",
+    "url": "https://example.invalid/issue/103"
+  },
+  {
+    "kind": "issue",
+    "number": 104,
+    "title": "Production token deployment task",
+    "body": "Blocked waiting for Oleksii approval.",
+    "labels": ["risk:red"],
+    "state": "open",
+    "risk_level": "RED",
+    "route_target": "BLOCKED_RED",
+    "blocked_reason": "RED task detected by Skeleton tripwire.",
+    "source_repo": "alanua/jeeves",
+    "url": "https://example.invalid/issue/104"
+  }
+]
