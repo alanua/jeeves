@@ -1,0 +1,13 @@
+{
+  "repository": "alanua/bauclock",
+  "issue_number": 22,
+  "title": "[agent-task-green] BauClock overnight baseline validation",
+  "risk_level": "GREEN",
+  "runner_route": "RUNNER_GREEN",
+  "review_required": false,
+  "allowed_files": [],
+  "expected_commands": ["python -m pytest"],
+  "blocked_by": [],
+  "merge_allowed": false,
+  "deploy_allowed": false
+}

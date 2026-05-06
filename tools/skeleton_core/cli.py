@@ -20,6 +20,7 @@ from tools.skeleton_core.pr_status import PRStatusInput, build_pr_status
 from tools.skeleton_core.queue_classifier import classify_queue_items
 from tools.skeleton_core.report import render_runner_report_from_trace
 from tools.skeleton_core.router import route_task
+from tools.skeleton_core.runner_command_pack import RunnerCommandInput, build_runner_command_pack
 from tools.skeleton_core.state_validator import validate_state
 from tools.skeleton_core.task_lifecycle import build_task_lifecycle_packet
 from tools.skeleton_core.templates import render_runner_issue
@@ -35,6 +36,7 @@ SUBCOMMANDS = {
     "job-log-summary",
     "pr-status",
     "queue-summary",
+    "runner-command-pack",
     "runner-report-from-trace",
     "task-from-text",
     "task-lifecycle",
@@ -74,6 +76,11 @@ def load_pr_status_input(input_path: Path) -> PRStatusInput:
 def load_issue_runner_input(input_path: Path) -> IssueRunnerInput:
     """Load public-safe issue runner input from JSON."""
     return IssueRunnerInput.model_validate_json(input_path.read_text(encoding="utf-8"))
+
+
+def load_runner_command_input(input_path: Path) -> RunnerCommandInput:
+    """Load public-safe runner command input from JSON."""
+    return RunnerCommandInput.model_validate_json(input_path.read_text(encoding="utf-8"))
 
 
 def build_queue_summary_payload(input_path: Path) -> dict[str, int]:
@@ -188,13 +195,12 @@ def _add_trace_args(parser: argparse.ArgumentParser) -> None:
     )
 
 
+def _add_input_arg(parser: argparse.ArgumentParser, help_text: str) -> None:
+    parser.add_argument("--input", required=True, type=Path, help=help_text)
+
+
 def _add_issue_input_arg(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument(
-        "--input",
-        required=True,
-        type=Path,
-        help="Path to public-safe GitHub issue JSON",
-    )
+    _add_input_arg(parser, "Path to public-safe GitHub issue JSON")
 
 
 def _subcommand_parser() -> argparse.ArgumentParser:
@@ -211,12 +217,7 @@ def _subcommand_parser() -> argparse.ArgumentParser:
         "classify-queue",
         help="Classify offline queue JSON items",
     )
-    classify_queue_parser.add_argument(
-        "--input",
-        required=True,
-        type=Path,
-        help="Path to public-safe queue JSON",
-    )
+    _add_input_arg(classify_queue_parser, "Path to public-safe queue JSON")
 
     decide_parser = subparsers.add_parser("decide", help="Build a Skeleton task decision packet")
     _add_decide_args(decide_parser)
@@ -242,45 +243,31 @@ def _subcommand_parser() -> argparse.ArgumentParser:
         "job-log-summary",
         help="Summarize a public-safe GitHub Actions job log excerpt",
     )
-    job_log_parser.add_argument(
-        "--input",
-        required=True,
-        type=Path,
-        help="Path to public-safe job log text",
-    )
+    _add_input_arg(job_log_parser, "Path to public-safe job log text")
 
     pr_status_parser = subparsers.add_parser(
         "pr-status",
         help="Build a deterministic PR status packet from public-safe JSON",
     )
-    pr_status_parser.add_argument(
-        "--input",
-        required=True,
-        type=Path,
-        help="Path to public-safe PR status JSON",
-    )
+    _add_input_arg(pr_status_parser, "Path to public-safe PR status JSON")
 
     queue_parser = subparsers.add_parser(
         "queue-summary",
         help="Summarize an offline queue JSON file",
     )
-    queue_parser.add_argument(
-        "--input",
-        required=True,
-        type=Path,
-        help="Path to public-safe queue JSON",
+    _add_input_arg(queue_parser, "Path to public-safe queue JSON")
+
+    runner_command_parser = subparsers.add_parser(
+        "runner-command-pack",
+        help="Build a compact runner command from public-safe JSON",
     )
+    _add_input_arg(runner_command_parser, "Path to public-safe runner command JSON")
 
     report_parser = subparsers.add_parser(
         "runner-report-from-trace",
         help="Render a short runner report from a TracePacket JSON file",
     )
-    report_parser.add_argument(
-        "--input",
-        required=True,
-        type=Path,
-        help="Path to public-safe TracePacket JSON",
-    )
+    _add_input_arg(report_parser, "Path to public-safe TracePacket JSON")
 
     task_from_text_parser = subparsers.add_parser(
         "task-from-text",
@@ -406,6 +393,17 @@ def _run_queue_summary(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_runner_command_pack(args: argparse.Namespace) -> int:
+    try:
+        result = build_runner_command_pack(load_runner_command_input(args.input))
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
+
+    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
+    return 0
+
+
 def _run_runner_report_from_trace(args: argparse.Namespace) -> int:
     try:
         packet = load_trace_packet(args.input)
@@ -516,6 +514,8 @@ def main(argv: list[str] | None = None) -> int:
         return _run_pr_status(args)
     if args.command == "queue-summary":
         return _run_queue_summary(args)
+    if args.command == "runner-command-pack":
+        return _run_runner_command_pack(args)
     if args.command == "runner-report-from-trace":
         return _run_runner_report_from_trace(args)
     if args.command == "task-from-text":

@@ -1,0 +1,6 @@
+{
+  "repository": "alanua/bauclock",
+  "risk_level": "YELLOW",
+  "merge_allowed": false,
+  "deploy_allowed": false
+}
