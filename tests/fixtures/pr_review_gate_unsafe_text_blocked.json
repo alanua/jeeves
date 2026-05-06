@@ -1,0 +1,18 @@
+{
+  "repository": "alanua/bauclock",
+  "pr_number": 105,
+  "title": "test: deploy calendar access-control regressions",
+  "draft": true,
+  "source_issue": {
+    "issue_number": 23,
+    "risk_level": "YELLOW",
+    "allowed_files": ["tests/test_calendar_service.py"],
+    "test_only": true
+  },
+  "changed_files": ["tests/test_calendar_service.py"],
+  "ci": {
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "body": "This PR mentions deploy and production DB in public-safe text."
+}
