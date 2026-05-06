@@ -200,12 +200,11 @@ def _report_text(
             ["", "Next safe step: queue-state may unlock the next BauClock task."]
         )
     else:
-        lines.extend(
-            [
-                "",
-                "Next safe step: review or fix the workflow result before unlocking the queue.",
-            ]
+        next_step = (
+            "Next safe step: review or fix the workflow result "
+            "before unlocking the queue."
         )
+        lines.extend(["", next_step])
     return "\n".join(lines)
 
 
@@ -244,6 +243,9 @@ def build_github_actions_runner_control(
     )
 
 
-def build_github_actions_runner_control_from_json(raw_json: str) -> GithubActionsRunnerPacket:
+def build_github_actions_runner_control_from_json(
+    raw_json: str,
+) -> GithubActionsRunnerPacket:
     """Validate local JSON text and build an Actions report packet."""
-    return build_github_actions_runner_control(GithubActionsRunnerInput.model_validate_json(raw_json))
+    packet = GithubActionsRunnerInput.model_validate_json(raw_json)
+    return build_github_actions_runner_control(packet)
