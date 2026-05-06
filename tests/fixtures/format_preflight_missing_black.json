@@ -1,0 +1,7 @@
+{
+  "formatter": "black",
+  "checked_paths": ["tools/skeleton_core", "tests/skeleton_core"],
+  "files_needing_format": [],
+  "black_available": "missing",
+  "blocked_reason": ""
+}
