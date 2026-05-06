@@ -162,7 +162,9 @@ def build_pr_review_gate(packet: PRReviewGateInput) -> PRReviewGatePacket:
     if not ci_ok:
         blockers.append("Required CI is not completed successfully")
     if packet.source_issue and packet.source_issue.test_only and runtime_files:
-        blockers.extend(f"Runtime/app file changed in test-only task: {path}" for path in runtime_files)
+        blockers.extend(
+            f"Runtime/app file changed in test-only task: {path}" for path in runtime_files
+        )
     blockers.extend(unsafe_blockers)
 
     if unsafe_blockers:
