@@ -1,0 +1,8 @@
+{
+  "issue_number": 63,
+  "title": "Merge and deploy runner bridge",
+  "body": "After implementation, merge the PR and deploy to production using tokens.",
+  "labels": ["risk:yellow", "skeleton"],
+  "project": "skeleton",
+  "requested_by": "oleksii"
+}
