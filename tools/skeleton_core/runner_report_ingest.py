@@ -20,9 +20,7 @@ UNSAFE_PATTERNS = {
     "private_data": (
         r"private[_ -]?data[_ -]?seen\s*[:=]\s*true|private data was used|private data seen"
     ),
-    "runtime_code": (
-        r"runtime[_ -]?code[_ -]?touched\s*[:=]\s*true|runtime code touched"
-    ),
+    "runtime_code": (r"runtime[_ -]?code[_ -]?touched\s*[:=]\s*true|runtime code touched"),
     "external_service": (
         r"external[_ -]?services?[_ -]?called\s*[:=]\s*true|external service called|external api called"
     ),
@@ -103,9 +101,7 @@ def _section_items(text: str, *headings: str) -> list[str]:
         if any(heading.startswith(candidate.casefold()) for candidate in headings):
             collecting = True
             continue
-        if collecting and (
-            stripped.startswith("##") or re.match(r"^[A-Za-z_ -]+:\s*$", stripped)
-        ):
+        if collecting and (stripped.startswith("##") or re.match(r"^[A-Za-z_ -]+:\s*$", stripped)):
             break
         if collecting and stripped.startswith("```"):
             continue
@@ -143,9 +139,7 @@ def _failure_summary(text: str) -> str | None:
     value = _field_value(text, "failure_summary", "failure summary")
     if value:
         return value
-    match = re.search(
-        r"(?:failed|failure|error)\s*[:\-]\s*(.+)", text, flags=re.IGNORECASE
-    )
+    match = re.search(r"(?:failed|failure|error)\s*[:\-]\s*(.+)", text, flags=re.IGNORECASE)
     if match:
         return match.group(1).strip()
     return None
@@ -186,9 +180,7 @@ def _open_prs(text: str) -> list[str]:
     explicit = _csv_or_section(text, "open_prs", "open prs", "open pull requests")
     if explicit:
         return explicit
-    return sorted(
-        set(re.findall(r"PR\s*#?\d+|pull request\s*#?\d+", text, flags=re.IGNORECASE))
-    )
+    return sorted(set(re.findall(r"PR\s*#?\d+|pull request\s*#?\d+", text, flags=re.IGNORECASE)))
 
 
 def _status(
