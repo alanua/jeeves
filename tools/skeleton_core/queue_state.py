@@ -111,10 +111,7 @@ def _needs_review(item: QueueStateInputItem) -> bool:
     text = _combined_text(item).casefold()
     if "needs review" in text or "ready for review" in text:
         return True
-    for pr in item.prs:
-        if str(pr.get("state", "")).casefold() == "open":
-            return True
-    return False
+    return any(str(pr.get("state", "")).casefold() == "open" for pr in item.prs)
 
 
 def _unsafe_blockers(item: QueueStateInputItem) -> list[str]:
