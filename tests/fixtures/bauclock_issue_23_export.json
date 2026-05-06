@@ -1,0 +1,8 @@
+{
+  "repository": "alanua/bauclock",
+  "issue_number": 23,
+  "title": "[agent-task-yellow] BauClock test-only calendar and manual-time access-control hardening",
+  "body": "# YELLOW — BauClock test-only calendar and manual-time access-control hardening\n\n## Allowed files\n\n```text\ntests/test_calendar_service.py\ntests/test_legal_hardening.py\n```\n\n## Validation required\n\n```bash\npython -m pytest tests/test_calendar_service.py tests/test_legal_hardening.py -q\npython -m pytest\n```\n\nSafety: No merge. No deploy. No production DB. No .env. No secrets.",
+  "comments": ["depends_on #22"],
+  "state": "open"
+}
