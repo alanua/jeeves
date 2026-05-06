@@ -38,6 +38,7 @@ runner-command-pack
 issue-dispatch
 queue-state
 runner-report-ingest
+pr-review-gate
 ```
 
 Project-state layer exists as the public-safe mechanism for applying Skeleton to BauClock and other projects without mixing project context with СК/Jeeves canon.
@@ -58,6 +59,14 @@ Do not add abstract policy or runtime behavior by default.
 #62/#77 issue-dispatch CLI -> merged, SHA 80a1c984aa65ac46f1b16eba6b5eb41f64e48ce4
 #71/#78 queue-state CLI -> merged, SHA a69d564845cc2121fa9718df42ebe7f3dfef85b1
 #72/#79 runner-report-ingest CLI -> merged, SHA b7a0fb0b9f4a798e28046486c41380d13897cd9f
+#74/#80 pr-review-gate CLI -> merged, SHA 88a1b7c98583e433846746a3c39fa2a856c4b4f4
+```
+
+Pr-review-gate result:
+
+```text
+Given a public-safe PR review export, Skeleton can now decide ready_for_chatgpt_review, blocked_disallowed_files, blocked_failed_ci, blocked_scope_mismatch, blocked_runtime_change, blocked_unsafe_text, or unknown_needs_review.
+The CLI remains local/offline and grants no merge/deploy authority.
 ```
 
 Runner-report-ingest result:
@@ -88,10 +97,10 @@ Given a public-safe GREEN/YELLOW task packet, Skeleton can emit a compact КОД
 Blocked, RED, unsafe, missing-field, merge/deploy, secrets, network, and live-mode packets do not get runnable commands.
 ```
 
-Validation for #72/#79:
+Validation for #74/#80:
 
 ```text
-Skeleton Core CI run 25452241723 -> success.
+Skeleton Core CI run 25453123196 -> success.
 Tests, ruff, black --check, and validate-state passed.
 ```
 
@@ -106,20 +115,19 @@ Main planning issue:
 Open practical Skeleton Core candidates:
 
 ```text
-#74 pr-review-gate — decide whether a PR is ready for ChatGPT review or blocked
 #68 branch-recovery — recover interrupted Skeleton branches from public-safe export
 ```
 
 Recommended next core slice:
 
 ```text
-#74 pr-review-gate
+#68 branch-recovery
 ```
 
 Reason:
 
 ```text
-After runner-report-ingest, queue-state, issue-dispatch, task-lifecycle, and runner-command-pack, the remaining manual step is deciding whether a PR is ready for ChatGPT/Oleksii review or blocked.
+After pr-review-gate, runner-report-ingest, queue-state, issue-dispatch, task-lifecycle, and runner-command-pack, the remaining open practical Skeleton Core candidate is interrupted branch recovery from public-safe exports.
 ```
 
 ## Safety boundaries
