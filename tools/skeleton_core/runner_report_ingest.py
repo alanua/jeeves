@@ -17,10 +17,18 @@ RunnerReportStatus = Literal[
 ]
 
 UNSAFE_PATTERNS = {
-    "private_data": r"private[_ -]?data[_ -]?seen\s*[:=]\s*true|private data was used|private data seen",
-    "runtime_code": r"runtime[_ -]?code[_ -]?touched\s*[:=]\s*true|runtime code touched",
-    "external_service": r"external[_ -]?services?[_ -]?called\s*[:=]\s*true|external service called|external api called",
-    "secret": r"secret(s)?\s+(used|touched|read|exposed)|used secret|read secret|api key from|token from",
+    "private_data": (
+        r"private[_ -]?data[_ -]?seen\s*[:=]\s*true|private data was used|private data seen"
+    ),
+    "runtime_code": (
+        r"runtime[_ -]?code[_ -]?touched\s*[:=]\s*true|runtime code touched"
+    ),
+    "external_service": (
+        r"external[_ -]?services?[_ -]?called\s*[:=]\s*true|external service called|external api called"
+    ),
+    "secret": (
+        r"secret(s)?\s+(used|touched|read|exposed)|used secret|read secret|api key from|token from"
+    ),
     "env": r"read\s+\.env|used\s+\.env|\.env\s+(read|used|touched)",
     "server": r"server ssh used|ssh to server|production server",
     "production_db": r"production db access|production database access|prod db access",
@@ -75,7 +83,11 @@ def _issue_number(text: str) -> int | None:
         match = re.search(r"#?(\d+)", value)
         if match:
             return int(match.group(1))
-    match = re.search(r"(?:issue|task)\s+#(\d+)|#(\d+)\s+report", text, flags=re.IGNORECASE)
+    match = re.search(
+        r"(?:issue|task)\s+#(\d+)|#(\d+)\s+report",
+        text,
+        flags=re.IGNORECASE,
+    )
     if match:
         return int(next(group for group in match.groups() if group))
     return None
@@ -91,7 +103,9 @@ def _section_items(text: str, *headings: str) -> list[str]:
         if any(heading.startswith(candidate.casefold()) for candidate in headings):
             collecting = True
             continue
-        if collecting and (stripped.startswith("##") or re.match(r"^[A-Za-z_ -]+:\s*$", stripped)):
+        if collecting and (
+            stripped.startswith("##") or re.match(r"^[A-Za-z_ -]+:\s*$", stripped)
+        ):
             break
         if collecting and stripped.startswith("```"):
             continue
@@ -170,7 +184,9 @@ def _open_prs(text: str) -> list[str]:
     explicit = _csv_or_section(text, "open_prs", "open prs", "open pull requests")
     if explicit:
         return explicit
-    return sorted(set(re.findall(r"PR\s*#?\d+|pull request\s*#?\d+", text, flags=re.IGNORECASE)))
+    return sorted(
+        set(re.findall(r"PR\s*#?\d+|pull request\s*#?\d+", text, flags=re.IGNORECASE))
+    )
 
 
 def _status(
@@ -189,7 +205,12 @@ def _status(
         return "blocked_report", True, "blocked"
     if test_result == "failed" or "validation failed" in lowered:
         return "failed_validation", True, "validation_failed"
-    if open_prs or "needs review" in lowered or "ready for review" in lowered or "draft pr" in lowered:
+    if (
+        open_prs
+        or "needs review" in lowered
+        or "ready for review" in lowered
+        or "draft pr" in lowered
+    ):
         return "needs_review", True, "review_required"
     if test_result == "passed" and repo_status == "clean":
         return "green_report", False, "dependency_satisfied"
@@ -199,8 +220,14 @@ def _status(
 def ingest_runner_report(text: str) -> RunnerReportIngestPacket:
     """Parse a public-safe runner report/comment excerpt into structured status."""
     unsafe_flags = _unsafe_flags(text)
-    private_data_seen = _field_bool(text, "private_data_seen", "private data seen") or "private_data" in unsafe_flags
-    runtime_code_touched = _field_bool(text, "runtime_code_touched", "runtime code touched") or "runtime_code" in unsafe_flags
+    private_data_seen = (
+        _field_bool(text, "private_data_seen", "private data seen")
+        or "private_data" in unsafe_flags
+    )
+    runtime_code_touched = (
+        _field_bool(text, "runtime_code_touched", "runtime code touched")
+        or "runtime_code" in unsafe_flags
+    )
     external_services_called = (
         _field_bool(text, "external_services_called", "external services called")
         or "external_service" in unsafe_flags
