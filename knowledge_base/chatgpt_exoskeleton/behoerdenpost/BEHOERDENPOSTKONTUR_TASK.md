@@ -182,6 +182,49 @@ If a document contains a deadline or implies action:
 
 No fake deadlines.
 
+## Gemini / NotebookLM integration
+
+Gemini and NotebookLM may be added as auxiliary analysis and long-context reading layers for Behördenpost.
+
+Core separation:
+
+```text
+ChatGPT / Skeleton = operator, classifier, workflow controller, write guard
+Google Drive = original file vault
+Google Sheets = structured database and status tracker
+Gemini = auxiliary Google-side document analyst
+NotebookLM = source-grounded reading and Q&A layer over accumulated documents
+```
+
+Rules:
+
+- Google Drive remains the storage layer for originals.
+- Google Sheets remains the structured source of status, tasks, deadlines, and document indexes.
+- Gemini is not the source of truth; it may assist with extraction, OCR review, summarization, and cross-checking.
+- NotebookLM is not the database; it is a reading/search/Q&A layer over selected source documents.
+- AI summaries, OCR, Gemini outputs, and NotebookLM answers never replace original scans/PDFs/emails.
+- NotebookLM source refresh must be explicit: if a Drive document changes, the NotebookLM source must be refreshed or re-imported according to the chosen workflow.
+- No private documents, OCR text, case numbers, or personal data are committed to GitHub.
+- Any answer from Gemini or NotebookLM that affects deadlines, legal status, payments, or official responses must be checked against the original document before action.
+
+Suggested workflow:
+
+```text
+scan / PDF / image / email
+-> Drive: preserve original
+-> Skeleton: classify + extract metadata + decide destination
+-> Sheets: write document/status/deadline/task rows
+-> Gemini: optional secondary analysis or extraction review
+-> NotebookLM: optional long-context reading over curated document set
+-> Skeleton: final user-facing summary and task list
+```
+
+Future deliverable:
+
+```text
+knowledge_base/chatgpt_exoskeleton/behoerdenpost/BEHOERDENPOSTKONTUR_NOTEBOOKLM_GEMINI_PLAN.md
+```
+
 ## Security and privacy rules
 
 - No raw private data in public GitHub.
@@ -205,6 +248,8 @@ deadline_extractor.py
 private_sheet_writer.py
 audit_log.py
 notebook_export.py
+gemini_document_review.py
+notebooklm_sync_plan.py
 ```
 
 ## Future NotebookLM / external memory
@@ -217,7 +262,9 @@ Rules for that memory:
 - do not mix unrelated projects;
 - cross-link Gewerbe only through references, not raw duplication, unless needed;
 - preserve original file links;
-- keep document summaries and deadlines queryable.
+- keep document summaries and deadlines queryable;
+- keep NotebookLM as a read/query layer, not as the authoritative status database;
+- refresh or re-import sources when originals change.
 
 ## Deliverables
 
@@ -228,6 +275,7 @@ knowledge_base/chatgpt_exoskeleton/behoerdenpost/BEHOERDENPOSTKONTUR_DESIGN.md
 knowledge_base/chatgpt_exoskeleton/behoerdenpost/BEHOERDENPOSTKONTUR_SCHEMA.md
 knowledge_base/chatgpt_exoskeleton/behoerdenpost/BEHOERDENPOSTKONTUR_RUNBOOK.md
 knowledge_base/chatgpt_exoskeleton/behoerdenpost/BEHOERDENPOSTKONTUR_TASKS.md
+knowledge_base/chatgpt_exoskeleton/behoerdenpost/BEHOERDENPOSTKONTUR_NOTEBOOKLM_GEMINI_PLAN.md
 ```
 
 Optional code package:
@@ -246,6 +294,8 @@ tools/behoerdenpostkontur/
 - Deadline/task extraction flow exists.
 - Gewerbe separation rule exists.
 - NotebookLM/private memory export is planned but not created until reviewed.
+- Gemini/NotebookLM integration is defined as auxiliary, not authoritative.
+- NotebookLM refresh/re-import rule is documented.
 
 ## First implementation phase
 
