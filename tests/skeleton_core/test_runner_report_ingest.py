@@ -2,8 +2,7 @@ from tools.skeleton_core.runner_report_ingest import ingest_runner_report
 
 
 def test_ingest_green_report() -> None:
-    result = ingest_runner_report(
-        """Agent report for issue #22
+    result = ingest_runner_report("""Agent report for issue #22
 
 issue_number: 22
 branch: bauclock/overnight-baseline
@@ -16,8 +15,7 @@ runtime_code_touched: false
 external_services_called: false
 178 passed
 working tree clean
-"""
-    )
+""")
 
     assert result.status == "green_report"
     assert result.issue_number == 22
@@ -33,13 +31,11 @@ working tree clean
 
 
 def test_ingest_blocked_report() -> None:
-    result = ingest_runner_report(
-        """Blocked report: missing dependency #22 report.
+    result = ingest_runner_report("""Blocked report: missing dependency #22 report.
 issue_number: 23
 blocked_reason: waiting for #22 green baseline validation
 repo_status: clean
-"""
-    )
+""")
 
     assert result.status == "blocked_report"
     assert result.issue_number == 23
@@ -49,16 +45,14 @@ repo_status: clean
 
 
 def test_ingest_failed_validation() -> None:
-    result = ingest_runner_report(
-        """Agent report for issue #24
+    result = ingest_runner_report("""Agent report for issue #24
 issue_number: 24
 commands_run: python -m pytest
 test_result: failed
 repo_status: dirty
 failure_summary: tests failed in test_calendar_service.py
 validation failed: tests failed in test_calendar_service.py
-"""
-    )
+""")
 
     assert result.status == "failed_validation"
     assert result.issue_number == 24
@@ -68,16 +62,14 @@ validation failed: tests failed in test_calendar_service.py
 
 
 def test_ingest_needs_review_pr() -> None:
-    result = ingest_runner_report(
-        """Runner report for issue #25
+    result = ingest_runner_report("""Runner report for issue #25
 issue_number: 25
 commands_run: python -m pytest
 Tests: passed
 repo_status: clean
 open_prs: PR #88
 Draft PR #88 is ready for ChatGPT/Oleksii review.
-"""
-    )
+""")
 
     assert result.status == "needs_review"
     assert result.issue_number == 25
@@ -87,15 +79,13 @@ Draft PR #88 is ready for ChatGPT/Oleksii review.
 
 
 def test_ingest_unsafe_secret_flag() -> None:
-    result = ingest_runner_report(
-        """Runner report for issue #26
+    result = ingest_runner_report("""Runner report for issue #26
 issue_number: 26
 test_result: passed
 repo_status: clean
 private_data_seen: true
 failure_summary: used secret from environment by mistake
-"""
-    )
+""")
 
     assert result.status == "unsafe_or_policy_violation"
     assert result.issue_number == 26
