@@ -13,6 +13,7 @@ from pydantic import ValidationError
 from tools.skeleton_core.checkpoint import render_checkpoint
 from tools.skeleton_core.github_queue import normalize_issue, normalize_pr, summarize_queue
 from tools.skeleton_core.handoff_pack import render_handoff_pack
+from tools.skeleton_core.issue_dispatch import IssueDispatchInput, build_issue_dispatch_packet
 from tools.skeleton_core.issue_runner_bridge import IssueRunnerInput, build_issue_runner_packet
 from tools.skeleton_core.job_log_summary import summarize_job_log
 from tools.skeleton_core.models import EvidencePolicy, TaskPacket
@@ -32,6 +33,7 @@ SUBCOMMANDS = {
     "classify-queue",
     "decide",
     "handoff-pack",
+    "issue-dispatch",
     "issue-runner-bridge",
     "job-log-summary",
     "pr-status",
@@ -76,6 +78,11 @@ def load_pr_status_input(input_path: Path) -> PRStatusInput:
 def load_issue_runner_input(input_path: Path) -> IssueRunnerInput:
     """Load public-safe issue runner input from JSON."""
     return IssueRunnerInput.model_validate_json(input_path.read_text(encoding="utf-8"))
+
+
+def load_issue_dispatch_input(input_path: Path) -> IssueDispatchInput:
+    """Load public-safe issue dispatch input from JSON."""
+    return IssueDispatchInput.model_validate_json(input_path.read_text(encoding="utf-8"))
 
 
 def load_runner_command_input(input_path: Path) -> RunnerCommandInput:
@@ -233,6 +240,28 @@ def _subcommand_parser() -> argparse.ArgumentParser:
         help="Repository root to use",
     )
 
+    issue_dispatch_parser = subparsers.add_parser(
+        "issue-dispatch",
+        help="Normalize a public-safe issue export for runner bridge",
+    )
+    _add_issue_input_arg(issue_dispatch_parser)
+    issue_dispatch_parser.add_argument(
+        "--run-bridge",
+        action="store_true",
+        help="Run normalized packet through issue-runner-bridge locally",
+    )
+    issue_dispatch_parser.add_argument(
+        "--parent-queue",
+        type=int,
+        default=None,
+        help="Optional parent queue issue number",
+    )
+    issue_dispatch_parser.add_argument(
+        "--depends-on",
+        default="",
+        help="Optional comma-separated dependency issue numbers",
+    )
+
     issue_runner_parser = subparsers.add_parser(
         "issue-runner-bridge",
         help="Build a GREEN/YELLOW runner packet from public-safe issue JSON",
@@ -355,6 +384,22 @@ def _run_classify_queue(args: argparse.Namespace) -> int:
 
 def _run_handoff_pack(args: argparse.Namespace) -> int:
     print(render_handoff_pack(args.root), flush=True)
+    return 0
+
+
+def _run_issue_dispatch(args: argparse.Namespace) -> int:
+    try:
+        result = build_issue_dispatch_packet(
+            load_issue_dispatch_input(args.input),
+            run_bridge=args.run_bridge,
+            parent_queue=args.parent_queue,
+            depends_on=[int(value) for value in _split_csv(args.depends_on)],
+        )
+    except (ValidationError, ValueError) as exc:
+        print(str(exc), flush=True)
+        return 2
+
+    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
     return 0
 
 
@@ -506,6 +551,8 @@ def main(argv: list[str] | None = None) -> int:
         return _run_classify_queue(args)
     if args.command == "handoff-pack":
         return _run_handoff_pack(args)
+    if args.command == "issue-dispatch":
+        return _run_issue_dispatch(args)
     if args.command == "issue-runner-bridge":
         return _run_issue_runner_bridge(args)
     if args.command == "job-log-summary":
