@@ -39,6 +39,7 @@ issue-dispatch
 queue-state
 runner-report-ingest
 pr-review-gate
+branch-recovery
 ```
 
 Project-state layer exists as the public-safe mechanism for applying Skeleton to BauClock and other projects without mixing project context with СК/Jeeves canon.
@@ -60,6 +61,14 @@ Do not add abstract policy or runtime behavior by default.
 #71/#78 queue-state CLI -> merged, SHA a69d564845cc2121fa9718df42ebe7f3dfef85b1
 #72/#79 runner-report-ingest CLI -> merged, SHA b7a0fb0b9f4a798e28046486c41380d13897cd9f
 #74/#80 pr-review-gate CLI -> merged, SHA 88a1b7c98583e433846746a3c39fa2a856c4b4f4
+#68/#81 branch-recovery CLI -> merged, SHA e558bc569031b8844b507bd040ea5a5c7802c09b
+```
+
+Branch-recovery result:
+
+```text
+Given a public-safe interrupted branch export, Skeleton can now normalize completed, needs_fix, wait_for_ci_or_fetch_status, create_pr_if_branch_ready, or unknown_needs_review into a compact recovery packet.
+The CLI remains local/offline and grants no merge/deploy authority.
 ```
 
 Pr-review-gate result:
@@ -97,10 +106,10 @@ Given a public-safe GREEN/YELLOW task packet, Skeleton can emit a compact КОД
 Blocked, RED, unsafe, missing-field, merge/deploy, secrets, network, and live-mode packets do not get runnable commands.
 ```
 
-Validation for #74/#80:
+Validation for #68/#81:
 
 ```text
-Skeleton Core CI run 25453123196 -> success.
+Skeleton Core CI run 25454107958 -> success.
 Tests, ruff, black --check, and validate-state passed.
 ```
 
@@ -115,19 +124,19 @@ Main planning issue:
 Open practical Skeleton Core candidates:
 
 ```text
-#68 branch-recovery — recover interrupted Skeleton branches from public-safe export
+#82 project-skeleton-profile — let projects declare Skeleton capabilities and emit project-needs/missing-capability signals
 ```
 
 Recommended next core slice:
 
 ```text
-#68 branch-recovery
+#82 project-skeleton-profile
 ```
 
 Reason:
 
 ```text
-After pr-review-gate, runner-report-ingest, queue-state, issue-dispatch, task-lifecycle, and runner-command-pack, the remaining open practical Skeleton Core candidate is interrupted branch recovery from public-safe exports.
+After branch-recovery, pr-review-gate, runner-report-ingest, queue-state, issue-dispatch, task-lifecycle, and runner-command-pack, the next useful growth is a project profile that lets projects adapt their development flow to Skeleton and lets Skeleton skill growth adapt to recurring project needs via reviewable signals.
 ```
 
 ## Safety boundaries
