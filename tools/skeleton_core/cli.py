@@ -17,6 +17,7 @@ from tools.skeleton_core.issue_dispatch import IssueDispatchInput, build_issue_d
 from tools.skeleton_core.issue_runner_bridge import IssueRunnerInput, build_issue_runner_packet
 from tools.skeleton_core.job_log_summary import summarize_job_log
 from tools.skeleton_core.models import EvidencePolicy, TaskPacket
+from tools.skeleton_core.pr_review_gate import PRReviewGateInput, build_pr_review_gate
 from tools.skeleton_core.pr_status import PRStatusInput, build_pr_status
 from tools.skeleton_core.queue_classifier import classify_queue_items
 from tools.skeleton_core.queue_state import QueueStateInput, build_queue_state
@@ -38,6 +39,7 @@ SUBCOMMANDS = {
     "issue-dispatch",
     "issue-runner-bridge",
     "job-log-summary",
+    "pr-review-gate",
     "pr-status",
     "queue-state",
     "queue-summary",
@@ -77,6 +79,11 @@ def load_queue_items(input_path: Path) -> list[dict[str, Any]]:
 def load_queue_state_input(input_path: Path) -> QueueStateInput:
     """Load public-safe queue-state input from JSON."""
     return QueueStateInput.model_validate_json(input_path.read_text(encoding="utf-8"))
+
+
+def load_pr_review_gate_input(input_path: Path) -> PRReviewGateInput:
+    """Load public-safe PR review gate input from JSON."""
+    return PRReviewGateInput.model_validate_json(input_path.read_text(encoding="utf-8"))
 
 
 def load_pr_status_input(input_path: Path) -> PRStatusInput:
@@ -283,6 +290,12 @@ def _subcommand_parser() -> argparse.ArgumentParser:
     )
     _add_input_arg(job_log_parser, "Path to public-safe job log text")
 
+    pr_review_parser = subparsers.add_parser(
+        "pr-review-gate",
+        help="Decide whether a public-safe PR export is ready for ChatGPT review",
+    )
+    _add_input_arg(pr_review_parser, "Path to public-safe PR review gate JSON")
+
     pr_status_parser = subparsers.add_parser(
         "pr-status",
         help="Build a deterministic PR status packet from public-safe JSON",
@@ -446,6 +459,16 @@ def _run_job_log_summary(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_pr_review_gate(args: argparse.Namespace) -> int:
+    try:
+        result = build_pr_review_gate(load_pr_review_gate_input(args.input))
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
+    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
+    return 0
+
+
 def _run_pr_status(args: argparse.Namespace) -> int:
     try:
         result = build_pr_status(load_pr_status_input(args.input))
@@ -600,6 +623,8 @@ def main(argv: list[str] | None = None) -> int:
         return _run_issue_runner_bridge(args)
     if args.command == "job-log-summary":
         return _run_job_log_summary(args)
+    if args.command == "pr-review-gate":
+        return _run_pr_review_gate(args)
     if args.command == "pr-status":
         return _run_pr_status(args)
     if args.command == "queue-state":
