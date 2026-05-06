@@ -13,6 +13,7 @@ from pydantic import ValidationError
 from tools.skeleton_core.checkpoint import render_checkpoint
 from tools.skeleton_core.github_queue import normalize_issue, normalize_pr, summarize_queue
 from tools.skeleton_core.handoff_pack import render_handoff_pack
+from tools.skeleton_core.issue_runner_bridge import IssueRunnerInput, build_issue_runner_packet
 from tools.skeleton_core.job_log_summary import summarize_job_log
 from tools.skeleton_core.models import EvidencePolicy, TaskPacket
 from tools.skeleton_core.pr_status import PRStatusInput, build_pr_status
@@ -29,6 +30,7 @@ SUBCOMMANDS = {
     "classify-queue",
     "decide",
     "handoff-pack",
+    "issue-runner-bridge",
     "job-log-summary",
     "pr-status",
     "queue-summary",
@@ -65,6 +67,11 @@ def load_queue_items(input_path: Path) -> list[dict[str, Any]]:
 def load_pr_status_input(input_path: Path) -> PRStatusInput:
     """Load public-safe PR status input from JSON."""
     return PRStatusInput.model_validate_json(input_path.read_text(encoding="utf-8"))
+
+
+def load_issue_runner_input(input_path: Path) -> IssueRunnerInput:
+    """Load public-safe issue runner input from JSON."""
+    return IssueRunnerInput.model_validate_json(input_path.read_text(encoding="utf-8"))
 
 
 def build_queue_summary_payload(input_path: Path) -> dict[str, int]:
@@ -214,6 +221,17 @@ def _subcommand_parser() -> argparse.ArgumentParser:
         help="Repository root to use",
     )
 
+    issue_runner_parser = subparsers.add_parser(
+        "issue-runner-bridge",
+        help="Build a GREEN/YELLOW runner packet from public-safe issue JSON",
+    )
+    issue_runner_parser.add_argument(
+        "--input",
+        required=True,
+        type=Path,
+        help="Path to public-safe GitHub issue JSON",
+    )
+
     job_log_parser = subparsers.add_parser(
         "job-log-summary",
         help="Summarize a public-safe GitHub Actions job log excerpt",
@@ -341,6 +359,17 @@ def _run_handoff_pack(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_issue_runner_bridge(args: argparse.Namespace) -> int:
+    try:
+        result = build_issue_runner_packet(load_issue_runner_input(args.input))
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
+
+    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
+    return 0
+
+
 def _run_job_log_summary(args: argparse.Namespace) -> int:
     result = summarize_job_log(args.input.read_text(encoding="utf-8"))
     print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
@@ -456,6 +485,8 @@ def main(argv: list[str] | None = None) -> int:
         return _run_classify_queue(args)
     if args.command == "handoff-pack":
         return _run_handoff_pack(args)
+    if args.command == "issue-runner-bridge":
+        return _run_issue_runner_bridge(args)
     if args.command == "job-log-summary":
         return _run_job_log_summary(args)
     if args.command == "pr-status":

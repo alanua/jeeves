@@ -1,0 +1,8 @@
+{
+  "issue_number": 62,
+  "title": "Add project-state docs note",
+  "body": "Create a public-safe docs note for Skeleton-assisted project-state usage.",
+  "labels": ["risk:yellow", "skeleton"],
+  "project": "skeleton",
+  "requested_by": "oleksii"
+}

@@ -1,0 +1,8 @@
+{
+  "issue_number": 61,
+  "title": "Docs cleanup for Skeleton handoff wording",
+  "body": "Update public-safe wording in docs only.",
+  "labels": ["risk:green", "skeleton"],
+  "project": "skeleton",
+  "requested_by": "oleksii"
+}

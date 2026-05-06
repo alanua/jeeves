@@ -288,6 +288,36 @@ def test_cli_work_packet_preserves_title_and_evidence_policy(capsys) -> None:
     assert "MANUAL_EVIDENCE_ALLOWED" in captured.out
 
 
+def test_cli_issue_runner_bridge_green_fixture(capsys) -> None:
+    exit_code = main(["issue-runner-bridge", "--input", "tests/fixtures/issue_runner_green.json"])
+
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert exit_code == 0
+    assert payload["status"] == "accepted"
+    assert payload["risk_level"] == "GREEN"
+    assert payload["runner_route"] == "RUNNER_GREEN"
+    assert payload["merge_allowed"] is False
+    assert payload["deploy_allowed"] is False
+
+
+def test_cli_issue_runner_bridge_blocks_merge_fixture(capsys) -> None:
+    exit_code = main(
+        ["issue-runner-bridge", "--input", "tests/fixtures/issue_runner_red_merge.json"]
+    )
+
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert exit_code == 0
+    assert payload["status"] == "blocked"
+    assert payload["runner_route"] == "BLOCKED"
+    assert payload["merge_allowed"] is False
+    assert payload["deploy_allowed"] is False
+    assert any("merge" in blocker for blocker in payload["blockers"])
+
+
 def test_cli_returns_2_for_invalid_packet(capsys) -> None:
     exit_code = main(["--title", "", "--body", "Body"])
 
