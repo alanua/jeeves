@@ -1,0 +1,12 @@
+{
+  "branch_name": "skeleton/example-missing-ci",
+  "issue_number": 68,
+  "pr_number": 71,
+  "pr_state": "open",
+  "merged": false,
+  "merged_sha": "",
+  "changed_files": ["tools/skeleton_core/example.py"],
+  "ci_status": "missing",
+  "ci_blockers": [],
+  "checkpoint_result": "queued"
+}

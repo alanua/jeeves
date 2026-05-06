@@ -1,0 +1,12 @@
+{
+  "branch_name": "skeleton/example-merged",
+  "issue_number": 68,
+  "pr_number": 70,
+  "pr_state": "closed",
+  "merged": true,
+  "merged_sha": "abc123def456",
+  "changed_files": ["tools/skeleton_core/example.py"],
+  "ci_status": "success",
+  "ci_blockers": [],
+  "checkpoint_result": "completed"
+}
