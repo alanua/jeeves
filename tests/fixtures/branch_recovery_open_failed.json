@@ -1,0 +1,12 @@
+{
+  "branch_name": "skeleton/example-failed",
+  "issue_number": 68,
+  "pr_number": 69,
+  "pr_state": "open",
+  "merged": false,
+  "merged_sha": "",
+  "changed_files": ["tools/skeleton_core/example.py"],
+  "ci_status": "failed",
+  "ci_blockers": ["black"],
+  "checkpoint_result": "queued"
+}
