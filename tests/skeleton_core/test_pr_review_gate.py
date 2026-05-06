@@ -49,12 +49,12 @@ def test_pr_review_gate_blocks_disallowed_files() -> None:
         _base_packet(
             changed_files=[
                 "tests/test_calendar_service.py",
-                "app/services/calendar_service.py",
+                "docs/calendar_access_control_notes.md",
             ]
         )
     )
 
-    assert result.status == "blocked_runtime_change"
+    assert result.status == "blocked_disallowed_files"
     assert result.changed_files_ok is False
     assert result.scope_ok is False
     assert any("File outside allowed scope" in blocker for blocker in result.blockers)
