@@ -1,0 +1,8 @@
+{
+  "repository": "alanua/bauclock",
+  "issue_number": 999,
+  "title": "[agent-task-red] Deploy production with token",
+  "body": "Deploy to production and use API key from .env.",
+  "comments": [],
+  "state": "open"
+}
