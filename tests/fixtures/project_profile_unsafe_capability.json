@@ -1,0 +1,17 @@
+{
+  "project": "Unsafe Example",
+  "type": "application",
+  "default_risk": "YELLOW",
+  "allowed_skeleton_capabilities": [
+    "issue-dispatch",
+    "autonomous-deploy"
+  ],
+  "project_needs": ["runner-env-check"],
+  "test_commands": ["python -m pytest -q"],
+  "forbidden_by_default": [
+    "deploy without approval",
+    "secrets",
+    ".env"
+  ],
+  "runtime_change_requires_explicit_approval": false
+}
