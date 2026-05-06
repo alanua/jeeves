@@ -1,0 +1,8 @@
+{
+  "repository": "alanua/bauclock",
+  "issue_number": 22,
+  "title": "[agent-task-green] BauClock overnight baseline validation",
+  "body": "# GREEN — BauClock overnight baseline validation\n\n## Validation required\n\n```bash\npython -m pytest\n```\n\nSafety: No merge. No deploy. No secrets.",
+  "comments": [],
+  "state": "open"
+}
