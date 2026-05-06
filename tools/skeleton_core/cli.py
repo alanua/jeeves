@@ -23,6 +23,7 @@ from tools.skeleton_core.queue_state import QueueStateInput, build_queue_state
 from tools.skeleton_core.report import render_runner_report_from_trace
 from tools.skeleton_core.router import route_task
 from tools.skeleton_core.runner_command_pack import RunnerCommandInput, build_runner_command_pack
+from tools.skeleton_core.runner_report_ingest import ingest_runner_report_file_content
 from tools.skeleton_core.state_validator import validate_state
 from tools.skeleton_core.task_lifecycle import build_task_lifecycle_packet
 from tools.skeleton_core.templates import render_runner_issue
@@ -42,6 +43,7 @@ SUBCOMMANDS = {
     "queue-summary",
     "runner-command-pack",
     "runner-report-from-trace",
+    "runner-report-ingest",
     "task-from-text",
     "task-lifecycle",
     "trace-packet",
@@ -310,6 +312,12 @@ def _subcommand_parser() -> argparse.ArgumentParser:
     )
     _add_input_arg(runner_command_parser, "Path to public-safe runner command JSON")
 
+    report_ingest_parser = subparsers.add_parser(
+        "runner-report-ingest",
+        help="Normalize public-safe runner report text into status JSON",
+    )
+    _add_input_arg(report_ingest_parser, "Path to public-safe runner report text")
+
     report_parser = subparsers.add_parser(
         "runner-report-from-trace",
         help="Render a short runner report from a TracePacket JSON file",
@@ -478,6 +486,12 @@ def _run_runner_command_pack(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_runner_report_ingest(args: argparse.Namespace) -> int:
+    result = ingest_runner_report_file_content(args.input.read_text(encoding="utf-8"))
+    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
+    return 0
+
+
 def _run_runner_report_from_trace(args: argparse.Namespace) -> int:
     try:
         packet = load_trace_packet(args.input)
@@ -594,6 +608,8 @@ def main(argv: list[str] | None = None) -> int:
         return _run_queue_summary(args)
     if args.command == "runner-command-pack":
         return _run_runner_command_pack(args)
+    if args.command == "runner-report-ingest":
+        return _run_runner_report_ingest(args)
     if args.command == "runner-report-from-trace":
         return _run_runner_report_from_trace(args)
     if args.command == "task-from-text":
