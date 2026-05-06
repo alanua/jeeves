@@ -21,6 +21,7 @@ from tools.skeleton_core.queue_classifier import classify_queue_items
 from tools.skeleton_core.report import render_runner_report_from_trace
 from tools.skeleton_core.router import route_task
 from tools.skeleton_core.state_validator import validate_state
+from tools.skeleton_core.task_lifecycle import build_task_lifecycle_packet
 from tools.skeleton_core.templates import render_runner_issue
 from tools.skeleton_core.trace import TracePacket
 from tools.skeleton_core.work_packet import render_work_packet
@@ -36,6 +37,7 @@ SUBCOMMANDS = {
     "queue-summary",
     "runner-report-from-trace",
     "task-from-text",
+    "task-lifecycle",
     "trace-packet",
     "validate-state",
     "work-packet",
@@ -186,6 +188,15 @@ def _add_trace_args(parser: argparse.ArgumentParser) -> None:
     )
 
 
+def _add_issue_input_arg(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--input",
+        required=True,
+        type=Path,
+        help="Path to public-safe GitHub issue JSON",
+    )
+
+
 def _subcommand_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Skeleton Externalizer CLI.")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -225,12 +236,7 @@ def _subcommand_parser() -> argparse.ArgumentParser:
         "issue-runner-bridge",
         help="Build a GREEN/YELLOW runner packet from public-safe issue JSON",
     )
-    issue_runner_parser.add_argument(
-        "--input",
-        required=True,
-        type=Path,
-        help="Path to public-safe GitHub issue JSON",
-    )
+    _add_issue_input_arg(issue_runner_parser)
 
     job_log_parser = subparsers.add_parser(
         "job-log-summary",
@@ -281,6 +287,12 @@ def _subcommand_parser() -> argparse.ArgumentParser:
         help="Build a Skeleton decision packet from free-form text",
     )
     _add_task_from_text_args(task_from_text_parser)
+
+    task_lifecycle_parser = subparsers.add_parser(
+        "task-lifecycle",
+        help="Build a compact lifecycle packet from public-safe issue JSON",
+    )
+    _add_issue_input_arg(task_lifecycle_parser)
 
     trace_parser = subparsers.add_parser("trace-packet", help="Build a Skeleton trace packet")
     _add_trace_args(trace_parser)
@@ -405,6 +417,17 @@ def _run_runner_report_from_trace(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_task_lifecycle(args: argparse.Namespace) -> int:
+    try:
+        result = build_task_lifecycle_packet(load_issue_runner_input(args.input))
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
+
+    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
+    return 0
+
+
 def _trace_packet_from_args(args: argparse.Namespace) -> TracePacket:
     return TracePacket(
         task_id=args.task_id,
@@ -497,6 +520,8 @@ def main(argv: list[str] | None = None) -> int:
         return _run_runner_report_from_trace(args)
     if args.command == "task-from-text":
         return _run_task_from_text(args)
+    if args.command == "task-lifecycle":
+        return _run_task_lifecycle(args)
     if args.command == "trace-packet":
         return _run_trace_packet(args)
     if args.command == "validate-state":
