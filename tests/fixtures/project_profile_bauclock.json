@@ -1,0 +1,33 @@
+{
+  "project": "BauClock",
+  "type": "application",
+  "default_risk": "YELLOW",
+  "allowed_skeleton_capabilities": [
+    "issue-dispatch",
+    "runner-command-pack",
+    "runner-report-ingest",
+    "queue-state",
+    "pr-review-gate",
+    "branch-recovery"
+  ],
+  "project_needs": [
+    "runner-env-check",
+    "telegram-bot-safe-release-flow",
+    "migration-risk-gate",
+    "role-permission-regression-flow"
+  ],
+  "test_commands": [
+    "python -m pytest -q",
+    "python -m ruff check .",
+    "python -m black --check ."
+  ],
+  "forbidden_by_default": [
+    "deploy",
+    "server ssh",
+    "production db",
+    "secrets",
+    ".env",
+    "automerge"
+  ],
+  "runtime_change_requires_explicit_approval": true
+}
