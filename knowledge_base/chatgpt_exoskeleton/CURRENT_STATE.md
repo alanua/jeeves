@@ -36,6 +36,7 @@ issue-runner-bridge
 task-lifecycle
 runner-command-pack
 issue-dispatch
+queue-state
 ```
 
 Project-state layer exists as the public-safe mechanism for applying Skeleton to BauClock and other projects without mixing project context with СК/Jeeves canon.
@@ -54,12 +55,20 @@ Do not add abstract policy or runtime behavior by default.
 #65 issue-runner-bridge negation-aware safety clauses -> merged, SHA 689b75e05df4e80a0be9fc21c6a06f06601a2885
 #75/#76 runner-command-pack CLI -> merged, SHA 12c9b5e8daba570617cfc7c08e36819b7abe02bb
 #62/#77 issue-dispatch CLI -> merged, SHA 80a1c984aa65ac46f1b16eba6b5eb41f64e48ce4
+#71/#78 queue-state CLI -> merged, SHA a69d564845cc2121fa9718df42ebe7f3dfef85b1
+```
+
+Queue-state result:
+
+```text
+Given a public-safe controller queue export, Skeleton can now classify items as runnable, blocked_by_dependency, completed_or_reported, needs_review, or unsafe_or_unknown, then select the next safe runnable issue.
+The CLI remains local/offline and grants no merge/deploy authority.
 ```
 
 Issue-dispatch result:
 
 ```text
-Given a public-safe GitHub issue export, Skeleton can now normalize risk, route, review flag, allowed files, commands, and dependencies, and optionally pass the packet through issue-runner-bridge.
+Given a public-safe GitHub issue export, Skeleton can normalize risk, route, review flag, allowed files, commands, and dependencies, and optionally pass the packet through issue-runner-bridge.
 The CLI remains local/offline and grants no merge/deploy authority.
 ```
 
@@ -70,10 +79,10 @@ Given a public-safe GREEN/YELLOW task packet, Skeleton can emit a compact КОД
 Blocked, RED, unsafe, missing-field, merge/deploy, secrets, network, and live-mode packets do not get runnable commands.
 ```
 
-Validation for #62/#77:
+Validation for #71/#78:
 
 ```text
-Skeleton Core CI run 25449759045 -> success.
+Skeleton Core CI run 25450337326 -> success.
 Tests, ruff, black --check, and validate-state passed.
 ```
 
@@ -88,7 +97,6 @@ Main planning issue:
 Open practical Skeleton Core candidates:
 
 ```text
-#71 queue-state — determine next safe runnable item from a controller queue export
 #72 runner-report-ingest — normalize public-safe runner reports into status packets
 #74 pr-review-gate — decide whether a PR is ready for ChatGPT review or blocked
 #68 branch-recovery — recover interrupted Skeleton branches from public-safe export
@@ -97,13 +105,13 @@ Open practical Skeleton Core candidates:
 Recommended next core slice:
 
 ```text
-#71 queue-state
+#72 runner-report-ingest
 ```
 
 Reason:
 
 ```text
-After issue-dispatch and runner-command-pack, the remaining manual step is choosing the next safe runnable item from a queue export.
+After queue-state, issue-dispatch, task-lifecycle, and runner-command-pack, the remaining manual step is ingesting runner reports back into a structured status packet.
 ```
 
 ## Safety boundaries
