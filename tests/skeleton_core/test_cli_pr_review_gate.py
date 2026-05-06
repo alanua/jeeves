@@ -30,7 +30,7 @@ def test_cli_pr_review_gate_ready_fixture(capsys) -> None:
 def test_cli_pr_review_gate_disallowed_file_fixture(capsys) -> None:
     payload = _run_fixture("tests/fixtures/pr_review_gate_disallowed_file.json", capsys)
 
-    assert payload["status"] == "blocked_runtime_change"
+    assert payload["status"] == "blocked_disallowed_files"
     assert payload["changed_files_ok"] is False
     assert payload["scope_ok"] is False
     assert payload["blockers"]
