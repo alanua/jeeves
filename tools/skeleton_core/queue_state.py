@@ -21,7 +21,9 @@ UNSAFE_PATTERNS = {
     "deploy": r"\bdeploy\b|\bdeployment\b|\brelease\b",
     "production": r"production db|production database|\bprod db\b",
     "server": r"server ssh|\bssh\b",
-    "secret": r"\.env|\bsecret\b|\bsecrets\b|\btoken\b|\btokens\b|api key|apikey|credential|password",
+    "secret": (
+        r"\.env|\bsecret\b|\bsecrets\b|\btoken\b|\btokens\b|api key|apikey|credential|password"
+    ),
     "network": r"live network|live executor|external service|external api|http[s]?://",
 }
 
@@ -97,7 +99,10 @@ def _completed_or_reported(item: QueueStateInputItem) -> bool:
     if item.state.casefold() in {"closed", "done", "completed"}:
         return True
     text = _combined_text(item).casefold()
-    if any(marker in text for marker in ("agent report", "completed", "validation passed", "ci success")):
+    if any(
+        marker in text
+        for marker in ("agent report", "completed", "validation passed", "ci success")
+    ):
         return True
     for pr in item.prs:
         merged = pr.get("merged")
@@ -177,7 +182,9 @@ def build_queue_state(queue: QueueStateInput, *, project: str | None = None) -> 
         item = item_by_number[issue_number]
         blockers = _unsafe_blockers(item)
         dependencies = _inferred_dependencies(item)
-        open_dependencies = [dependency for dependency in dependencies if dependency not in completed]
+        open_dependencies = [
+            dependency for dependency in dependencies if dependency not in completed
+        ]
 
         if _completed_or_reported(item):
             state: QueueItemState = "completed_or_reported"
