@@ -346,9 +346,23 @@ def _subcommand_parser() -> argparse.ArgumentParser:
         "runner-env-check",
         help="Check runner environment readiness before assigning validation work",
     )
-    runner_env_parser.add_argument("--input", type=Path, default=None, help="Path to offline fixture JSON")
-    runner_env_parser.add_argument("--repo-url", default=None, help="Repository URL for live preflight")
-    runner_env_parser.add_argument("--workdir", type=Path, default=None, help="Disposable workdir")
+    runner_env_parser.add_argument(
+        "--input",
+        type=Path,
+        default=None,
+        help="Path to offline fixture JSON",
+    )
+    runner_env_parser.add_argument(
+        "--repo-url",
+        default=None,
+        help="Repository URL for live preflight",
+    )
+    runner_env_parser.add_argument(
+        "--workdir",
+        type=Path,
+        default=None,
+        help="Disposable workdir",
+    )
     runner_env_parser.add_argument(
         "--allow-network-check",
         action="store_true",
