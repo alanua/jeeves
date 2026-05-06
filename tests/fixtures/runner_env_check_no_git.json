@@ -1,0 +1,18 @@
+{
+  "repository": "alanua/bauclock",
+  "repo_url_checked": "https://github.com/alanua/bauclock.git",
+  "checks": {
+    "python": "ok",
+    "git": "missing",
+    "workdir": "ok",
+    "dns_github": "not_checked",
+    "clone": "not_checked",
+    "pytest": "ok"
+  },
+  "commands_run": [
+    "python --version",
+    "git --version"
+  ],
+  "blocked_reason": "Git is not installed in this runner.",
+  "policy_violation": false
+}
