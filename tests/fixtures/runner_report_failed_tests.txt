@@ -1,0 +1,13 @@
+Agent report for issue #24
+
+issue_number: 24
+branch: bauclock/failing-validation
+commands_run: python -m pytest
+test_result: failed
+repo_status: dirty
+failure_summary: tests failed in test_calendar_service.py
+private_data_seen: false
+runtime_code_touched: false
+external_services_called: false
+
+validation failed: tests failed in test_calendar_service.py
