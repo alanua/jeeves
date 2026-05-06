@@ -143,7 +143,9 @@ def _failure_summary(text: str) -> str | None:
     value = _field_value(text, "failure_summary", "failure summary")
     if value:
         return value
-    match = re.search(r"(?:failed|failure|error)\s*[:\-]\s*(.+)", text, flags=re.IGNORECASE)
+    match = re.search(
+        r"(?:failed|failure|error)\s*[:\-]\s*(.+)", text, flags=re.IGNORECASE
+    )
     if match:
         return match.group(1).strip()
     return None
