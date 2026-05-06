@@ -1,0 +1,27 @@
+{
+  "repository": "alanua/bauclock",
+  "workflow": "Tests",
+  "workflow_file": "tests.yml",
+  "ref": "main",
+  "head_sha": "abc123failed",
+  "run_id": 1002,
+  "run_status": "completed",
+  "run_conclusion": "failure",
+  "commands_inferred": ["pytest"],
+  "logs_summary": ["pytest failed in test_dashboard.py"],
+  "jobs": [
+    {
+      "name": "tests",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Run tests",
+          "status": "completed",
+          "conclusion": "failure",
+          "summary": "1 failed"
+        }
+      ]
+    }
+  ]
+}
