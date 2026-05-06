@@ -1,0 +1,7 @@
+{
+  "formatter": "black",
+  "checked_paths": ["tools/skeleton_core/cli.py"],
+  "files_needing_format": ["tools/skeleton_core/cli.py"],
+  "black_available": "ok",
+  "blocked_reason": ""
+}
