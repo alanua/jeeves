@@ -1,0 +1,8 @@
+{
+  "issue_number": 22,
+  "title": "BauClock docs cleanup",
+  "body": "Update public-safe docs only.\n\nSafety note:\nNo merge.\nNo deploy.\nNo production database.\nNo `.env` reading or printing.\nNo secrets.\nNo tokens.\nForbidden: merge/deploy/server/production DB/.env/secrets.",
+  "labels": ["risk:green", "skeleton"],
+  "project": "bauclock",
+  "requested_by": "oleksii"
+}
