@@ -153,6 +153,14 @@ def _bridge_input(packet: IssueDispatchInput, risk: BridgeRisk) -> IssueRunnerIn
     )
 
 
+def _route_without_bridge(risk: BridgeRisk) -> RunnerRoute:
+    if risk == "YELLOW":
+        return "RUNNER_YELLOW"
+    if risk == "GREEN":
+        return "RUNNER_GREEN"
+    return "BLOCKED"
+
+
 def build_issue_dispatch_packet(
     packet: IssueDispatchInput,
     *,
@@ -176,13 +184,7 @@ def build_issue_dispatch_packet(
         next_action = bridge_result.next_action
     else:
         status = "accepted" if risk in {"GREEN", "YELLOW"} else "unknown_needs_review"
-        runner_route = (
-            "RUNNER_YELLOW"
-            if risk == "YELLOW"
-            else "RUNNER_GREEN"
-            if risk == "GREEN"
-            else "BLOCKED"
-        )
+        runner_route = _route_without_bridge(risk)
         review_required = risk == "YELLOW"
         blockers = [] if risk in {"GREEN", "YELLOW"} else [f"Unsupported risk level: {risk}"]
         next_action = "Run issue-runner-bridge for the normalized packet; do not merge or deploy."
