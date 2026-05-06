@@ -29,6 +29,11 @@ from tools.skeleton_core.queue_state import QueueStateInput, build_queue_state
 from tools.skeleton_core.report import render_runner_report_from_trace
 from tools.skeleton_core.router import route_task
 from tools.skeleton_core.runner_command_pack import RunnerCommandInput, build_runner_command_pack
+from tools.skeleton_core.runner_env_check import (
+    RunnerEnvCheckInput,
+    build_runner_env_check,
+    live_runner_env_check,
+)
 from tools.skeleton_core.runner_report_ingest import ingest_runner_report_file_content
 from tools.skeleton_core.state_validator import validate_state
 from tools.skeleton_core.task_lifecycle import build_task_lifecycle_packet
@@ -51,6 +56,7 @@ SUBCOMMANDS = {
     "queue-state",
     "queue-summary",
     "runner-command-pack",
+    "runner-env-check",
     "runner-report-from-trace",
     "runner-report-ingest",
     "task-from-text",
@@ -83,6 +89,11 @@ def load_branch_recovery_input(input_path: Path) -> BranchRecoveryInput:
 def load_project_skeleton_profile_input(input_path: Path) -> ProjectSkeletonProfileInput:
     """Load public-safe project Skeleton profile input from JSON."""
     return ProjectSkeletonProfileInput.model_validate_json(input_path.read_text(encoding="utf-8"))
+
+
+def load_runner_env_check_input(input_path: Path) -> RunnerEnvCheckInput:
+    """Load public-safe runner environment check input from JSON."""
+    return RunnerEnvCheckInput.model_validate_json(input_path.read_text(encoding="utf-8"))
 
 
 def load_queue_items(input_path: Path) -> list[dict[str, Any]]:
@@ -331,6 +342,43 @@ def _subcommand_parser() -> argparse.ArgumentParser:
     )
     _add_input_arg(project_profile_parser, "Path to public-safe project profile JSON")
 
+    runner_env_parser = subparsers.add_parser(
+        "runner-env-check",
+        help="Check runner environment readiness before assigning validation work",
+    )
+    runner_env_parser.add_argument(
+        "--input",
+        type=Path,
+        default=None,
+        help="Path to offline fixture JSON",
+    )
+    runner_env_parser.add_argument(
+        "--repo-url",
+        default=None,
+        help="Repository URL for live preflight",
+    )
+    runner_env_parser.add_argument(
+        "--workdir",
+        type=Path,
+        default=None,
+        help="Disposable workdir",
+    )
+    runner_env_parser.add_argument(
+        "--allow-network-check",
+        action="store_true",
+        help="Explicitly allow DNS/network/clone checks",
+    )
+    runner_env_parser.add_argument(
+        "--skip-clone-check",
+        action="store_true",
+        help="Skip clone even when network check is allowed",
+    )
+    runner_env_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Compatibility flag; output is always JSON",
+    )
+
     queue_state_parser = subparsers.add_parser(
         "queue-state",
         help="Determine the next runnable item from public-safe queue state JSON",
@@ -528,6 +576,31 @@ def _run_project_skeleton_profile(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_runner_env_check(args: argparse.Namespace) -> int:
+    try:
+        if args.input is not None:
+            result = build_runner_env_check(load_runner_env_check_input(args.input))
+        elif args.repo_url and args.workdir:
+            result = live_runner_env_check(
+                repo_url=args.repo_url,
+                workdir=args.workdir,
+                allow_network_check=args.allow_network_check,
+                skip_clone_check=args.skip_clone_check,
+            )
+        else:
+            result = build_runner_env_check(
+                RunnerEnvCheckInput(
+                    checks={},
+                    blocked_reason="Provide --input or both --repo-url and --workdir.",
+                )
+            )
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
+    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
+    return 0
+
+
 def _run_queue_state(args: argparse.Namespace) -> int:
     try:
         result = build_queue_state(load_queue_state_input(args.input), project=args.project)
@@ -686,6 +759,8 @@ def main(argv: list[str] | None = None) -> int:
         return _run_queue_summary(args)
     if args.command == "runner-command-pack":
         return _run_runner_command_pack(args)
+    if args.command == "runner-env-check":
+        return _run_runner_env_check(args)
     if args.command == "runner-report-ingest":
         return _run_runner_report_ingest(args)
     if args.command == "runner-report-from-trace":
