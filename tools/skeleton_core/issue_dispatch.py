@@ -83,7 +83,7 @@ def _section_lines(body: str, headings: tuple[str, ...]) -> list[str]:
     in_fence = False
     for line in lines:
         stripped = line.strip()
-        heading = stripped.strip("#:").casefold()
+        heading = stripped.strip("#:").strip().casefold()
         if any(heading.startswith(candidate) for candidate in headings):
             collecting = True
             continue
