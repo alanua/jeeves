@@ -10,6 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from tools.skeleton_core.issue_runner_bridge import (
     BridgeRisk,
     BridgeStatus,
+    IssueRunnerInput,
     RunnerRoute,
     build_issue_runner_packet,
 )
@@ -129,22 +130,26 @@ def _extract_expected_commands(body: str) -> list[str]:
 def _extract_dependencies(packet: IssueDispatchInput) -> list[int]:
     text = _combined_text(packet)
     dependencies = set()
-    for pattern in (r"depends[_ -]?on\s*#?(\d+)", r"blocked until\s*#?(\d+)", r"after\s*#(\d+)"):
+    for pattern in (
+        r"depends[_ -]?on\s*#?(\d+)",
+        r"blocked until\s*#?(\d+)",
+        r"after\s*#(\d+)",
+    ):
         for match in re.finditer(pattern, text, flags=re.IGNORECASE):
             dependencies.add(int(match.group(1)))
     return sorted(dependencies)
 
 
-def _bridge_input(packet: IssueDispatchInput, risk: BridgeRisk) -> dict[str, object]:
-    return {
-        "issue_number": _issue_number(packet),
-        "title": packet.title,
-        "body": packet.body,
-        "labels": packet.labels,
-        "risk_level": risk,
-        "project": "skeleton",
-        "requested_by": "oleksii",
-    }
+def _bridge_input(packet: IssueDispatchInput, risk: BridgeRisk) -> IssueRunnerInput:
+    return IssueRunnerInput(
+        issue_number=_issue_number(packet),
+        title=packet.title,
+        body=packet.body,
+        labels=packet.labels,
+        risk_level=risk,
+        project="skeleton",
+        requested_by="oleksii",
+    )
 
 
 def build_issue_dispatch_packet(
@@ -161,13 +166,8 @@ def build_issue_dispatch_packet(
     allowed_files = _extract_allowed_files(packet.body)
     expected_commands = _extract_expected_commands(packet.body)
 
-    bridge = build_issue_runner_packet.model_validate if False else None
     if run_bridge:
-        from tools.skeleton_core.issue_runner_bridge import IssueRunnerInput
-
-        bridge_result = build_issue_runner_packet(
-            IssueRunnerInput.model_validate(_bridge_input(packet, risk))
-        )
+        bridge_result = build_issue_runner_packet(_bridge_input(packet, risk))
         status: BridgeStatus = bridge_result.status
         runner_route = bridge_result.runner_route
         review_required = bridge_result.review_required
@@ -175,7 +175,13 @@ def build_issue_dispatch_packet(
         next_action = bridge_result.next_action
     else:
         status = "accepted" if risk in {"GREEN", "YELLOW"} else "unknown_needs_review"
-        runner_route = "RUNNER_YELLOW" if risk == "YELLOW" else "RUNNER_GREEN" if risk == "GREEN" else "BLOCKED"
+        runner_route = (
+            "RUNNER_YELLOW"
+            if risk == "YELLOW"
+            else "RUNNER_GREEN"
+            if risk == "GREEN"
+            else "BLOCKED"
+        )
         review_required = risk == "YELLOW"
         blockers = [] if risk in {"GREEN", "YELLOW"} else [f"Unsupported risk level: {risk}"]
         next_action = "Run issue-runner-bridge for the normalized packet; do not merge or deploy."
