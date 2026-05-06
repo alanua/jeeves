@@ -13,7 +13,15 @@ ActionsRunnerStatus = Literal[
     "workflow_unknown_needs_review",
     "unsafe_or_policy_violation",
 ]
-StepConclusion = Literal["success", "failure", "cancelled", "skipped", "neutral", "timed_out", "unknown"]
+StepConclusion = Literal[
+    "success",
+    "failure",
+    "cancelled",
+    "skipped",
+    "neutral",
+    "timed_out",
+    "unknown",
+]
 
 SECRET_MARKERS = (
     "api_key",
@@ -151,7 +159,10 @@ def _failure_summary(
     if status == "workflow_success_report":
         return None
     if status == "unsafe_or_policy_violation":
-        return "Secret-like content was detected in the Actions export/log summary. Output was redacted."
+        return (
+            "Secret-like content was detected in the Actions export/log summary. "
+            "Output was redacted."
+        )
     if failed_steps:
         return "Failed steps: " + "; ".join(failed_steps)
     redacted_logs = [_redacted(item) for item in logs_summary]
@@ -185,9 +196,16 @@ def _report_text(
     if failed_steps:
         lines.extend(["", "Failed steps:", *[f"- {step}" for step in failed_steps]])
     if status == "workflow_success_report":
-        lines.extend(["", "Next safe step: queue-state may unlock the next BauClock task."])
+        lines.extend(
+            ["", "Next safe step: queue-state may unlock the next BauClock task."]
+        )
     else:
-        lines.extend(["", "Next safe step: review or fix the workflow result before unlocking the queue."])
+        lines.extend(
+            [
+                "",
+                "Next safe step: review or fix the workflow result before unlocking the queue.",
+            ]
+        )
     return "\n".join(lines)
 
 
