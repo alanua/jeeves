@@ -1,0 +1,11 @@
+Blocked report: missing dependency #22 report.
+
+issue_number: 23
+branch: bauclock/calendar-hardening
+blocked_reason: waiting for #22 green baseline validation
+commands_run:
+repo_status: clean
+private_data_seen: false
+runtime_code_touched: false
+external_services_called: false
+next_safe_step: wait for dependency completion
