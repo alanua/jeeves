@@ -13,6 +13,7 @@ from pydantic import ValidationError
 from tools.skeleton_core.checkpoint import render_checkpoint
 from tools.skeleton_core.github_queue import normalize_issue, normalize_pr, summarize_queue
 from tools.skeleton_core.handoff_pack import render_handoff_pack
+from tools.skeleton_core.issue_runner_bridge import IssueRunnerInput, build_issue_runner_packet
 from tools.skeleton_core.job_log_summary import summarize_job_log
 from tools.skeleton_core.models import EvidencePolicy, TaskPacket
 from tools.skeleton_core.pr_status import PRStatusInput, build_pr_status
@@ -29,6 +30,7 @@ SUBCOMMANDS = {
     "classify-queue",
     "decide",
     "handoff-pack",
+    "issue-runner-bridge",
     "job-log-summary",
     "pr-status",
     "queue-summary",
@@ -42,7 +44,6 @@ MAX_AUTO_TITLE_LENGTH = 80
 
 
 def build_decision_payload(packet: TaskPacket) -> dict[str, Any]:
-    """Build the JSON-serializable decision payload for a task packet."""
     decision = route_task(packet)
     return {
         "task": packet.model_dump(mode="json"),
@@ -55,7 +56,6 @@ def build_decision_payload(packet: TaskPacket) -> dict[str, Any]:
 
 
 def load_queue_items(input_path: Path) -> list[dict[str, Any]]:
-    """Load raw offline public-safe queue items from JSON."""
     raw_items = json.loads(input_path.read_text(encoding="utf-8"))
     if not isinstance(raw_items, list):
         raise ValueError("queue input must be a JSON list")
@@ -63,16 +63,17 @@ def load_queue_items(input_path: Path) -> list[dict[str, Any]]:
 
 
 def load_pr_status_input(input_path: Path) -> PRStatusInput:
-    """Load public-safe PR status input from JSON."""
     return PRStatusInput.model_validate_json(input_path.read_text(encoding="utf-8"))
 
 
+def load_issue_runner_input(input_path: Path) -> IssueRunnerInput:
+    return IssueRunnerInput.model_validate_json(input_path.read_text(encoding="utf-8"))
+
+
 def build_queue_summary_payload(input_path: Path) -> dict[str, int]:
-    """Build summary counts from an offline public-safe queue fixture."""
     items = []
     for raw in load_queue_items(input_path):
-        kind = str(raw.get("kind", "issue")).casefold()
-        if kind == "pr":
+        if str(raw.get("kind", "issue")).casefold() == "pr":
             items.append(normalize_pr(raw))
         else:
             items.append(normalize_issue(raw))
@@ -80,17 +81,14 @@ def build_queue_summary_payload(input_path: Path) -> dict[str, int]:
 
 
 def build_trace_packet_payload(packet: TracePacket) -> dict[str, Any]:
-    """Build the JSON-serializable trace packet payload."""
     return packet.model_dump(mode="json")
 
 
 def load_trace_packet(input_path: Path) -> TracePacket:
-    """Load and validate a TracePacket from a JSON file."""
     return TracePacket.model_validate_json(input_path.read_text(encoding="utf-8"))
 
 
 def title_from_text(text: str, max_length: int = MAX_AUTO_TITLE_LENGTH) -> str:
-    """Create a short deterministic title from free-form task text."""
     normalized = " ".join(text.split())
     if len(normalized) <= max_length:
         return normalized
@@ -105,7 +103,6 @@ def build_task_from_text_packet(
     requested_by: str,
     evidence_policy: EvidencePolicy,
 ) -> TaskPacket:
-    """Build a TaskPacket from free-form text without model calls."""
     return TaskPacket(
         title=title or title_from_text(text),
         body=text,
@@ -154,24 +151,12 @@ def _add_trace_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--route-target", required=True, help="Route target")
     parser.add_argument("--result", required=True, help="Result status")
     parser.add_argument("--next-safe-step", required=True, help="Next safe step")
-    parser.add_argument(
-        "--sources-read",
-        default="",
-        help="Comma-separated public-safe sources read",
-    )
+    parser.add_argument("--sources-read", default="", help="Comma-separated public-safe sources read")
     parser.add_argument("--files-changed", default="", help="Comma-separated files changed")
     parser.add_argument("--commands-run", default="", help="Comma-separated commands run")
     parser.add_argument("--blocked-reason", default=None, help="Optional blocked reason")
-    parser.add_argument(
-        "--private-data-seen",
-        action="store_true",
-        help="Mark private data as seen",
-    )
-    parser.add_argument(
-        "--runtime-code-touched",
-        action="store_true",
-        help="Mark runtime code as touched",
-    )
+    parser.add_argument("--private-data-seen", action="store_true", help="Mark private data as seen")
+    parser.add_argument("--runtime-code-touched", action="store_true", help="Mark runtime code as touched")
     parser.add_argument(
         "--external-services-called",
         action="store_true",
@@ -183,105 +168,49 @@ def _subcommand_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Skeleton Externalizer CLI.")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    checkpoint_parser = subparsers.add_parser(
-        "checkpoint",
-        help="Build a Skeleton checkpoint bundle",
-    )
+    checkpoint_parser = subparsers.add_parser("checkpoint", help="Build a Skeleton checkpoint bundle")
     _add_trace_args(checkpoint_parser)
 
-    classify_queue_parser = subparsers.add_parser(
-        "classify-queue",
-        help="Classify offline queue JSON items",
-    )
-    classify_queue_parser.add_argument(
-        "--input",
-        required=True,
-        type=Path,
-        help="Path to public-safe queue JSON",
-    )
+    classify_queue_parser = subparsers.add_parser("classify-queue", help="Classify offline queue JSON items")
+    classify_queue_parser.add_argument("--input", required=True, type=Path, help="Path to public-safe queue JSON")
 
     decide_parser = subparsers.add_parser("decide", help="Build a Skeleton task decision packet")
     _add_decide_args(decide_parser)
 
-    handoff_pack_parser = subparsers.add_parser(
-        "handoff-pack",
-        help="Render a compact Skeleton handoff packet",
-    )
-    handoff_pack_parser.add_argument(
-        "--root",
-        default=Path("."),
-        type=Path,
-        help="Repository root to use",
-    )
+    handoff_pack_parser = subparsers.add_parser("handoff-pack", help="Render a compact Skeleton handoff packet")
+    handoff_pack_parser.add_argument("--root", default=Path("."), type=Path, help="Repository root to use")
 
-    job_log_parser = subparsers.add_parser(
-        "job-log-summary",
-        help="Summarize a public-safe GitHub Actions job log excerpt",
+    issue_runner_parser = subparsers.add_parser(
+        "issue-runner-bridge",
+        help="Build a GREEN/YELLOW runner packet from public-safe issue JSON",
     )
-    job_log_parser.add_argument(
-        "--input",
-        required=True,
-        type=Path,
-        help="Path to public-safe job log text",
-    )
+    issue_runner_parser.add_argument("--input", required=True, type=Path, help="Path to public-safe GitHub issue JSON")
 
-    pr_status_parser = subparsers.add_parser(
-        "pr-status",
-        help="Build a deterministic PR status packet from public-safe JSON",
-    )
-    pr_status_parser.add_argument(
-        "--input",
-        required=True,
-        type=Path,
-        help="Path to public-safe PR status JSON",
-    )
+    job_log_parser = subparsers.add_parser("job-log-summary", help="Summarize a public-safe GitHub Actions job log excerpt")
+    job_log_parser.add_argument("--input", required=True, type=Path, help="Path to public-safe job log text")
 
-    queue_parser = subparsers.add_parser(
-        "queue-summary",
-        help="Summarize an offline queue JSON file",
-    )
-    queue_parser.add_argument(
-        "--input",
-        required=True,
-        type=Path,
-        help="Path to public-safe queue JSON",
-    )
+    pr_status_parser = subparsers.add_parser("pr-status", help="Build a deterministic PR status packet from public-safe JSON")
+    pr_status_parser.add_argument("--input", required=True, type=Path, help="Path to public-safe PR status JSON")
+
+    queue_parser = subparsers.add_parser("queue-summary", help="Summarize an offline queue JSON file")
+    queue_parser.add_argument("--input", required=True, type=Path, help="Path to public-safe queue JSON")
 
     report_parser = subparsers.add_parser(
         "runner-report-from-trace",
         help="Render a short runner report from a TracePacket JSON file",
     )
-    report_parser.add_argument(
-        "--input",
-        required=True,
-        type=Path,
-        help="Path to public-safe TracePacket JSON",
-    )
+    report_parser.add_argument("--input", required=True, type=Path, help="Path to public-safe TracePacket JSON")
 
-    task_from_text_parser = subparsers.add_parser(
-        "task-from-text",
-        help="Build a Skeleton decision packet from free-form text",
-    )
+    task_from_text_parser = subparsers.add_parser("task-from-text", help="Build a Skeleton decision packet from free-form text")
     _add_task_from_text_args(task_from_text_parser)
 
     trace_parser = subparsers.add_parser("trace-packet", help="Build a Skeleton trace packet")
     _add_trace_args(trace_parser)
 
-    validate_state_parser = subparsers.add_parser(
-        "validate-state",
-        help="Validate Skeleton boot and current-state files",
-    )
-    validate_state_parser.add_argument(
-        "--root",
-        default=Path("."),
-        type=Path,
-        help="Repository root to validate",
-    )
+    validate_state_parser = subparsers.add_parser("validate-state", help="Validate Skeleton boot and current-state files")
+    validate_state_parser.add_argument("--root", default=Path("."), type=Path, help="Repository root to validate")
 
-    work_packet_parser = subparsers.add_parser(
-        "work-packet",
-        help="Render a public-safe work packet from free-form task text",
-    )
+    work_packet_parser = subparsers.add_parser("work-packet", help="Render a public-safe work packet from free-form task text")
     _add_task_from_text_args(work_packet_parser)
     return parser
 
@@ -296,84 +225,23 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     effective_argv = sys.argv[1:] if argv is None else argv
     if effective_argv and effective_argv[0] in SUBCOMMANDS:
         return _subcommand_parser().parse_args(effective_argv)
-
     args = _legacy_decide_parser().parse_args(effective_argv)
     args.command = "decide"
     return args
 
 
-def _run_decide(args: argparse.Namespace) -> int:
-    try:
-        packet = TaskPacket(
-            title=args.title,
-            body=args.body,
-            project=args.project,
-            requested_by=args.requested_by,
-            evidence_policy=EvidencePolicy(args.evidence_policy),
-        )
-    except ValidationError as exc:
-        print(exc.json(), flush=True)
-        return 2
-
-    print(json.dumps(build_decision_payload(packet), ensure_ascii=False, indent=2), flush=True)
-    return 0
+def _json_out(payload: dict[str, Any]) -> None:
+    print(json.dumps(payload, ensure_ascii=False, indent=2), flush=True)
 
 
-def _run_checkpoint(args: argparse.Namespace) -> int:
-    try:
-        packet = _trace_packet_from_args(args)
-    except ValidationError as exc:
-        print(exc.json(), flush=True)
-        return 2
-
-    print(render_checkpoint(packet), flush=True)
-    return 0
-
-
-def _run_classify_queue(args: argparse.Namespace) -> int:
-    result = classify_queue_items(load_queue_items(args.input))
-    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
-    return 0
-
-
-def _run_handoff_pack(args: argparse.Namespace) -> int:
-    print(render_handoff_pack(args.root), flush=True)
-    return 0
-
-
-def _run_job_log_summary(args: argparse.Namespace) -> int:
-    result = summarize_job_log(args.input.read_text(encoding="utf-8"))
-    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
-    return 0
-
-
-def _run_pr_status(args: argparse.Namespace) -> int:
-    try:
-        result = build_pr_status(load_pr_status_input(args.input))
-    except ValidationError as exc:
-        print(exc.json(), flush=True)
-        return 2
-    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
-    return 0
-
-
-def _run_queue_summary(args: argparse.Namespace) -> int:
-    print(
-        json.dumps(build_queue_summary_payload(args.input), ensure_ascii=False, indent=2),
-        flush=True,
+def _task_packet_from_args(args: argparse.Namespace) -> TaskPacket:
+    return TaskPacket(
+        title=args.title,
+        body=args.body,
+        project=args.project,
+        requested_by=args.requested_by,
+        evidence_policy=EvidencePolicy(args.evidence_policy),
     )
-    return 0
-
-
-def _run_runner_report_from_trace(args: argparse.Namespace) -> int:
-    try:
-        packet = load_trace_packet(args.input)
-    except ValidationError as exc:
-        print(exc.json(), flush=True)
-        return 2
-
-    print(render_runner_report_from_trace(packet), flush=True)
-    return 0
 
 
 def _trace_packet_from_args(args: argparse.Namespace) -> TracePacket:
@@ -394,20 +262,95 @@ def _trace_packet_from_args(args: argparse.Namespace) -> TracePacket:
     )
 
 
-def _run_task_from_text(args: argparse.Namespace) -> int:
+def _task_from_text_args(args: argparse.Namespace) -> TaskPacket:
+    return build_task_from_text_packet(
+        text=args.text,
+        title=args.title,
+        project=args.project,
+        requested_by=args.requested_by,
+        evidence_policy=EvidencePolicy(args.evidence_policy),
+    )
+
+
+def _run_decide(args: argparse.Namespace) -> int:
     try:
-        packet = build_task_from_text_packet(
-            text=args.text,
-            title=args.title,
-            project=args.project,
-            requested_by=args.requested_by,
-            evidence_policy=EvidencePolicy(args.evidence_policy),
-        )
+        packet = _task_packet_from_args(args)
     except ValidationError as exc:
         print(exc.json(), flush=True)
         return 2
+    _json_out(build_decision_payload(packet))
+    return 0
 
-    print(json.dumps(build_decision_payload(packet), ensure_ascii=False, indent=2), flush=True)
+
+def _run_checkpoint(args: argparse.Namespace) -> int:
+    try:
+        packet = _trace_packet_from_args(args)
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
+    print(render_checkpoint(packet), flush=True)
+    return 0
+
+
+def _run_classify_queue(args: argparse.Namespace) -> int:
+    result = classify_queue_items(load_queue_items(args.input))
+    _json_out(result.model_dump(mode="json"))
+    return 0
+
+
+def _run_handoff_pack(args: argparse.Namespace) -> int:
+    print(render_handoff_pack(args.root), flush=True)
+    return 0
+
+
+def _run_issue_runner_bridge(args: argparse.Namespace) -> int:
+    try:
+        result = build_issue_runner_packet(load_issue_runner_input(args.input))
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
+    _json_out(result.model_dump(mode="json"))
+    return 0
+
+
+def _run_job_log_summary(args: argparse.Namespace) -> int:
+    result = summarize_job_log(args.input.read_text(encoding="utf-8"))
+    _json_out(result.model_dump(mode="json"))
+    return 0
+
+
+def _run_pr_status(args: argparse.Namespace) -> int:
+    try:
+        result = build_pr_status(load_pr_status_input(args.input))
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
+    _json_out(result.model_dump(mode="json"))
+    return 0
+
+
+def _run_queue_summary(args: argparse.Namespace) -> int:
+    _json_out(build_queue_summary_payload(args.input))
+    return 0
+
+
+def _run_runner_report_from_trace(args: argparse.Namespace) -> int:
+    try:
+        packet = load_trace_packet(args.input)
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
+    print(render_runner_report_from_trace(packet), flush=True)
+    return 0
+
+
+def _run_task_from_text(args: argparse.Namespace) -> int:
+    try:
+        packet = _task_from_text_args(args)
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
+    _json_out(build_decision_payload(packet))
     return 0
 
 
@@ -417,62 +360,43 @@ def _run_trace_packet(args: argparse.Namespace) -> int:
     except ValidationError as exc:
         print(exc.json(), flush=True)
         return 2
-
-    print(
-        json.dumps(build_trace_packet_payload(packet), ensure_ascii=False, indent=2),
-        flush=True,
-    )
+    _json_out(build_trace_packet_payload(packet))
     return 0
 
 
 def _run_validate_state(args: argparse.Namespace) -> int:
     result = validate_state(args.root)
-    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
+    _json_out(result.model_dump(mode="json"))
     return 0 if result.ok else 1
 
 
 def _run_work_packet(args: argparse.Namespace) -> int:
     try:
-        packet = build_task_from_text_packet(
-            text=args.text,
-            title=args.title,
-            project=args.project,
-            requested_by=args.requested_by,
-            evidence_policy=EvidencePolicy(args.evidence_policy),
-        )
+        packet = _task_from_text_args(args)
     except ValidationError as exc:
         print(exc.json(), flush=True)
         return 2
-
     print(render_work_packet(packet, route_task(packet)), flush=True)
     return 0
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    if args.command == "checkpoint":
-        return _run_checkpoint(args)
-    if args.command == "classify-queue":
-        return _run_classify_queue(args)
-    if args.command == "handoff-pack":
-        return _run_handoff_pack(args)
-    if args.command == "job-log-summary":
-        return _run_job_log_summary(args)
-    if args.command == "pr-status":
-        return _run_pr_status(args)
-    if args.command == "queue-summary":
-        return _run_queue_summary(args)
-    if args.command == "runner-report-from-trace":
-        return _run_runner_report_from_trace(args)
-    if args.command == "task-from-text":
-        return _run_task_from_text(args)
-    if args.command == "trace-packet":
-        return _run_trace_packet(args)
-    if args.command == "validate-state":
-        return _run_validate_state(args)
-    if args.command == "work-packet":
-        return _run_work_packet(args)
-    return _run_decide(args)
+    runners = {
+        "checkpoint": _run_checkpoint,
+        "classify-queue": _run_classify_queue,
+        "handoff-pack": _run_handoff_pack,
+        "issue-runner-bridge": _run_issue_runner_bridge,
+        "job-log-summary": _run_job_log_summary,
+        "pr-status": _run_pr_status,
+        "queue-summary": _run_queue_summary,
+        "runner-report-from-trace": _run_runner_report_from_trace,
+        "task-from-text": _run_task_from_text,
+        "trace-packet": _run_trace_packet,
+        "validate-state": _run_validate_state,
+        "work-packet": _run_work_packet,
+    }
+    return runners.get(args.command, _run_decide)(args)
 
 
 if __name__ == "__main__":
