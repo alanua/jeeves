@@ -66,7 +66,7 @@ def test_runner_command_pack_blocks_red() -> None:
     assert result.merge_allowed is False
     assert result.deploy_allowed is False
     assert result.command_text.startswith("BLOCKED")
-    assert any("Unsupported risk level: RED" == blocker for blocker in result.blockers)
+    assert any(blocker == "Unsupported risk level: RED" for blocker in result.blockers)
 
 
 def test_runner_command_pack_blocks_missing_fields() -> None:
