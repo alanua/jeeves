@@ -41,6 +41,7 @@ runner-report-ingest
 pr-review-gate
 branch-recovery
 project-skeleton-profile
+runner-env-check
 ```
 
 Project-state layer exists as the public-safe mechanism for applying Skeleton to BauClock and other projects without mixing project context with СК/Jeeves canon.
@@ -64,6 +65,14 @@ Do not add abstract policy or runtime behavior by default.
 #74/#80 pr-review-gate CLI -> merged, SHA 88a1b7c98583e433846746a3c39fa2a856c4b4f4
 #68/#81 branch-recovery CLI -> merged, SHA e558bc569031b8844b507bd040ea5a5c7802c09b
 #82/#84 project-skeleton-profile CLI -> merged, SHA 03e5aa4f399b2a22b4d634bac16c125320ed69f8
+#83/#85 runner-env-check CLI -> merged, SHA 02c69555b39427972df7d040bae91fc544e9abf5
+```
+
+Runner-env-check result:
+
+```text
+Given a public-safe fixture or explicit live preflight input, Skeleton can now detect whether a runner is ready for read-only validation work or blocked by missing Python, missing git, unwritable workdir, DNS/network failure, clone failure, missing pytest, or unsafe credential-like input.
+Fixture mode is offline. Live network/clone checks require explicit --allow-network-check. The CLI runs no project tests by default, reads no .env, prints no secrets, and grants no merge/deploy authority.
 ```
 
 Project-skeleton-profile result:
@@ -71,7 +80,6 @@ Project-skeleton-profile result:
 ```text
 Given a public-safe project profile JSON, Skeleton can now emit a deterministic development-flow packet and reviewable missing-capability signals.
 Projects can adapt branch flow to available Skeleton capabilities, and Skeleton skill growth can adapt to recurring project needs without auto-creating code, PRs, issues, merge, deploy, or runtime changes.
-The BauClock fixture emits runner-env-check as a missing-capability signal/backlog candidate for #83.
 The CLI remains local/offline and grants no merge/deploy authority.
 ```
 
@@ -117,10 +125,10 @@ Given a public-safe GREEN/YELLOW task packet, Skeleton can emit a compact КОД
 Blocked, RED, unsafe, missing-field, merge/deploy, secrets, network, and live-mode packets do not get runnable commands.
 ```
 
-Validation for #82/#84:
+Validation for #83/#85:
 
 ```text
-Skeleton Core CI run 25455796004 -> success.
+Skeleton Core CI run 25456981164 -> success.
 Tests, ruff, black --check, and validate-state passed.
 ```
 
@@ -135,19 +143,19 @@ Main planning issue:
 Open practical Skeleton Core candidates:
 
 ```text
-#83 runner-env-check — preflight runner environment before assigning BauClock/project validation work
+format-preflight / black-format-gate — prevent repeated Black-only CI failures before PR/CI
 ```
 
 Recommended next core slice:
 
 ```text
-#83 runner-env-check
+format-preflight / black-format-gate
 ```
 
 Reason:
 
 ```text
-BauClock #22 exposed a real execution-environment blocker: the runner/container could not resolve github.com. Project-skeleton-profile now emits runner-env-check as a BauClock missing-capability signal, so the next useful Skeleton growth is a runner environment preflight that blocks before assigning work to an unsuitable runner.
+Repeated Black-only failures show that text edits through GitHub API need a preflight formatter/check gate before PR/CI.
 ```
 
 ## Safety boundaries
