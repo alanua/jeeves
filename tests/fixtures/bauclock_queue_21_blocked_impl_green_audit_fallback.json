@@ -1,0 +1,43 @@
+{
+  "controller_issue": {
+    "repository": "alanua/bauclock",
+    "issue_number": 21,
+    "title": "[night-queue] BauClock expanded safe overnight queue",
+    "body": "Queue order: #22 then #23 then #24 then #25."
+  },
+  "items": [
+    {
+      "issue_number": 22,
+      "title": "[agent-task-green] BauClock overnight baseline validation",
+      "risk_level": "GREEN",
+      "state": "open",
+      "comments": ["Agent report: validation passed."],
+      "prs": []
+    },
+    {
+      "issue_number": 23,
+      "title": "[agent-task-yellow] BauClock test-only calendar hardening",
+      "risk_level": "YELLOW",
+      "state": "open",
+      "comments": ["blocked until #99 external prerequisite"],
+      "prs": []
+    },
+    {
+      "issue_number": 24,
+      "title": "[agent-task-yellow] BauClock follow-up implementation guard",
+      "risk_level": "YELLOW",
+      "state": "open",
+      "depends_on": [23],
+      "comments": [],
+      "prs": []
+    },
+    {
+      "issue_number": 25,
+      "title": "[agent-task-green] BauClock fallback audit",
+      "risk_level": "GREEN",
+      "state": "open",
+      "comments": [],
+      "prs": []
+    }
+  ]
+}
