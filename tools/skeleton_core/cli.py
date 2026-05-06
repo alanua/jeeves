@@ -294,8 +294,19 @@ def _subcommand_parser() -> argparse.ArgumentParser:
         "format-preflight",
         help="Check Black formatting readiness before CI",
     )
-    format_parser.add_argument("--input", type=Path, default=None, help="Path to offline fixture JSON")
-    format_parser.add_argument("--paths", nargs="*", type=Path, default=None, help="Paths for live check-only mode")
+    format_parser.add_argument(
+        "--input",
+        type=Path,
+        default=None,
+        help="Path to offline fixture JSON",
+    )
+    format_parser.add_argument(
+        "--paths",
+        nargs="*",
+        type=Path,
+        default=None,
+        help="Paths for live check-only mode",
+    )
     format_parser.add_argument(
         "--check-only",
         action="store_true",
