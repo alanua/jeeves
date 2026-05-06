@@ -20,6 +20,10 @@ from tools.skeleton_core.job_log_summary import summarize_job_log
 from tools.skeleton_core.models import EvidencePolicy, TaskPacket
 from tools.skeleton_core.pr_review_gate import PRReviewGateInput, build_pr_review_gate
 from tools.skeleton_core.pr_status import PRStatusInput, build_pr_status
+from tools.skeleton_core.project_profile import (
+    ProjectSkeletonProfileInput,
+    build_project_skeleton_profile,
+)
 from tools.skeleton_core.queue_classifier import classify_queue_items
 from tools.skeleton_core.queue_state import QueueStateInput, build_queue_state
 from tools.skeleton_core.report import render_runner_report_from_trace
@@ -43,6 +47,7 @@ SUBCOMMANDS = {
     "job-log-summary",
     "pr-review-gate",
     "pr-status",
+    "project-skeleton-profile",
     "queue-state",
     "queue-summary",
     "runner-command-pack",
@@ -73,6 +78,13 @@ def build_decision_payload(packet: TaskPacket) -> dict[str, Any]:
 def load_branch_recovery_input(input_path: Path) -> BranchRecoveryInput:
     """Load public-safe branch recovery input from JSON."""
     return BranchRecoveryInput.model_validate_json(input_path.read_text(encoding="utf-8"))
+
+
+def load_project_skeleton_profile_input(input_path: Path) -> ProjectSkeletonProfileInput:
+    """Load public-safe project Skeleton profile input from JSON."""
+    return ProjectSkeletonProfileInput.model_validate_json(
+        input_path.read_text(encoding="utf-8")
+    )
 
 
 def load_queue_items(input_path: Path) -> list[dict[str, Any]]:
@@ -315,6 +327,12 @@ def _subcommand_parser() -> argparse.ArgumentParser:
     )
     _add_input_arg(pr_status_parser, "Path to public-safe PR status JSON")
 
+    project_profile_parser = subparsers.add_parser(
+        "project-skeleton-profile",
+        help="Build project development flow and Skeleton skill-growth signals",
+    )
+    _add_input_arg(project_profile_parser, "Path to public-safe project profile JSON")
+
     queue_state_parser = subparsers.add_parser(
         "queue-state",
         help="Determine the next runnable item from public-safe queue state JSON",
@@ -502,6 +520,16 @@ def _run_pr_status(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_project_skeleton_profile(args: argparse.Namespace) -> int:
+    try:
+        result = build_project_skeleton_profile(load_project_skeleton_profile_input(args.input))
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
+    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
+    return 0
+
+
 def _run_queue_state(args: argparse.Namespace) -> int:
     try:
         result = build_queue_state(load_queue_state_input(args.input), project=args.project)
@@ -652,6 +680,8 @@ def main(argv: list[str] | None = None) -> int:
         return _run_pr_review_gate(args)
     if args.command == "pr-status":
         return _run_pr_status(args)
+    if args.command == "project-skeleton-profile":
+        return _run_project_skeleton_profile(args)
     if args.command == "queue-state":
         return _run_queue_state(args)
     if args.command == "queue-summary":
