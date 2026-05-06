@@ -80,15 +80,21 @@ def _section_lines(body: str, headings: tuple[str, ...]) -> list[str]:
     lines = body.splitlines()
     captured: list[str] = []
     collecting = False
+    in_fence = False
     for line in lines:
         stripped = line.strip()
         heading = stripped.strip("#:").casefold()
         if any(heading.startswith(candidate) for candidate in headings):
             collecting = True
             continue
-        if collecting and stripped.startswith("##"):
+        if collecting and stripped.startswith("##") and not in_fence:
             break
-        if collecting and stripped:
+        if not collecting:
+            continue
+        if stripped.startswith("```"):
+            in_fence = not in_fence
+            continue
+        if stripped:
             captured.append(stripped)
     return captured
 
@@ -99,12 +105,7 @@ def _clean_list_item(line: str) -> str:
 
 def _extract_allowed_files(body: str) -> list[str]:
     lines = _section_lines(body, ("allowed files", "allowed files only"))
-    files = []
-    for line in lines:
-        cleaned = _clean_list_item(line)
-        if cleaned and not cleaned.startswith("```"):
-            files.append(cleaned)
-    return files
+    return [_clean_list_item(line) for line in lines if _clean_list_item(line)]
 
 
 def _extract_expected_commands(body: str) -> list[str]:
