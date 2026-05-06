@@ -56,7 +56,6 @@ python -m pytest
     assert result.runner_route == "RUNNER_YELLOW"
     assert result.review_required is True
     assert result.allowed_files == [
-        "text",
         "tests/test_calendar_service.py",
         "tests/test_legal_hardening.py",
     ]
