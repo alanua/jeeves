@@ -1,0 +1,13 @@
+{
+  "repository": "alanua/bauclock",
+  "issue_number": 1000,
+  "title": "[agent-task-yellow] Use token and live mode",
+  "risk_level": "YELLOW",
+  "runner_route": "RUNNER_YELLOW",
+  "review_required": true,
+  "allowed_files": ["tests/test_example.py"],
+  "expected_commands": ["python -m pytest"],
+  "blocked_by": [],
+  "merge_allowed": false,
+  "deploy_allowed": false
+}
