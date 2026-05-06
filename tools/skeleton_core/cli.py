@@ -12,6 +12,11 @@ from pydantic import ValidationError
 
 from tools.skeleton_core.branch_recovery import BranchRecoveryInput, build_branch_recovery
 from tools.skeleton_core.checkpoint import render_checkpoint
+from tools.skeleton_core.format_preflight import (
+    FormatPreflightInput,
+    build_format_preflight,
+    live_format_preflight,
+)
 from tools.skeleton_core.github_queue import normalize_issue, normalize_pr, summarize_queue
 from tools.skeleton_core.handoff_pack import render_handoff_pack
 from tools.skeleton_core.issue_dispatch import IssueDispatchInput, build_issue_dispatch_packet
@@ -46,6 +51,7 @@ SUBCOMMANDS = {
     "checkpoint",
     "classify-queue",
     "decide",
+    "format-preflight",
     "handoff-pack",
     "issue-dispatch",
     "issue-runner-bridge",
@@ -84,6 +90,11 @@ def build_decision_payload(packet: TaskPacket) -> dict[str, Any]:
 def load_branch_recovery_input(input_path: Path) -> BranchRecoveryInput:
     """Load public-safe branch recovery input from JSON."""
     return BranchRecoveryInput.model_validate_json(input_path.read_text(encoding="utf-8"))
+
+
+def load_format_preflight_input(input_path: Path) -> FormatPreflightInput:
+    """Load public-safe format preflight input from JSON."""
+    return FormatPreflightInput.model_validate_json(input_path.read_text(encoding="utf-8"))
 
 
 def load_project_skeleton_profile_input(input_path: Path) -> ProjectSkeletonProfileInput:
@@ -278,6 +289,18 @@ def _subcommand_parser() -> argparse.ArgumentParser:
 
     decide_parser = subparsers.add_parser("decide", help="Build a Skeleton task decision packet")
     _add_decide_args(decide_parser)
+
+    format_parser = subparsers.add_parser(
+        "format-preflight",
+        help="Check Black formatting readiness before CI",
+    )
+    format_parser.add_argument("--input", type=Path, default=None, help="Path to offline fixture JSON")
+    format_parser.add_argument("--paths", nargs="*", type=Path, default=None, help="Paths for live check-only mode")
+    format_parser.add_argument(
+        "--check-only",
+        action="store_true",
+        help="Compatibility flag; live mode is always check-only",
+    )
 
     handoff_pack_parser = subparsers.add_parser(
         "handoff-pack",
@@ -504,6 +527,21 @@ def _run_checkpoint(args: argparse.Namespace) -> int:
 
 def _run_classify_queue(args: argparse.Namespace) -> int:
     result = classify_queue_items(load_queue_items(args.input))
+    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
+    return 0
+
+
+def _run_format_preflight(args: argparse.Namespace) -> int:
+    try:
+        if args.input is not None:
+            result = build_format_preflight(load_format_preflight_input(args.input))
+        elif args.paths:
+            result = live_format_preflight(args.paths)
+        else:
+            result = build_format_preflight(FormatPreflightInput())
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
     print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
     return 0
 
@@ -739,6 +777,8 @@ def main(argv: list[str] | None = None) -> int:
         return _run_checkpoint(args)
     if args.command == "classify-queue":
         return _run_classify_queue(args)
+    if args.command == "format-preflight":
+        return _run_format_preflight(args)
     if args.command == "handoff-pack":
         return _run_handoff_pack(args)
     if args.command == "issue-dispatch":
