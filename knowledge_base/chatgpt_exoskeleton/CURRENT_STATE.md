@@ -40,6 +40,7 @@ queue-state
 runner-report-ingest
 pr-review-gate
 branch-recovery
+project-skeleton-profile
 ```
 
 Project-state layer exists as the public-safe mechanism for applying Skeleton to BauClock and other projects without mixing project context with СК/Jeeves canon.
@@ -62,6 +63,16 @@ Do not add abstract policy or runtime behavior by default.
 #72/#79 runner-report-ingest CLI -> merged, SHA b7a0fb0b9f4a798e28046486c41380d13897cd9f
 #74/#80 pr-review-gate CLI -> merged, SHA 88a1b7c98583e433846746a3c39fa2a856c4b4f4
 #68/#81 branch-recovery CLI -> merged, SHA e558bc569031b8844b507bd040ea5a5c7802c09b
+#82/#84 project-skeleton-profile CLI -> merged, SHA 03e5aa4f399b2a22b4d634bac16c125320ed69f8
+```
+
+Project-skeleton-profile result:
+
+```text
+Given a public-safe project profile JSON, Skeleton can now emit a deterministic development-flow packet and reviewable missing-capability signals.
+Projects can adapt branch flow to available Skeleton capabilities, and Skeleton skill growth can adapt to recurring project needs without auto-creating code, PRs, issues, merge, deploy, or runtime changes.
+The BauClock fixture emits runner-env-check as a missing-capability signal/backlog candidate for #83.
+The CLI remains local/offline and grants no merge/deploy authority.
 ```
 
 Branch-recovery result:
@@ -106,10 +117,10 @@ Given a public-safe GREEN/YELLOW task packet, Skeleton can emit a compact КОД
 Blocked, RED, unsafe, missing-field, merge/deploy, secrets, network, and live-mode packets do not get runnable commands.
 ```
 
-Validation for #68/#81:
+Validation for #82/#84:
 
 ```text
-Skeleton Core CI run 25454107958 -> success.
+Skeleton Core CI run 25455796004 -> success.
 Tests, ruff, black --check, and validate-state passed.
 ```
 
@@ -124,19 +135,19 @@ Main planning issue:
 Open practical Skeleton Core candidates:
 
 ```text
-#82 project-skeleton-profile — let projects declare Skeleton capabilities and emit project-needs/missing-capability signals
+#83 runner-env-check — preflight runner environment before assigning BauClock/project validation work
 ```
 
 Recommended next core slice:
 
 ```text
-#82 project-skeleton-profile
+#83 runner-env-check
 ```
 
 Reason:
 
 ```text
-After branch-recovery, pr-review-gate, runner-report-ingest, queue-state, issue-dispatch, task-lifecycle, and runner-command-pack, the next useful growth is a project profile that lets projects adapt their development flow to Skeleton and lets Skeleton skill growth adapt to recurring project needs via reviewable signals.
+BauClock #22 exposed a real execution-environment blocker: the runner/container could not resolve github.com. Project-skeleton-profile now emits runner-env-check as a BauClock missing-capability signal, so the next useful Skeleton growth is a runner environment preflight that blocks before assigning work to an unsuitable runner.
 ```
 
 ## Safety boundaries
