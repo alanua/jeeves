@@ -35,6 +35,7 @@ job-log-summary
 issue-runner-bridge
 task-lifecycle
 runner-command-pack
+issue-dispatch
 ```
 
 Project-state layer exists as the public-safe mechanism for applying Skeleton to BauClock and other projects without mixing project context with СК/Jeeves canon.
@@ -52,19 +53,27 @@ Do not add abstract policy or runtime behavior by default.
 #63/#76 task-lifecycle wrapper -> merged, SHA 2938279952b072a81b0625b729fed6f3873153cc
 #65 issue-runner-bridge negation-aware safety clauses -> merged, SHA 689b75e05df4e80a0be9fc21c6a06f06601a2885
 #75/#76 runner-command-pack CLI -> merged, SHA 12c9b5e8daba570617cfc7c08e36819b7abe02bb
+#62/#77 issue-dispatch CLI -> merged, SHA 80a1c984aa65ac46f1b16eba6b5eb41f64e48ce4
+```
+
+Issue-dispatch result:
+
+```text
+Given a public-safe GitHub issue export, Skeleton can now normalize risk, route, review flag, allowed files, commands, and dependencies, and optionally pass the packet through issue-runner-bridge.
+The CLI remains local/offline and grants no merge/deploy authority.
 ```
 
 Runner-command-pack result:
 
 ```text
-Given a public-safe GREEN/YELLOW task packet, Skeleton can now emit a compact КОД-style runner/Codex/Antigravity instruction.
+Given a public-safe GREEN/YELLOW task packet, Skeleton can emit a compact КОД-style runner/Codex/Antigravity instruction.
 Blocked, RED, unsafe, missing-field, merge/deploy, secrets, network, and live-mode packets do not get runnable commands.
 ```
 
-Validation for #75/#76:
+Validation for #62/#77:
 
 ```text
-Skeleton Core CI run 25449037370 -> success.
+Skeleton Core CI run 25449759045 -> success.
 Tests, ruff, black --check, and validate-state passed.
 ```
 
@@ -79,7 +88,6 @@ Main planning issue:
 Open practical Skeleton Core candidates:
 
 ```text
-#62 issue-dispatch — normalize public-safe GitHub issue exports and optionally run issue-runner-bridge
 #71 queue-state — determine next safe runnable item from a controller queue export
 #72 runner-report-ingest — normalize public-safe runner reports into status packets
 #74 pr-review-gate — decide whether a PR is ready for ChatGPT review or blocked
@@ -89,13 +97,13 @@ Open practical Skeleton Core candidates:
 Recommended next core slice:
 
 ```text
-#62 issue-dispatch
+#71 queue-state
 ```
 
 Reason:
 
 ```text
-It reduces the remaining manual step between a raw public-safe GitHub issue export and the existing issue-runner-bridge / task-lifecycle / runner-command-pack chain.
+After issue-dispatch and runner-command-pack, the remaining manual step is choosing the next safe runnable item from a queue export.
 ```
 
 ## Safety boundaries
