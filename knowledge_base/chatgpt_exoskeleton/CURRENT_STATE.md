@@ -42,6 +42,7 @@ pr-review-gate
 branch-recovery
 project-skeleton-profile
 runner-env-check
+format-preflight
 ```
 
 Project-state layer exists as the public-safe mechanism for applying Skeleton to BauClock and other projects without mixing project context with СК/Jeeves canon.
@@ -66,6 +67,14 @@ Do not add abstract policy or runtime behavior by default.
 #68/#81 branch-recovery CLI -> merged, SHA e558bc569031b8844b507bd040ea5a5c7802c09b
 #82/#84 project-skeleton-profile CLI -> merged, SHA 03e5aa4f399b2a22b4d634bac16c125320ed69f8
 #83/#85 runner-env-check CLI -> merged, SHA 02c69555b39427972df7d040bae91fc544e9abf5
+#86/#87 format-preflight CLI -> merged, SHA a7b23564b9ddf4733912e7dbb81ab5ae386d3ab7
+```
+
+Format-preflight result:
+
+```text
+Given a public-safe fixture or explicit check-only path input, Skeleton can now detect format_ready, needs_black_format, blocked_missing_black, or unknown_needs_review before CI/PR review.
+The CLI is local/offline by default. Live mode is Black check-only, does not modify files, reads no .env, prints no secrets, and grants no merge/deploy authority.
 ```
 
 Runner-env-check result:
@@ -125,10 +134,10 @@ Given a public-safe GREEN/YELLOW task packet, Skeleton can emit a compact КОД
 Blocked, RED, unsafe, missing-field, merge/deploy, secrets, network, and live-mode packets do not get runnable commands.
 ```
 
-Validation for #83/#85:
+Validation for #86/#87:
 
 ```text
-Skeleton Core CI run 25456981164 -> success.
+Skeleton Core CI run 25460114727 -> success.
 Tests, ruff, black --check, and validate-state passed.
 ```
 
@@ -143,19 +152,22 @@ Main planning issue:
 Open practical Skeleton Core candidates:
 
 ```text
-format-preflight / black-format-gate — prevent repeated Black-only CI failures before PR/CI
+secrets-preflight — prevent secrets, .env, tokens, keys, and private URLs from entering diffs/outputs
+migration-preflight — require migration review when DB/model files change
+test-scope-preflight — choose minimal relevant validation commands for a change
+ci-log-diagnoser — summarize failed CI as cause/file/action
 ```
 
 Recommended next core slice:
 
 ```text
-format-preflight / black-format-gate
+secrets-preflight
 ```
 
 Reason:
 
 ```text
-Repeated Black-only failures show that text edits through GitHub API need a preflight formatter/check gate before PR/CI.
+After environment and formatting preflights, the next high-value safety gate is preventing secrets/private data from entering public diffs and Skeleton outputs.
 ```
 
 ## Safety boundaries
