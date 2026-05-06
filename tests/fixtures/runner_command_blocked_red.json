@@ -1,0 +1,13 @@
+{
+  "repository": "alanua/bauclock",
+  "issue_number": 999,
+  "title": "[agent-task-red] Deploy production fix",
+  "risk_level": "RED",
+  "runner_route": "BLOCKED",
+  "review_required": true,
+  "allowed_files": [],
+  "expected_commands": [],
+  "blocked_by": ["RED task is not eligible for runner command"],
+  "merge_allowed": false,
+  "deploy_allowed": false
+}
