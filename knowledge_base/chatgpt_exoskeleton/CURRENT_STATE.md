@@ -2,7 +2,7 @@
 
 Status: CONFIRMED_CANON
 Scope: short public-safe handoff for the next ChatGPT branch working on СК / Skeleton
-Last updated: 2026-05-05
+Last updated: 2026-05-06
 
 ## Active project
 
@@ -16,7 +16,7 @@ Current work is the ChatGPT-side external control/support layer, not Jeeves runt
 
 Skeleton Stage 1 is complete enough for active use.
 Skeleton Stage 2+ is active as practical productivity growth.
-Externalizer v1 includes local offline `work-packet`, `validate-state`, `checkpoint`, `classify-queue`, `handoff-pack`, `pr-status`, and `job-log-summary` commands.
+Externalizer v1 includes local offline `work-packet`, `validate-state`, `checkpoint`, `classify-queue`, `handoff-pack`, `pr-status`, `job-log-summary`, and `issue-runner-bridge` commands.
 Project-state layer exists as the intended public-safe mechanism for applying Skeleton to BauClock and other projects without mixing context with СК/Jeeves.
 Skeleton core has GitHub Actions CI validation.
 Gemini Adapter is a Stage 3 candidate only, with evidence-only mock tests recorded in #40. It is not implemented.
@@ -66,6 +66,26 @@ Do not add abstract policy or runtime behavior by default.
 #51/#52 handoff-pack CLI -> merged, SHA 6325d6f72ca0500802602403c5706a7a92968e36
 #53/#55 pr-status reader CLI -> merged, SHA e17bfffea60734db76b91011ff135b1ebf460064
 #56 job-log-summary CLI -> merged, SHA aaad43ae5e3620012e3786988edda9c5bcb76ed8
+#57/#58 project-state layer -> merged, SHA b4990c446dcdfb6005b2b3fdd0837922312af6f9
+#60/#61 issue-runner-bridge CLI -> merged, SHA 0312c62140b7b9eb9cd46bedf95a102e3291503c
+```
+
+## Issue runner bridge data-flow
+
+```text
+GitHub issue export JSON
+-> normalized bridge input
+-> issue-runner-bridge
+-> runner packet
+-> next safe runner instruction
+```
+
+Safety invariant:
+
+```text
+merge_allowed=false
+deploy_allowed=false
+merge/deploy/release/production/secrets/tokens/credentials/network/live-mode scope blocks the packet
 ```
 
 ## Project-state layer
@@ -85,7 +105,6 @@ Use Skeleton tools for BauClock and other products while keeping each target pro
 
 ```text
 #40 [skeleton] Stage 2 practical exoskeleton growth
-#57 [agent-task-yellow] Add generic project-state template
 ```
 
 Closed/completed Skeleton references:
@@ -111,6 +130,10 @@ Closed/completed Skeleton references:
 #53 pr-status reader task
 #55 pr-status reader PR
 #56 job-log-summary task and PR
+#57 project-state task
+#58 project-state PR
+#60 issue-runner-bridge task
+#61 issue-runner-bridge PR
 ```
 
 ## Gemini Adapter evidence-only candidate
@@ -136,10 +159,10 @@ mock-live-mode-disabled-001 -> block
 mock-strict-redaction-privacy-001 -> accept with redacted summary/rationale
 ```
 
-Next Gemini-related step after current Skeleton productivity loop:
+Next Gemini-related step:
 
 ```text
-Create Gemini Adapter mock-mode acceptance suite task only after project-state layer is stable.
+Create Gemini Adapter mock-mode acceptance suite task only after runner lifecycle wrapper is stable.
 ```
 
 ## Core active files
@@ -208,6 +231,14 @@ Handoff pack:
 
 ```bash
 python -m tools.skeleton_core.cli handoff-pack
+```
+
+Issue runner bridge:
+
+```bash
+python -m tools.skeleton_core.cli issue-runner-bridge --input tests/fixtures/issue_runner_green.json
+python -m tools.skeleton_core.cli issue-runner-bridge --input tests/fixtures/issue_runner_yellow.json
+python -m tools.skeleton_core.cli issue-runner-bridge --input tests/fixtures/issue_runner_red_merge.json
 ```
 
 PR status reader:
@@ -294,6 +325,8 @@ Current validated behavior:
 ```text
 - GitHub Actions validates Skeleton core PRs/pushes without Hetzner screenshots
 - handoff-pack emits compact branch/session handoff with validation and CURRENT_STATE excerpt
+- issue-runner-bridge converts public-safe GitHub issue exports into runner packets for GREEN/YELLOW only
+- issue-runner-bridge always denies merge/deploy authority and blocks unsafe scopes
 - pr-status converts public-safe PR/CI/job-log exports into deterministic status packets
 - job-log-summary converts public-safe GitHub Actions log excerpts into deterministic diagnosis packets
 - project-state files keep target project context separate from СК/Jeeves canon
@@ -327,7 +360,8 @@ Skeleton CI: #49/#50 PASS; PR CI run 25397481083 completed successfully.
 Handoff-pack CLI: #51/#52 PASS; CI run 25403326633, pytest 119 passed, ruff passed, black passed, validate-state passed.
 PR-status reader CLI: #53/#55 PASS; CI run 25405435005, pytest 126 passed, ruff passed, black passed, validate-state passed.
 Job-log-summary CLI: #56 PASS; CI run 25406576201, pytest 136 passed, ruff passed, black passed, validate-state passed.
-Project-state layer: #57 in progress, docs-only PR pending.
+Project-state layer: #57/#58 PASS; CI run 25407166788, tests passed, ruff passed, black passed, validate-state passed.
+Issue-runner-bridge CLI: #60/#61 PASS; CI run 25420555695, tests passed, ruff passed, black passed, validate-state passed.
 Gemini Adapter mock evidence: six baseline mock tests recorded in #40 as evidence-only Stage 3 candidate.
 Queue/runner audits: #25 PASS; #24 PASS via #39; #22 PASS.
 Stage 1: #23 PASS / closed.
@@ -339,8 +373,8 @@ Conclusion:
 A future Skeleton branch can reconstruct and validate the current СК state from namespace files without entering Jeeves runtime docs.
 Jeeves runtime docs are aligned for explicit runtime work.
 Fast `+` continuation and compact reporting are part of the working protocol.
-Externalizer has usable merged code on main: handoff-pack, pr-status, job-log-summary, validate-state, task-from-text, decision gate, work-packet, checkpoint, classify-queue, queue-summary, trace-packet, and runner-report-from-trace.
-Project-state layer is being added so Skeleton can support BauClock and other projects without context mixing.
+Externalizer has usable merged code on main: handoff-pack, issue-runner-bridge, pr-status, job-log-summary, validate-state, task-from-text, decision gate, work-packet, checkpoint, classify-queue, queue-summary, trace-packet, and runner-report-from-trace.
+Project-state layer lets Skeleton support BauClock and other projects without context mixing.
 Skeleton Stage 2+ is now active through #40 and should grow around maximum practical productivity.
 Gemini/Antigravity/NotebookLM are external tool layers, not current Skeleton Core runtime.
 ```
@@ -350,7 +384,7 @@ Gemini/Antigravity/NotebookLM are external tool layers, not current Skeleton Cor
 Recommended next Stage 2+ step:
 
 ```text
-Finish #57 docs-only project-state PR and merge after CI.
+Add one-command task lifecycle wrapper around issue-runner-bridge + work-packet + checkpoint, while preserving no-merge safety gates.
 ```
 
 Candidate productivity areas:
