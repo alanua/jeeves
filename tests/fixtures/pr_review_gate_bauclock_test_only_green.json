@@ -1,0 +1,21 @@
+{
+  "repository": "alanua/bauclock",
+  "pr_number": 101,
+  "title": "test: add calendar access-control regressions",
+  "draft": true,
+  "source_issue": {
+    "issue_number": 23,
+    "risk_level": "YELLOW",
+    "allowed_files": [
+      "tests/test_calendar_service.py",
+      "tests/test_legal_hardening.py"
+    ],
+    "test_only": true
+  },
+  "changed_files": ["tests/test_calendar_service.py"],
+  "ci": {
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "body": "Public-safe test-only PR body. No merge. No deploy."
+}
