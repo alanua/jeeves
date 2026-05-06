@@ -82,9 +82,7 @@ def load_branch_recovery_input(input_path: Path) -> BranchRecoveryInput:
 
 def load_project_skeleton_profile_input(input_path: Path) -> ProjectSkeletonProfileInput:
     """Load public-safe project Skeleton profile input from JSON."""
-    return ProjectSkeletonProfileInput.model_validate_json(
-        input_path.read_text(encoding="utf-8")
-    )
+    return ProjectSkeletonProfileInput.model_validate_json(input_path.read_text(encoding="utf-8"))
 
 
 def load_queue_items(input_path: Path) -> list[dict[str, Any]]:
