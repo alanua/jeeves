@@ -1,0 +1,27 @@
+{
+  "repository": "alanua/bauclock",
+  "workflow": "Tests",
+  "workflow_file": "tests.yml",
+  "ref": "main",
+  "head_sha": "abc123success",
+  "run_id": 1001,
+  "run_status": "completed",
+  "run_conclusion": "success",
+  "commands_inferred": ["pytest"],
+  "logs_summary": ["All tests passed."],
+  "jobs": [
+    {
+      "name": "tests",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Run tests",
+          "status": "completed",
+          "conclusion": "success",
+          "summary": "228 passed"
+        }
+      ]
+    }
+  ]
+}
