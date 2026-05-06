@@ -17,9 +17,23 @@ BLOCKED_PATTERNS = {
     "deploy": r"\bdeploy\b|\bdeployment\b|\bdeployed\b|\bдеплой",
     "release": r"\brelease\b|\bproduction release\b",
     "production": r"\bproduction\b|\bprod\b|\bпрод\b",
-    "secret": r"\bsecret\b|\bsecrets\b|\btoken\b|\btokens\b|\bcredential\b|\bcredentials\b|api key|apikey|ключ",
-    "network": r"\bnetwork\b|\bexternal service\b|\bexternal api\b|\blive mode\b|\bhttp[s]?://",
+    "secret": r"\bsecret\b|\bsecrets\b|\btoken\b|\btokens\b|\bcredential\b|\bcredentials\b|api key|apikey|ключ|\.env",
+    "network": r"\bnetwork\b|\bexternal service\b|\bexternal api\b|\blive mode\b|\bhttp[s]?://|\bserver ssh\b|\bssh\b",
 }
+NEGATION_PREFIXES = (
+    "no ",
+    "no.",
+    "do not ",
+    "don't ",
+    "never ",
+    "forbidden:",
+    "forbidden ",
+    "hard safety:",
+    "hard safety rules:",
+    "safety:",
+    "safety note:",
+    "security rule:",
+)
 
 
 class IssueLabel(BaseModel):
@@ -97,12 +111,34 @@ def _content(packet: IssueRunnerInput) -> str:
     return f"{packet.title}\n{packet.body}"
 
 
+def _line_fragments(text: str) -> list[str]:
+    fragments = []
+    for line in text.splitlines():
+        cleaned = " ".join(line.strip(" -\t").split())
+        if cleaned:
+            fragments.append(cleaned)
+    return fragments
+
+
+def _is_negated_or_prohibitive(fragment: str, match_start: int) -> bool:
+    lower = fragment.casefold().strip()
+    before_match = lower[:match_start].strip()
+    if lower.startswith(NEGATION_PREFIXES):
+        return True
+    if before_match.endswith(("no", "do not", "don't", "never", "forbidden")):
+        return True
+    return bool(re.search(r"\b(no|do not|don't|never|forbidden)\b\W*$", before_match))
+
+
 def _safety_blockers(text: str) -> list[str]:
     blockers = []
-    for name, pattern in BLOCKED_PATTERNS.items():
-        if re.search(pattern, text, flags=re.IGNORECASE):
-            blockers.append(f"Blocked unsafe request: {name}")
-    return blockers
+    for fragment in _line_fragments(text):
+        for name, pattern in BLOCKED_PATTERNS.items():
+            for match in re.finditer(pattern, fragment, flags=re.IGNORECASE):
+                if not _is_negated_or_prohibitive(fragment, match.start()):
+                    blockers.append(f"Blocked unsafe request: {name}")
+                    break
+    return sorted(set(blockers))
 
 
 def build_issue_runner_packet(packet: IssueRunnerInput) -> IssueRunnerPacket:
