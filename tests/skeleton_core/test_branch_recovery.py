@@ -69,12 +69,10 @@ def test_branch_recovery_suggests_create_pr_when_branch_has_changes() -> None:
         )
     )
 
+    expected_action = "create draft PR if branch diff is still needed and public-safe"
     assert result.status == "create_pr_if_branch_ready"
     assert result.pr_number is None
-    assert (
-        result.next_safe_action
-        == "create draft PR if branch diff is still needed and public-safe"
-    )
+    assert result.next_safe_action == expected_action
 
 
 def test_branch_recovery_unknown_for_merged_without_sha() -> None:
