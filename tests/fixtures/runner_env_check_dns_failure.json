@@ -1,0 +1,19 @@
+{
+  "repository": "alanua/bauclock",
+  "repo_url_checked": "https://github.com/alanua/bauclock.git",
+  "checks": {
+    "python": "ok",
+    "git": "ok",
+    "workdir": "ok",
+    "dns_github": "failed",
+    "clone": "not_run_or_failed",
+    "pytest": "not_checked"
+  },
+  "commands_run": [
+    "python --version",
+    "git --version",
+    "git clone --depth 1 <redacted-repo-url> /tmp/bauclock_preflight/repo"
+  ],
+  "blocked_reason": "Could not resolve host: github.com",
+  "policy_violation": false
+}
