@@ -1,0 +1,15 @@
+{
+  "repository": "alanua/bauclock",
+  "repo_url_checked": "https://token@example.com/alanua/bauclock.git",
+  "checks": {
+    "python": "ok",
+    "git": "ok",
+    "workdir": "ok",
+    "dns_github": "not_checked",
+    "clone": "not_checked",
+    "pytest": "ok"
+  },
+  "commands_run": [],
+  "blocked_reason": "Repository URL contains credentials and was redacted.",
+  "policy_violation": true
+}
