@@ -17,5 +17,5 @@
     "status": "completed",
     "conclusion": "success"
   },
-  "body": "Public-safe test-only PR body. No merge. No deploy."
+  "body": "Public-safe test-only PR body for ChatGPT review."
 }
