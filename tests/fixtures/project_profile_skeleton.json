@@ -1,0 +1,31 @@
+{
+  "project": "Skeleton Core",
+  "type": "skeleton-core",
+  "default_risk": "YELLOW",
+  "allowed_skeleton_capabilities": [
+    "issue-dispatch",
+    "runner-command-pack",
+    "runner-report-ingest",
+    "pr-review-gate",
+    "branch-recovery",
+    "queue-state",
+    "validate-state",
+    "handoff-pack"
+  ],
+  "project_needs": [],
+  "test_commands": [
+    "python -m pytest -q",
+    "python -m ruff check tools/skeleton_core tests/skeleton_core",
+    "python -m black --check tools/skeleton_core tests/skeleton_core",
+    "python -m tools.skeleton_core.cli validate-state"
+  ],
+  "forbidden_by_default": [
+    "deploy",
+    "server ssh",
+    "production db",
+    "secrets",
+    ".env",
+    "automerge"
+  ],
+  "runtime_change_requires_explicit_approval": true
+}
