@@ -11,7 +11,7 @@
   },
   "changed_files": [
     "tests/test_calendar_service.py",
-    "app/services/calendar_service.py"
+    "docs/calendar_access_control_notes.md"
   ],
   "ci": {
     "status": "completed",
