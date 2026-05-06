@@ -17,9 +17,12 @@ def test_cli_pr_review_gate_ready_fixture(capsys) -> None:
         capsys,
     )
 
-    assert payload["status"] == "blocked_unsafe_text"
+    assert payload["status"] == "ready_for_chatgpt_review"
     assert payload["repository"] == "alanua/bauclock"
     assert payload["pr_number"] == 101
+    assert payload["changed_files_ok"] is True
+    assert payload["ci_ok"] is True
+    assert payload["scope_ok"] is True
     assert payload["merge_allowed"] is False
     assert payload["deploy_allowed"] is False
 
