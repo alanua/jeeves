@@ -10,6 +10,10 @@ from typing import Any
 
 from pydantic import ValidationError
 
+from tools.skeleton_core.branch_recovery import (
+    BranchRecoveryInput,
+    build_branch_recovery_packet,
+)
 from tools.skeleton_core.checkpoint import render_checkpoint
 from tools.skeleton_core.github_queue import normalize_issue, normalize_pr, summarize_queue
 from tools.skeleton_core.handoff_pack import render_handoff_pack
@@ -27,6 +31,7 @@ from tools.skeleton_core.trace import TracePacket
 from tools.skeleton_core.work_packet import render_work_packet
 
 SUBCOMMANDS = {
+    "branch-recovery",
     "checkpoint",
     "classify-queue",
     "decide",
@@ -74,6 +79,11 @@ def load_pr_status_input(input_path: Path) -> PRStatusInput:
 def load_issue_runner_input(input_path: Path) -> IssueRunnerInput:
     """Load public-safe issue runner input from JSON."""
     return IssueRunnerInput.model_validate_json(input_path.read_text(encoding="utf-8"))
+
+
+def load_branch_recovery_input(input_path: Path) -> BranchRecoveryInput:
+    """Load public-safe branch recovery input from JSON."""
+    return BranchRecoveryInput.model_validate_json(input_path.read_text(encoding="utf-8"))
 
 
 def build_queue_summary_payload(input_path: Path) -> dict[str, int]:
@@ -200,6 +210,17 @@ def _add_issue_input_arg(parser: argparse.ArgumentParser) -> None:
 def _subcommand_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Skeleton Externalizer CLI.")
     subparsers = parser.add_subparsers(dest="command", required=True)
+
+    branch_recovery_parser = subparsers.add_parser(
+        "branch-recovery",
+        help="Build a compact recovery packet from public-safe branch/PR JSON",
+    )
+    branch_recovery_parser.add_argument(
+        "--input",
+        required=True,
+        type=Path,
+        help="Path to public-safe branch recovery JSON",
+    )
 
     checkpoint_parser = subparsers.add_parser(
         "checkpoint",
@@ -346,6 +367,17 @@ def _run_decide(args: argparse.Namespace) -> int:
         return 2
 
     print(json.dumps(build_decision_payload(packet), ensure_ascii=False, indent=2), flush=True)
+    return 0
+
+
+def _run_branch_recovery(args: argparse.Namespace) -> int:
+    try:
+        result = build_branch_recovery_packet(load_branch_recovery_input(args.input))
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
+
+    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
     return 0
 
 
@@ -502,6 +534,8 @@ def _run_work_packet(args: argparse.Namespace) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
+    if args.command == "branch-recovery":
+        return _run_branch_recovery(args)
     if args.command == "checkpoint":
         return _run_checkpoint(args)
     if args.command == "classify-queue":
