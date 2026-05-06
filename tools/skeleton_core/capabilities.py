@@ -86,9 +86,12 @@ SKELETON_CORE_FLOW = [
 ]
 
 DANGEROUS_DEFAULT_MARKERS = {
-    "automerge",
-    "auto merge",
-    "auto-merge",
+    "auto merge allowed",
+    "auto merge without approval",
+    "auto-merge allowed",
+    "auto-merge without approval",
+    "automerge allowed",
+    "automerge without approval",
     "deploy allowed",
     "deploy without approval",
     "merge allowed",
