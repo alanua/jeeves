@@ -43,6 +43,7 @@ branch-recovery
 project-skeleton-profile
 runner-env-check
 format-preflight
+github-actions-runner-control
 ```
 
 Project-state layer exists as the public-safe mechanism for applying Skeleton to BauClock and other projects without mixing project context with СК/Jeeves canon.
@@ -89,6 +90,15 @@ format-preflight is a check/report gate, not a formatter. Local Black formatting
 #82/#84 project-skeleton-profile CLI -> merged, SHA 03e5aa4f399b2a22b4d634bac16c125320ed69f8
 #83/#85 runner-env-check CLI -> merged, SHA 02c69555b39427972df7d040bae91fc544e9abf5
 #86/#87 format-preflight CLI -> merged, SHA a7b23564b9ddf4733912e7dbb81ab5ae386d3ab7
+#88/#91 github-actions-runner-control CLI -> merged, SHA abc2bd9c0623a2ac46191cd5d724c970dd2c0939
+```
+
+Github-actions-runner-control result:
+
+```text
+Given a public-safe GitHub Actions run/job export, Skeleton can now normalize workflow_success_report, workflow_failed_report, workflow_cancelled_report, workflow_unknown_needs_review, and unsafe_or_policy_violation.
+The CLI remains offline/public-safe by default. It does not dispatch live workflows, perform network actions, read .env, print secrets, or grant merge/deploy authority.
+This is now available for BauClock #22-style Actions result reporting before runner-report-ingest / queue-state.
 ```
 
 Format-preflight result:
@@ -156,6 +166,13 @@ Given a public-safe GREEN/YELLOW task packet, Skeleton can emit a compact КОД
 Blocked, RED, unsafe, missing-field, merge/deploy, secrets, network, and live-mode packets do not get runnable commands.
 ```
 
+Validation for #88/#91:
+
+```text
+Skeleton Core CI run 25478609111 -> success.
+Tests, ruff, black --check, and validate-state passed.
+```
+
 Validation for #86/#87:
 
 ```text
@@ -175,7 +192,6 @@ Active / highest priority:
 
 ```text
 #92 workflow-gate — enforce that ready Skeleton skills are actually used before GitHub write/review/runner/queue actions
-#88/#91 github-actions-runner-control — open PR, CI success on latest head, pending review/merge
 #90 capability-request-broker — project blocker/manual step -> Skeleton skill request packet
 #89 secrets-preflight — prevent secrets, .env, tokens, keys, and private URLs from entering diffs/outputs
 ```
