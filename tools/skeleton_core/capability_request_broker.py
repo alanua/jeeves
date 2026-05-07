@@ -79,21 +79,21 @@ def _slug(value: str) -> str:
     return re.sub(r"[^a-z0-9-]+", "-", lowered).strip("-")
 
 
-def _combined_text(packet: CapabilityRequestInput) -> str:
+def _unsafe_text(packet: CapabilityRequestInput) -> str:
+    """Text that represents requested capability, excluding safety constraints."""
     parts = [
         packet.project,
         packet.repository,
         packet.blocker_or_need,
         packet.desired_capability,
         "\n".join(packet.manual_steps_repeated),
-        "\n".join(packet.safety_constraints),
         "\n".join(packet.evidence),
     ]
     return "\n".join(parts)
 
 
 def _unsafe_blockers(packet: CapabilityRequestInput) -> list[str]:
-    text = _combined_text(packet)
+    text = _unsafe_text(packet)
     blockers = []
     for name, pattern in UNSAFE_PATTERNS.items():
         if re.search(pattern, text, flags=re.IGNORECASE):
