@@ -2,7 +2,7 @@
 
 Status: CONFIRMED_CANON
 Scope: short public-safe handoff for the next ChatGPT branch working on СК / Skeleton
-Last updated: 2026-05-06
+Last updated: 2026-05-07
 
 ## Active project
 
@@ -54,6 +54,27 @@ Grow the Skeleton for maximum practical productivity, but only where it reduces 
 Do not add abstract policy or runtime behavior by default.
 ```
 
+Mandatory activation rule:
+
+```text
+A ready Skeleton skill must be used when it is relevant to the next action.
+If a ready skill is skipped, the next action is blocked until the gate is satisfied or a human explicitly overrides it.
+Skeleton must not be a paper checklist; built skills must become active workflow gates.
+```
+
+Immediate enforcement rule for ChatGPT/GitHub API work:
+
+```text
+Before Python file updates:
+1. fetch the current file
+2. apply real local Black formatting to the outgoing content
+3. update_file only with formatted content
+4. verify PR/head SHA changed
+5. verify CI for the new head
+
+format-preflight is a check/report gate, not a formatter. Local Black formatting must happen before update_file.
+```
+
 ## Recently completed
 
 ```text
@@ -75,6 +96,7 @@ Format-preflight result:
 ```text
 Given a public-safe fixture or explicit check-only path input, Skeleton can now detect format_ready, needs_black_format, blocked_missing_black, or unknown_needs_review before CI/PR review.
 The CLI is local/offline by default. Live mode is Black check-only, does not modify files, reads no .env, prints no secrets, and grants no merge/deploy authority.
+Important limitation: it checks formatting; it does not apply formatting. ChatGPT-side GitHub edits must run real local Black before update_file.
 ```
 
 Runner-env-check result:
@@ -149,10 +171,18 @@ Main planning issue:
 #40 [skeleton] Stage 2 practical exoskeleton growth
 ```
 
+Active / highest priority:
+
+```text
+#92 workflow-gate — enforce that ready Skeleton skills are actually used before GitHub write/review/runner/queue actions
+#88/#91 github-actions-runner-control — open PR, CI success on latest head, pending review/merge
+#90 capability-request-broker — project blocker/manual step -> Skeleton skill request packet
+#89 secrets-preflight — prevent secrets, .env, tokens, keys, and private URLs from entering diffs/outputs
+```
+
 Open practical Skeleton Core candidates:
 
 ```text
-secrets-preflight — prevent secrets, .env, tokens, keys, and private URLs from entering diffs/outputs
 migration-preflight — require migration review when DB/model files change
 test-scope-preflight — choose minimal relevant validation commands for a change
 ci-log-diagnoser — summarize failed CI as cause/file/action
@@ -161,13 +191,14 @@ ci-log-diagnoser — summarize failed CI as cause/file/action
 Recommended next core slice:
 
 ```text
-secrets-preflight
+workflow-gate
 ```
 
 Reason:
 
 ```text
-After environment and formatting preflights, the next high-value safety gate is preventing secrets/private data from entering public diffs and Skeleton outputs.
+Existing skills are useful only if the workflow blocks when they are skipped.
+The next priority is making Skeleton operational, not paper-only.
 ```
 
 ## Safety boundaries
@@ -189,6 +220,7 @@ No secrets, tokens, passwords, API keys, .env values, bank data, private documen
 Не створювати окремий issue/doc для кожного дрібного кроку.
 Користуватися короткими коментарями, чеклістами і прямими діями.
 Нові policy docs — тільки за прямою командою.
+Built Skeleton skills must be activated as gates, not just listed as capabilities.
 ```
 
 `+` means:
