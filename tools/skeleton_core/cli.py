@@ -53,6 +53,7 @@ from tools.skeleton_core.task_lifecycle import build_task_lifecycle_packet
 from tools.skeleton_core.templates import render_runner_issue
 from tools.skeleton_core.trace import TracePacket
 from tools.skeleton_core.work_packet import render_work_packet
+from tools.skeleton_core.workflow_gate import WorkflowGateInput, build_workflow_gate
 
 SUBCOMMANDS = {
     "branch-recovery",
@@ -79,6 +80,7 @@ SUBCOMMANDS = {
     "task-lifecycle",
     "trace-packet",
     "validate-state",
+    "workflow-gate",
     "work-packet",
 }
 MAX_AUTO_TITLE_LENGTH = 80
@@ -125,6 +127,11 @@ def load_project_skeleton_profile_input(input_path: Path) -> ProjectSkeletonProf
 def load_runner_env_check_input(input_path: Path) -> RunnerEnvCheckInput:
     """Load public-safe runner environment check input from JSON."""
     return RunnerEnvCheckInput.model_validate_json(input_path.read_text(encoding="utf-8"))
+
+
+def load_workflow_gate_input(input_path: Path) -> WorkflowGateInput:
+    """Load public-safe workflow gate input from JSON."""
+    return WorkflowGateInput.model_validate_json(input_path.read_text(encoding="utf-8"))
 
 
 def load_queue_items(input_path: Path) -> list[dict[str, Any]]:
@@ -506,6 +513,12 @@ def _subcommand_parser() -> argparse.ArgumentParser:
         help="Repository root to validate",
     )
 
+    workflow_gate_parser = subparsers.add_parser(
+        "workflow-gate",
+        help="Enforce ready Skeleton skills before workflow actions",
+    )
+    _add_input_arg(workflow_gate_parser, "Path to public-safe workflow gate JSON")
+
     work_packet_parser = subparsers.add_parser(
         "work-packet",
         help="Render a public-safe work packet from free-form task text",
@@ -760,6 +773,16 @@ def _run_task_lifecycle(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_workflow_gate(args: argparse.Namespace) -> int:
+    try:
+        result = build_workflow_gate(load_workflow_gate_input(args.input))
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
+    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
+    return 0
+
+
 def _trace_packet_from_args(args: argparse.Namespace) -> TracePacket:
     return TracePacket(
         task_id=args.task_id,
@@ -880,6 +903,8 @@ def main(argv: list[str] | None = None) -> int:
         return _run_trace_packet(args)
     if args.command == "validate-state":
         return _run_validate_state(args)
+    if args.command == "workflow-gate":
+        return _run_workflow_gate(args)
     if args.command == "work-packet":
         return _run_work_packet(args)
     return _run_decide(args)
