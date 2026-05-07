@@ -1,0 +1,9 @@
+{
+  "action": "actions_report",
+  "repository": "alanua/jeeves",
+  "branch": "main",
+  "preflights": {
+    "github_actions_runner_control": "unsafe_or_policy_violation"
+  },
+  "requested_next_action": "use_actions_report"
+}
