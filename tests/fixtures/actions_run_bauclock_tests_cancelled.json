@@ -1,0 +1,20 @@
+{
+  "repository": "alanua/bauclock",
+  "workflow": "Tests",
+  "workflow_file": "tests.yml",
+  "ref": "main",
+  "head_sha": "abc123cancelled",
+  "run_id": 1003,
+  "run_status": "completed",
+  "run_conclusion": "cancelled",
+  "commands_inferred": ["pytest"],
+  "logs_summary": ["Workflow was cancelled."],
+  "jobs": [
+    {
+      "name": "tests",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "steps": []
+    }
+  ]
+}

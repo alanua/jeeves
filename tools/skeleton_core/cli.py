@@ -17,6 +17,10 @@ from tools.skeleton_core.format_preflight import (
     build_format_preflight,
     live_format_preflight,
 )
+from tools.skeleton_core.github_actions_runner_control import (
+    GithubActionsRunnerInput,
+    build_github_actions_runner_control,
+)
 from tools.skeleton_core.github_queue import normalize_issue, normalize_pr, summarize_queue
 from tools.skeleton_core.handoff_pack import render_handoff_pack
 from tools.skeleton_core.issue_dispatch import IssueDispatchInput, build_issue_dispatch_packet
@@ -52,6 +56,7 @@ SUBCOMMANDS = {
     "classify-queue",
     "decide",
     "format-preflight",
+    "github-actions-runner-control",
     "handoff-pack",
     "issue-dispatch",
     "issue-runner-bridge",
@@ -95,6 +100,11 @@ def load_branch_recovery_input(input_path: Path) -> BranchRecoveryInput:
 def load_format_preflight_input(input_path: Path) -> FormatPreflightInput:
     """Load public-safe format preflight input from JSON."""
     return FormatPreflightInput.model_validate_json(input_path.read_text(encoding="utf-8"))
+
+
+def load_github_actions_runner_input(input_path: Path) -> GithubActionsRunnerInput:
+    """Load public-safe GitHub Actions runner input from JSON."""
+    return GithubActionsRunnerInput.model_validate_json(input_path.read_text(encoding="utf-8"))
 
 
 def load_project_skeleton_profile_input(input_path: Path) -> ProjectSkeletonProfileInput:
@@ -312,6 +322,12 @@ def _subcommand_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Compatibility flag; live mode is always check-only",
     )
+
+    actions_parser = subparsers.add_parser(
+        "github-actions-runner-control",
+        help="Build a report from public-safe GitHub Actions run/job JSON",
+    )
+    _add_input_arg(actions_parser, "Path to public-safe GitHub Actions run/job JSON")
 
     handoff_pack_parser = subparsers.add_parser(
         "handoff-pack",
@@ -557,6 +573,16 @@ def _run_format_preflight(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_github_actions_runner_control(args: argparse.Namespace) -> int:
+    try:
+        result = build_github_actions_runner_control(load_github_actions_runner_input(args.input))
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
+    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
+    return 0
+
+
 def _run_handoff_pack(args: argparse.Namespace) -> int:
     print(render_handoff_pack(args.root), flush=True)
     return 0
@@ -790,6 +816,8 @@ def main(argv: list[str] | None = None) -> int:
         return _run_classify_queue(args)
     if args.command == "format-preflight":
         return _run_format_preflight(args)
+    if args.command == "github-actions-runner-control":
+        return _run_github_actions_runner_control(args)
     if args.command == "handoff-pack":
         return _run_handoff_pack(args)
     if args.command == "issue-dispatch":
