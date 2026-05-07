@@ -1,0 +1,23 @@
+{
+  "project": "bauclock",
+  "repository": "alanua/bauclock",
+  "source_issue": 22,
+  "blocker_or_need": "Need to detect whether the runner environment is ready before attempting BauClock validation.",
+  "manual_steps_repeated": [
+    "Check python availability",
+    "Check git availability",
+    "Check writable workdir",
+    "Report blocked state manually"
+  ],
+  "desired_capability": "runner-env-check",
+  "safety_constraints": [
+    "no merge",
+    "no deploy",
+    "no secrets",
+    "no runtime changes"
+  ],
+  "evidence": [
+    "BauClock #22 validation was blocked by environment readiness uncertainty",
+    "Skeleton #83 introduced runner-env-check"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "project": "bauclock",
+  "repository": "alanua/bauclock",
+  "source_issue": 22,
+  "blocker_or_need": "Need to run baseline validation with less manual work using GitHub Actions results.",
+  "manual_steps_repeated": [
+    "Start workflow manually",
+    "Read Actions run status",
+    "Read job result",
+    "Write #22 report"
+  ],
+  "desired_capability": "github-actions-runner-control",
+  "safety_constraints": [
+    "no merge",
+    "no deploy",
+    "no secrets",
+    "no runtime changes"
+  ],
+  "evidence": [
+    "BauClock #22 baseline validation is blocked/manual",
+    "BauClock #45 adds workflow_dispatch"
+  ]
+}

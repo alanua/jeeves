@@ -1,0 +1,10 @@
+{
+  "project": "bauclock",
+  "repository": "alanua/bauclock",
+  "source_issue": 22,
+  "blocker_or_need": "Need a live executor that can merge, deploy, read .env tokens, and SSH into production server automatically.",
+  "manual_steps_repeated": ["Manual deploy", "Manual server SSH"],
+  "desired_capability": "live-executor",
+  "safety_constraints": [],
+  "evidence": ["unsafe request fixture"]
+}

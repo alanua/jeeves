@@ -11,6 +11,10 @@ from typing import Any
 from pydantic import ValidationError
 
 from tools.skeleton_core.branch_recovery import BranchRecoveryInput, build_branch_recovery
+from tools.skeleton_core.capability_request_broker import (
+    CapabilityRequestInput,
+    build_capability_request,
+)
 from tools.skeleton_core.checkpoint import render_checkpoint
 from tools.skeleton_core.format_preflight import (
     FormatPreflightInput,
@@ -52,6 +56,7 @@ from tools.skeleton_core.work_packet import render_work_packet
 
 SUBCOMMANDS = {
     "branch-recovery",
+    "capability-request-broker",
     "checkpoint",
     "classify-queue",
     "decide",
@@ -95,6 +100,11 @@ def build_decision_payload(packet: TaskPacket) -> dict[str, Any]:
 def load_branch_recovery_input(input_path: Path) -> BranchRecoveryInput:
     """Load public-safe branch recovery input from JSON."""
     return BranchRecoveryInput.model_validate_json(input_path.read_text(encoding="utf-8"))
+
+
+def load_capability_request_input(input_path: Path) -> CapabilityRequestInput:
+    """Load public-safe capability request input from JSON."""
+    return CapabilityRequestInput.model_validate_json(input_path.read_text(encoding="utf-8"))
 
 
 def load_format_preflight_input(input_path: Path) -> FormatPreflightInput:
@@ -284,6 +294,12 @@ def _subcommand_parser() -> argparse.ArgumentParser:
         help="Build a recovery packet for interrupted Skeleton branch work",
     )
     _add_input_arg(branch_recovery_parser, "Path to public-safe branch recovery JSON")
+
+    capability_parser = subparsers.add_parser(
+        "capability-request-broker",
+        help="Build a Skeleton skill request packet from a project need JSON",
+    )
+    _add_input_arg(capability_parser, "Path to public-safe capability request JSON")
 
     checkpoint_parser = subparsers.add_parser(
         "checkpoint",
@@ -517,6 +533,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def _run_branch_recovery(args: argparse.Namespace) -> int:
     try:
         result = build_branch_recovery(load_branch_recovery_input(args.input))
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
+    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
+    return 0
+
+
+def _run_capability_request_broker(args: argparse.Namespace) -> int:
+    try:
+        result = build_capability_request(load_capability_request_input(args.input))
     except ValidationError as exc:
         print(exc.json(), flush=True)
         return 2
@@ -810,6 +836,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     if args.command == "branch-recovery":
         return _run_branch_recovery(args)
+    if args.command == "capability-request-broker":
+        return _run_capability_request_broker(args)
     if args.command == "checkpoint":
         return _run_checkpoint(args)
     if args.command == "classify-queue":
