@@ -1,0 +1,10 @@
+{
+  "project": "bauclock",
+  "repository": "alanua/bauclock",
+  "source_issue": 22,
+  "blocker_or_need": "Need some automation.",
+  "desired_capability": "",
+  "manual_steps_repeated": [],
+  "safety_constraints": ["no merge"],
+  "evidence": []
+}
