@@ -1,0 +1,11 @@
+{
+  "project": "bauclock",
+  "repository": "alanua/bauclock",
+  "source_issue": 22,
+  "blocker_or_need": "Need to use existing runner-env-check before validation.",
+  "manual_steps_repeated": ["Check runner environment manually"],
+  "desired_capability": "runner-env-check",
+  "existing_capabilities": ["runner-env-check", "queue-state"],
+  "safety_constraints": ["no merge", "no deploy"],
+  "evidence": ["runner-env-check already exists in Skeleton"]
+}
