@@ -199,8 +199,7 @@ def _report_text(
         lines.extend(["", "Next safe step: queue-state may unlock the next BauClock task."])
     else:
         next_step = (
-            "Next safe step: review or fix the workflow result "
-            "before unlocking the queue."
+            "Next safe step: review or fix the workflow result " "before unlocking the queue."
         )
         lines.extend(["", next_step])
     return "\n".join(lines)
