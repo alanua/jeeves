@@ -41,7 +41,10 @@ def test_cli_capability_request_existing(capsys) -> None:
     )
 
     assert payload["status"] == "capability_already_exists"
-    assert payload["next_safe_step"] == "Update the project workflow to use the existing Skeleton capability."
+    assert (
+        payload["next_safe_step"]
+        == "Update the project workflow to use the existing Skeleton capability."
+    )
 
 
 def test_cli_capability_request_unsafe(capsys) -> None:
