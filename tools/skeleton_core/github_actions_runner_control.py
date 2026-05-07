@@ -196,9 +196,7 @@ def _report_text(
     if failed_steps:
         lines.extend(["", "Failed steps:", *[f"- {step}" for step in failed_steps]])
     if status == "workflow_success_report":
-        lines.extend(
-            ["", "Next safe step: queue-state may unlock the next BauClock task."]
-        )
+        lines.extend(["", "Next safe step: queue-state may unlock the next BauClock task."])
     else:
         next_step = (
             "Next safe step: review or fix the workflow result "
