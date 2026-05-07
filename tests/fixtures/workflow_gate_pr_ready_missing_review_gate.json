@@ -1,0 +1,10 @@
+{
+  "action": "ready_for_review",
+  "repository": "alanua/jeeves",
+  "branch": "skeleton/workflow-gate-v2",
+  "changed_files": ["tools/skeleton_core/workflow_gate.py"],
+  "preflights": {
+    "ci_status": "success"
+  },
+  "requested_next_action": "ready_for_review"
+}
