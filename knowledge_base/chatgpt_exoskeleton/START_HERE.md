@@ -3,7 +3,7 @@
 Status: CONFIRMED_CANON
 Scope: namespace entrypoint for the ChatGPT Exoskeleton / Skeleton layer
 Created: 2026-05-04
-Last updated: 2026-05-05
+Last updated: 2026-05-07
 
 ## Purpose
 
@@ -27,6 +27,21 @@ load current state
 ```
 
 Avoid creating new process artifacts unless they materially improve execution, safety, or continuity.
+
+## Controlled growth rule
+
+For adding or activating Skeleton skills, read:
+
+```text
+knowledge_base/chatgpt_exoskeleton/CONTROLLED_GROWTH.md
+```
+
+Core rule:
+
+```text
+Skeleton grows by converting repeated failure into enforced workflow.
+A skill that does not change behavior is not a finished skill.
+```
 
 ## Core distinction
 
@@ -58,12 +73,13 @@ knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md
 
 This namespace file exists to prevent agents and ChatGPT branches from confusing those files with Jeeves runtime code.
 
-When the user says `СК`, `Skeleton`, or `ChatGPT Exoskeleton`, load this namespace first, then `CURRENT_STATE.md`, then the two canonical Skeleton files above.
+When the user says `СК`, `Skeleton`, or `ChatGPT Exoskeleton`, load this namespace first, then `CURRENT_STATE.md`, then the controlled growth rule, then the two canonical Skeleton files above.
 
 ## Practical Skeleton files
 
 ```text
 knowledge_base/chatgpt_exoskeleton/CURRENT_STATE.md
+knowledge_base/chatgpt_exoskeleton/CONTROLLED_GROWTH.md
 knowledge_base/chatgpt_exoskeleton/SKELETON_RUNNER_TASK_TEMPLATE.md
 ```
 
