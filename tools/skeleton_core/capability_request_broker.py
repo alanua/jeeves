@@ -227,7 +227,9 @@ def build_capability_request(packet: CapabilityRequestInput) -> CapabilityReques
         risk_level = "YELLOW"
 
     title = _issue_title(capability_name) if capability_name else ""
-    issue_body = "" if status == "blocked_unsafe_capability" else _issue_body(packet, capability_name)
+    issue_body = (
+        "" if status == "blocked_unsafe_capability" else _issue_body(packet, capability_name)
+    )
     return CapabilityRequestPacket(
         status=status,
         capability_name=capability_name,
@@ -238,9 +240,13 @@ def build_capability_request(packet: CapabilityRequestInput) -> CapabilityReques
         risk_level=risk_level,
         recommended_skeleton_issue_title=title,
         recommended_skeleton_issue_body=issue_body,
-        allowed_scope=[] if status == "blocked_unsafe_capability" else _allowed_scope(capability_name),
+        allowed_scope=(
+            [] if status == "blocked_unsafe_capability" else _allowed_scope(capability_name)
+        ),
         forbidden_scope=_forbidden_scope(),
-        acceptance_criteria=[] if status == "blocked_unsafe_capability" else _acceptance_criteria(capability_name),
+        acceptance_criteria=(
+            [] if status == "blocked_unsafe_capability" else _acceptance_criteria(capability_name)
+        ),
         links_or_references=_clean_items(packet.evidence),
         blockers=blockers,
         merge_allowed=False,
