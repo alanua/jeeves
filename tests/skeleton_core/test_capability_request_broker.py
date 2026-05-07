@@ -42,7 +42,10 @@ def test_existing_capability_request() -> None:
     )
 
     assert result.status == "capability_already_exists"
-    assert result.next_safe_step == "Update the project workflow to use the existing Skeleton capability."
+    assert (
+        result.next_safe_step
+        == "Update the project workflow to use the existing Skeleton capability."
+    )
     assert result.merge_allowed is False
     assert result.deploy_allowed is False
 
