@@ -211,6 +211,7 @@ Active / highest priority:
 ```text
 #92 workflow-gate — enforce that ready Skeleton skills are actually used before GitHub write/review/runner/queue actions
 #89 secrets-preflight — prevent secrets, .env, tokens, keys, and private URLs from entering diffs/outputs
+#95 runner-status-check — runner heartbeat/status -> queue pacing so tasks do not advance while runner is still running/blocked/stale
 ```
 
 Open practical Skeleton Core candidates:
@@ -232,6 +233,13 @@ Reason:
 ```text
 Existing skills are useful only if the workflow blocks when they are skipped.
 The next priority is making Skeleton operational, not paper-only.
+```
+
+Runner-status-check rationale:
+
+```text
+This is a valid controlled-growth candidate because it connects queue-state, runner-report-ingest, and real runner tempo.
+It should prevent starting a next issue while the runner is still running another one, and surface blocked/stale runner states as queue blockers.
 ```
 
 ## Safety boundaries
