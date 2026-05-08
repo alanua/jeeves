@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from tools.skeleton_core.gemini_auditor_adapter import (
     GeminiAuditorInput,
     GeminiAuditorOutput,
@@ -5,6 +7,10 @@ from tools.skeleton_core.gemini_auditor_adapter import (
     run_adapter_from_json,
     validate_output,
 )
+
+
+def _read_fixture(path: str) -> str:
+    return Path(path).read_text(encoding="utf-8")
 
 
 def test_mock_public_safe_accepts() -> None:
@@ -123,7 +129,7 @@ def test_output_validation_blocks_forbidden_fields() -> None:
 
 def test_fixture_public_safe_accepts() -> None:
     result = run_adapter_from_json(
-        open("tests/fixtures/gemini_auditor_input_public_safe.json", encoding="utf-8").read()
+        _read_fixture("tests/fixtures/gemini_auditor_input_public_safe.json")
     )
 
     assert result.status == "mock_accept"
@@ -133,7 +139,7 @@ def test_fixture_live_missing_key_blocks(monkeypatch) -> None:
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
     result = run_adapter_from_json(
-        open("tests/fixtures/gemini_auditor_input_live_missing_key.json", encoding="utf-8").read()
+        _read_fixture("tests/fixtures/gemini_auditor_input_live_missing_key.json")
     )
 
     assert result.status == "blocked_live_mode_missing_key"
@@ -141,7 +147,7 @@ def test_fixture_live_missing_key_blocks(monkeypatch) -> None:
 
 def test_fixture_secret_blocks() -> None:
     result = run_adapter_from_json(
-        open("tests/fixtures/gemini_auditor_input_secret_blocked.json", encoding="utf-8").read()
+        _read_fixture("tests/fixtures/gemini_auditor_input_secret_blocked.json")
     )
 
     assert result.status == "blocked_secret_or_pii"
