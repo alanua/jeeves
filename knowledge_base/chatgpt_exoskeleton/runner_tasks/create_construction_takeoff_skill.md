@@ -1,5 +1,10 @@
 # [skeleton-task] create-construction-takeoff-skill
 
+Priority: HIGH
+Queue class: priority practical Skeleton skill
+Skill status target after task: LIKELY_NEEDS_REVIEW
+Private pilot route: Consum Quartier / real objects stay in private Drive only
+
 ## Active project
 
 СК / ChatGPT Exoskeleton / Skeleton Core
