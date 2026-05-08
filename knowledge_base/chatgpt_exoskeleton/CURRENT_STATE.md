@@ -2,7 +2,7 @@
 
 Status: CONFIRMED_CANON
 Scope: short public-safe handoff for the next ChatGPT branch working on СК / Skeleton
-Last updated: 2026-05-07
+Last updated: 2026-05-08
 
 ## Active project
 
@@ -45,6 +45,7 @@ runner-env-check
 format-preflight
 github-actions-runner-control
 capability-request-broker
+workflow-gate
 ```
 
 Project-state layer exists as the public-safe mechanism for applying Skeleton to BauClock and other projects without mixing project context with СК/Jeeves canon.
@@ -75,6 +76,7 @@ Before Python file updates:
 5. verify CI for the new head
 
 format-preflight is a check/report gate, not a formatter. Local Black formatting must happen before update_file.
+workflow-gate is now the mandatory readiness check before relevant GitHub write/review/runner/queue actions.
 ```
 
 ## Recently completed
@@ -93,6 +95,17 @@ format-preflight is a check/report gate, not a formatter. Local Black formatting
 #86/#87 format-preflight CLI -> merged, SHA a7b23564b9ddf4733912e7dbb81ab5ae386d3ab7
 #88/#91 github-actions-runner-control CLI -> merged, SHA abc2bd9c0623a2ac46191cd5d724c970dd2c0939
 #90/#94 capability-request-broker CLI -> merged, SHA 99d59a0e2951857584f9d7f53b4b84c93e1e8aac
+#92/#96 workflow-gate CLI -> merged, SHA 52fb67a38e963b742b2fb83854fd87f343827577
+```
+
+Workflow-gate result:
+
+```text
+Given a public-safe workflow action packet, Skeleton can now block relevant actions when required ready skills were skipped or failed.
+It covers Python update gates, PR review gates, runner dispatch gates, queue advance gates, and GitHub Actions report gates.
+It emits action_ready, blocked_missing_required_skill, blocked_failed_required_skill, blocked_unsafe_or_policy_violation, or unknown_needs_review.
+The CLI remains local/offline/public-safe. It does not write to GitHub, call live APIs, execute runners, read .env, print secrets, or grant merge/deploy authority.
+This is now the operational enforcement joint that prevents ready Skeleton skills from remaining paper-only.
 ```
 
 Capability-request-broker result:
@@ -177,6 +190,13 @@ Given a public-safe GREEN/YELLOW task packet, Skeleton can emit a compact КОД
 Blocked, RED, unsafe, missing-field, merge/deploy, secrets, network, and live-mode packets do not get runnable commands.
 ```
 
+Validation for #92/#96:
+
+```text
+Skeleton Core CI run 25526615544 -> success.
+Tests, ruff, black --check, and validate-state passed.
+```
+
 Validation for #90/#94:
 
 ```text
@@ -209,7 +229,7 @@ Main planning issue:
 Active / highest priority:
 
 ```text
-#92 workflow-gate — enforce that ready Skeleton skills are actually used before GitHub write/review/runner/queue actions
+construction-takeoff-from-drawings — HIGH priority practical skill task; public-safe docs/template first; status target LIKELY_NEEDS_REVIEW; private Consum Quartier pilot stays in Drive
 #89 secrets-preflight — prevent secrets, .env, tokens, keys, and private URLs from entering diffs/outputs
 #95 runner-status-check — runner heartbeat/status -> queue pacing so tasks do not advance while runner is still running/blocked/stale
 ```
@@ -225,14 +245,14 @@ ci-log-diagnoser — summarize failed CI as cause/file/action
 Recommended next core slice:
 
 ```text
-workflow-gate
+construction-takeoff-from-drawings docs/template skill
 ```
 
 Reason:
 
 ```text
-Existing skills are useful only if the workflow blocks when they are skipped.
-The next priority is making Skeleton operational, not paper-only.
+This is a high-priority practical Skeleton skill with a clear public/private split and real private pilot path.
+Now that workflow-gate is merged, the next priority can be a real domain skill, not another paper capability.
 ```
 
 Runner-status-check rationale:
@@ -240,6 +260,15 @@ Runner-status-check rationale:
 ```text
 This is a valid controlled-growth candidate because it connects queue-state, runner-report-ingest, and real runner tempo.
 It should prevent starting a next issue while the runner is still running another one, and surface blocked/stale runner states as queue blockers.
+```
+
+Construction-takeoff rationale:
+
+```text
+This is a priority practical skill because it converts repeated construction drawing/Aufmaß work into a reusable Skeleton workflow.
+The public GitHub part must stay generic: skill docs, schemas, statuses, gates, and runner task template only.
+Real object files, extracted real tables, assumptions, and pilot outputs stay private in Drive.
+The skill remains LIKELY_NEEDS_REVIEW until one real floor/object is processed end-to-end and reviewed by Oleksii.
 ```
 
 ## Safety boundaries
@@ -251,6 +280,7 @@ No private infrastructure details in public GitHub.
 No external service calls unless explicitly authorized.
 No deploy/server changes unless explicitly requested.
 No secrets, tokens, passwords, API keys, .env values, bank data, private documents, or raw private content in public GitHub.
+No real construction-object drawings, addresses, client data, extracted real quantities, or Drive URLs in public GitHub.
 ```
 
 ## Current operating rules
