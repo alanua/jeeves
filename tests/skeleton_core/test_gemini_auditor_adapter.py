@@ -13,12 +13,12 @@ def _read_fixture(path: str) -> str:
     return Path(path).read_text(encoding="utf-8")
 
 
-def test_mock_public_safe_accepts() -> None:
-    packet = GeminiAuditorInput(
+def _packet(mode: str = "mock") -> GeminiAuditorInput:
+    return GeminiAuditorInput(
         schema_version="gemini_adapter.input.v1",
-        packet_id="test-public-safe",
+        packet_id=f"test-{mode}",
         objective="Review synthetic packet.",
-        mode="mock",
+        mode=mode,
         privacy_level="PUBLIC_SAFE",
         confirmed_canon="Gemini cannot execute commands or update canon.",
         evidence="Synthetic public-safe evidence.",
@@ -27,7 +27,9 @@ def test_mock_public_safe_accepts() -> None:
         forbidden_actions=["do not execute commands"],
     )
 
-    result = run_adapter(packet)
+
+def test_mock_public_safe_accepts() -> None:
+    result = run_adapter(_packet())
 
     assert result.status == "mock_accept"
     assert result.output is not None
@@ -37,23 +39,23 @@ def test_mock_public_safe_accepts() -> None:
     assert result.deploy_allowed is False
 
 
-def test_live_missing_key_blocks(monkeypatch) -> None:
+def test_live_disabled_blocks_before_key_check(monkeypatch) -> None:
+    monkeypatch.delenv("GEMINI_API_LIVE_MODE", raising=False)
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
-    packet = GeminiAuditorInput(
-        schema_version="gemini_adapter.input.v1",
-        packet_id="test-live-missing-key",
-        objective="Review synthetic packet.",
-        mode="live",
-        privacy_level="PUBLIC_SAFE",
-        confirmed_canon="Live mode needs environment key.",
-        evidence="Synthetic public-safe evidence.",
-        draft_artifact="Synthetic draft.",
-        exact_questions=["Should this block?"],
-        forbidden_actions=["do not execute commands"],
-    )
 
-    result = run_adapter(packet)
+    result = run_adapter(_packet("live"))
+
+    assert result.status == "blocked_live_mode_disabled"
+    assert result.output is None
+
+
+def test_live_missing_key_blocks_when_live_flag_enabled(monkeypatch) -> None:
+    monkeypatch.setenv("GEMINI_API_LIVE_MODE", "true")
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+
+    result = run_adapter(_packet("live"))
 
     assert result.status == "blocked_live_mode_missing_key"
     assert result.output is None
@@ -135,9 +137,23 @@ def test_fixture_public_safe_accepts() -> None:
     assert result.status == "mock_accept"
 
 
-def test_fixture_live_missing_key_blocks(monkeypatch) -> None:
+def test_fixture_live_disabled_blocks(monkeypatch) -> None:
+    monkeypatch.delenv("GEMINI_API_LIVE_MODE", raising=False)
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+
+    result = run_adapter_from_json(
+        _read_fixture("tests/fixtures/gemini_auditor_input_live_missing_key.json")
+    )
+
+    assert result.status == "blocked_live_mode_disabled"
+
+
+def test_fixture_live_missing_key_blocks_when_live_flag_enabled(monkeypatch) -> None:
+    monkeypatch.setenv("GEMINI_API_LIVE_MODE", "true")
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+
     result = run_adapter_from_json(
         _read_fixture("tests/fixtures/gemini_auditor_input_live_missing_key.json")
     )
