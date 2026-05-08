@@ -53,6 +53,17 @@ workflow-gate
 ```text
 construction_takeoff_from_drawings
 construction_takeoff_runner_task_template
+gemini_auditor_node
+gemini_auditor_adapter
+```
+
+Gemini Auditor Node status:
+
+```text
+Priority: HIGH
+Status: LIKELY_NEEDS_REVIEW
+Public GitHub: protocol + mock-first adapter only
+Private/live route: only through Runner environment with GEMINI_API_KEY and GEMINI_API_LIVE_MODE=true
 ```
 
 Construction Takeoff / Aufmaß status:
@@ -77,7 +88,7 @@ Skeleton must not be a paper checklist; built skills must become active workflow
 ```text
 Before Python file updates:
 1. fetch the current file
-2. apply real local Black formatting to outgoing content
+2. apply real local Black formatting using repo pyproject config
 3. update_file only with formatted content
 4. verify PR/head SHA changed
 5. verify CI for the new head
@@ -104,6 +115,8 @@ workflow-gate is mandatory before relevant GitHub write/review/runner/queue acti
 #90/#94 capability-request-broker CLI -> merged, SHA 99d59a0e2951857584f9d7f53b4b84c93e1e8aac
 #92/#96 workflow-gate CLI -> merged, SHA 52fb67a38e963b742b2fb83854fd87f343827577
 construction-takeoff-from-drawings/#98 docs+template -> merged, SHA 0b71d67f97bcad41bbae7aeacba92d1edec4ffc0
+#99 Gemini Auditor Node bridge protocol -> merged, SHA f2833a19ed658fc1e071ceb3a8a47fb1b2f174ab
+#100 mock-first Gemini auditor adapter -> merged, SHA aca2e71c1543c50b8b1f44474c8d9a3a77500c69
 ```
 
 ## Key results
@@ -114,6 +127,17 @@ Workflow-gate:
 Blocks relevant actions when required ready skills were skipped or failed.
 Covers Python update, PR review, runner dispatch, queue advance, and GitHub Actions report gates.
 Prevents ready Skeleton skills from staying paper-only.
+```
+
+Gemini Auditor Node:
+
+```text
+Universal Runner-mediated Gemini bridge now exists.
+ChatGPT does not connect to Gemini directly.
+Gemini is stateless auditor/reviewer, not manager, executor, canon writer, merger, or deployer.
+Adapter is mock-first and fail-closed.
+Live mode is blocked unless GEMINI_API_LIVE_MODE=true and GEMINI_API_KEY or GOOGLE_API_KEY exists in the Runner environment.
+Secrets must not be posted in chat, Drive docs, public GitHub, or hardcoded code.
 ```
 
 Capability-request-broker:
@@ -134,6 +158,7 @@ Remains LIKELY_NEEDS_REVIEW until one real private floor/object pilot is process
 ## Validation records
 
 ```text
+#100 Skeleton Core CI run 25565705312 -> success.
 #98 Skeleton Core CI run 25539774958 -> success.
 #92/#96 Skeleton Core CI run 25526615544 -> success.
 #90/#94 Skeleton Core CI run 25499030865 -> success.
@@ -144,9 +169,10 @@ Remains LIKELY_NEEDS_REVIEW until one real private floor/object pilot is process
 ## Active queue
 
 ```text
-1. private construction-takeoff pilot prep — use the public skill on a private Drive/local dataset, without public object data
-2. #89 secrets-preflight — prevent secrets, .env, tokens, keys, and private URLs from entering diffs/outputs
-3. #95 runner-status-check — runner heartbeat/status -> queue pacing so tasks do not advance while runner is still running/blocked/stale
+1. private Gemini live ping — only from Runner/local environment, using public-safe packet and GEMINI_API_LIVE_MODE=true
+2. private construction-takeoff pilot prep — use the public skill on a private Drive/local dataset, without public object data
+3. #89 secrets-preflight — prevent secrets, .env, tokens, keys, and private URLs from entering diffs/outputs
+4. #95 runner-status-check — runner heartbeat/status -> queue pacing so tasks do not advance while runner is still running/blocked/stale
 ```
 
 ## Safety boundaries
@@ -158,6 +184,7 @@ No private infrastructure details in public GitHub.
 No external service calls unless explicitly authorized.
 No deploy/server changes unless explicitly requested.
 No secrets, tokens, passwords, API keys, .env values, bank data, private documents, or raw private content in public GitHub.
+No Gemini API key in chat, Google Drive files, public GitHub, committed .env files, or hardcoded code.
 No real construction-object drawings, addresses, client data, extracted real quantities, or Drive URLs in public GitHub.
 ```
 
