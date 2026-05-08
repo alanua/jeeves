@@ -37,9 +37,7 @@ OUTPUT_SCHEMA_VERSION = "gemini-auditor-mock-output-v0.1"
 DEFAULT_MODEL = "gemini-2.5-flash"
 SECRET_PATTERNS = {
     "gemini_api_key": r"AIza[0-9A-Za-z_\-]{20,}",
-    "generic_api_key": (
-        r"(?i)(api[_-]?key|secret|token|password)" r"\s*[:=]\s*['\"]?[^\s,'\"]+"
-    ),
+    "generic_api_key": (r"(?i)(api[_-]?key|secret|token|password)" r"\s*[:=]\s*['\"]?[^\s,'\"]+"),
     "email_address": r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}",
     "private_key": r"-----BEGIN [A-Z ]*PRIVATE KEY-----",
 }
@@ -116,9 +114,7 @@ def scan_sensitive_text(text: str) -> list[str]:
 
 
 def _packet_text(packet: GeminiAuditorInput) -> str:
-    return json.dumps(
-        packet.model_dump(mode="json"), ensure_ascii=False, sort_keys=True
-    )
+    return json.dumps(packet.model_dump(mode="json"), ensure_ascii=False, sort_keys=True)
 
 
 def _blocked(
@@ -235,9 +231,7 @@ def call_live_gemini(packet: GeminiAuditorInput, *, model: str) -> GeminiAuditor
         f"{urllib.parse.quote(model, safe='')}:generateContent"
         f"?key={urllib.parse.quote(api_key, safe='')}"
     )
-    body = json.dumps(
-        {"contents": [{"parts": [{"text": _live_prompt(packet)}]}]}
-    ).encode("utf-8")
+    body = json.dumps({"contents": [{"parts": [{"text": _live_prompt(packet)}]}]}).encode("utf-8")
     request = urllib.request.Request(
         endpoint,
         data=body,
@@ -251,9 +245,7 @@ def call_live_gemini(packet: GeminiAuditorInput, *, model: str) -> GeminiAuditor
     return GeminiAuditorOutput.model_validate_json(output_text)
 
 
-def run_adapter(
-    packet: GeminiAuditorInput, *, model: str = DEFAULT_MODEL
-) -> GeminiAdapterPacket:
+def run_adapter(packet: GeminiAuditorInput, *, model: str = DEFAULT_MODEL) -> GeminiAdapterPacket:
     """Run mock-first Gemini auditor adapter."""
     flags = scan_sensitive_text(_packet_text(packet))
     if flags:
@@ -334,9 +326,7 @@ def run_adapter(
     )
 
 
-def run_adapter_from_json(
-    raw_json: str, *, model: str = DEFAULT_MODEL
-) -> GeminiAdapterPacket:
+def run_adapter_from_json(raw_json: str, *, model: str = DEFAULT_MODEL) -> GeminiAdapterPacket:
     """Validate JSON input and run the adapter."""
     try:
         packet = GeminiAuditorInput.model_validate_json(raw_json)
