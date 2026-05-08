@@ -1,0 +1,13 @@
+{
+  "action": "github_update_file",
+  "repository": "alanua/jeeves",
+  "branch": "skeleton/workflow-gate-v2",
+  "changed_files": ["tools/skeleton_core/workflow_gate.py"],
+  "python_files_changed": true,
+  "preflights": {
+    "local_black_applied": "missing",
+    "format_preflight": "unknown",
+    "head_sha_verified": "ok"
+  },
+  "requested_next_action": "update_file"
+}

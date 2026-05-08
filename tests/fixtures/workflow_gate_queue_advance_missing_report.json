@@ -1,0 +1,10 @@
+{
+  "action": "queue_advance",
+  "repository": "alanua/jeeves",
+  "branch": "main",
+  "preflights": {
+    "queue_state": "has_next_runnable_issue"
+  },
+  "queue_next_runnable_issue": 90,
+  "requested_next_action": "start_next_issue"
+}
