@@ -26,6 +26,7 @@ AdapterStatus = Literal[
     "live_block",
     "blocked_schema_validation",
     "blocked_secret_or_pii",
+    "blocked_live_mode_disabled",
     "blocked_live_mode_missing_key",
     "blocked_output_validation",
     "blocked_live_transport_error",
@@ -36,13 +37,20 @@ OUTPUT_SCHEMA_VERSION = "gemini-auditor-mock-output-v0.1"
 DEFAULT_MODEL = "gemini-2.5-flash"
 SECRET_PATTERNS = {
     "gemini_api_key": r"AIza[0-9A-Za-z_\-]{20,}",
-    "generic_api_key": r"(?i)(api[_-]?key|secret|token|password)\s*[:=]\s*['\"]?[^\s,'\"]+",
+    "generic_api_key": (
+        r"(?i)(api[_-]?key|secret|token|password)"
+        r"\s*[:=]\s*['\"]?[^\s,'\"]+"
+    ),
     "email_address": r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}",
     "private_key": r"-----BEGIN [A-Z ]*PRIVATE KEY-----",
 }
 POISON_PATTERNS = {
-    "poisoned_instruction": r"(?i)poisoned_instruction|ignore previous|bypass.+control|disable.+gate",
-    "structural_code_injection": r"(?i)__proto__|constructor\s*:|import\s+os|subprocess|eval\(|exec\(",
+    "poisoned_instruction": (
+        r"(?i)poisoned_instruction|ignore previous|bypass.+control|disable.+gate"
+    ),
+    "structural_code_injection": (
+        r"(?i)__proto__|constructor\s*:|import\s+os|subprocess|eval\(|exec\("
+    ),
 }
 
 
@@ -145,6 +153,7 @@ def validate_output(output: GeminiAuditorOutput, *, strict_mode: bool) -> list[s
         reasons.append("live_access_references_must_be_empty")
     if strict_mode and output.architecture_suggestions:
         reasons.append("architecture_suggestions_must_be_empty_in_strict_mode")
+
     inbound_flags = scan_sensitive_text(output.model_dump_json())
     reasons.extend(f"inbound_{flag}" for flag in inbound_flags)
     return sorted(set(reasons))
@@ -180,6 +189,10 @@ def _api_key_from_env() -> str | None:
     return os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
 
 
+def _live_mode_enabled() -> bool:
+    return os.environ.get("GEMINI_API_LIVE_MODE", "").casefold() == "true"
+
+
 def _live_prompt(packet: GeminiAuditorInput) -> str:
     return (
         "You are a stateless Gemini Auditor Node. Return only strict JSON matching "
@@ -193,10 +206,12 @@ def _extract_text_from_gemini_response(raw: dict[str, Any]) -> str:
     candidates = raw.get("candidates") or []
     if not candidates:
         raise ValueError("missing_candidates")
+
     content = candidates[0].get("content") or {}
     parts = content.get("parts") or []
     texts = [part.get("text", "") for part in parts if isinstance(part, dict)]
     text = "".join(texts).strip()
+
     if text.startswith("```json"):
         text = text.removeprefix("```json").strip()
     if text.startswith("```"):
@@ -219,7 +234,9 @@ def call_live_gemini(packet: GeminiAuditorInput, *, model: str) -> GeminiAuditor
         f"{urllib.parse.quote(model, safe='')}:generateContent"
         f"?key={urllib.parse.quote(api_key, safe='')}"
     )
-    body = json.dumps({"contents": [{"parts": [{"text": _live_prompt(packet)}]}]}).encode("utf-8")
+    body = json.dumps(
+        {"contents": [{"parts": [{"text": _live_prompt(packet)}]}]}
+    ).encode("utf-8")
     request = urllib.request.Request(
         endpoint,
         data=body,
@@ -228,6 +245,7 @@ def call_live_gemini(packet: GeminiAuditorInput, *, model: str) -> GeminiAuditor
     )
     with urllib.request.urlopen(request, timeout=60) as response:
         raw_response = json.loads(response.read().decode("utf-8"))
+
     output_text = _extract_text_from_gemini_response(raw_response)
     return GeminiAuditorOutput.model_validate_json(output_text)
 
@@ -245,6 +263,15 @@ def run_adapter(packet: GeminiAuditorInput, *, model: str = DEFAULT_MODEL) -> Ge
             flags=flags,
         )
 
+    if packet.mode == "live" and not _live_mode_enabled():
+        return _blocked(
+            "blocked_live_mode_disabled",
+            packet_id=packet.packet_id,
+            mode=packet.mode,
+            model=model,
+            reasons=["GEMINI_API_LIVE_MODE=true is required for live mode."],
+        )
+
     if packet.mode == "live" and not _api_key_from_env():
         return _blocked(
             "blocked_live_mode_missing_key",
@@ -255,7 +282,11 @@ def run_adapter(packet: GeminiAuditorInput, *, model: str = DEFAULT_MODEL) -> Ge
         )
 
     try:
-        output = build_mock_output(packet) if packet.mode == "mock" else call_live_gemini(packet, model=model)
+        output = (
+            build_mock_output(packet)
+            if packet.mode == "mock"
+            else call_live_gemini(packet, model=model)
+        )
     except (RuntimeError, urllib.error.URLError, TimeoutError) as exc:
         return _blocked(
             "blocked_live_transport_error",
@@ -311,11 +342,19 @@ def run_adapter_from_json(raw_json: str, *, model: str = DEFAULT_MODEL) -> Gemin
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run the Gemini auditor adapter.")
-    parser.add_argument("--input", required=True, type=Path, help="Path to input packet JSON")
+    parser.add_argument(
+        "--input",
+        required=True,
+        type=Path,
+        help="Path to input packet JSON",
+    )
     parser.add_argument("--model", default=DEFAULT_MODEL, help="Gemini model name")
     args = parser.parse_args(argv)
 
-    result = run_adapter_from_json(args.input.read_text(encoding="utf-8"), model=args.model)
+    result = run_adapter_from_json(
+        args.input.read_text(encoding="utf-8"),
+        model=args.model,
+    )
     print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
     return 0 if not result.status.startswith("blocked_") else 1
 
