@@ -1,5 +1,3 @@
-import os
-
 from tools.skeleton_core.gemini_auditor_adapter import (
     GeminiAuditorInput,
     GeminiAuditorOutput,
