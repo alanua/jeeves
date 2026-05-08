@@ -1,0 +1,17 @@
+{
+  "schema_version": "gemini_adapter.input.v1",
+  "packet_id": "gemini-test-live-missing-key-001",
+  "objective": "Verify live mode blocks when no environment key is available.",
+  "mode": "live",
+  "privacy_level": "PUBLIC_SAFE",
+  "confirmed_canon": "Live mode requires GEMINI_API_KEY or GOOGLE_API_KEY in runner environment.",
+  "evidence": "Public-safe synthetic evidence only.",
+  "draft_artifact": "Synthetic live-mode request.",
+  "exact_questions": [
+    "Should this block without a key?"
+  ],
+  "forbidden_actions": [
+    "do not execute commands",
+    "do not update canon"
+  ]
+}
