@@ -76,8 +76,109 @@ source inventory
 -> cross-check matrix
 -> review items
 -> preliminary workbook
+-> optional Gemini second-brain review pass
+-> ChatGPT/Skeleton synthesis
 -> human review
 ```
+
+## Gemini second-brain review pass
+
+Gemini may be used as a Runner-mediated second-brain auditor after local/private extraction has produced preliminary tables and validation-gate results.
+
+Gemini is evidence/review support only. It is not a geometry source of record, not an executor, not a canon writer, not a merger/deployer, and not the final quantity authority. ChatGPT/Skeleton remains the architect, control plane, privacy gate, and canon gate. Oleksii remains the final reviewer for ambiguous construction facts.
+
+Use this review pattern:
+
+```text
+private drawings
+-> local source inventory
+-> local extraction/parsing
+-> preliminary CSV/XLSX tables
+-> validation gates
+-> redacted/public-safe or approved private Gemini Intake Packet
+-> Gemini anomaly/consistency review
+-> adapter fail-closed output validation
+-> ChatGPT/Skeleton synthesis
+-> Oleksii review
+```
+
+Gemini may help answer:
+
+```text
+Are source priorities applied consistently?
+Are room areas, wall areas, openings, heights, and façade values internally consistent?
+Which rows look suspicious or need human review?
+Which validation gates failed or are underspecified?
+Are there conflicts between DXF/DWG, IFC, PDF, sections, façades, and scans?
+Are assumptions clearly separated from extracted facts?
+Are statuses and confidence levels assigned consistently?
+```
+
+Gemini must not:
+
+```text
+produce final billable quantity claims
+execute commands
+access parser/source files outside the Runner packet
+update canon
+merge, deploy, or touch server/runtime state
+publish private project data
+be treated as the geometry source of record
+```
+
+## Gemini Intake Packet for Construction Takeoff
+
+The Runner may prepare a Gemini packet only after the privacy gate chooses a safe route:
+
+```text
+PUBLIC_SAFE = synthetic/redacted examples only.
+STRICT_REDACTION = real-derived summaries after deterministic redaction.
+INTERNAL_BHK = private/internal working packet allowed only inside approved Runner/server environment.
+```
+
+A Construction Takeoff Gemini packet should include only the minimum needed review surface:
+
+```text
+schema_version
+packet_id
+objective
+mode
+privacy_level
+confirmed_canon
+evidence summary
+draft_artifact summary
+exact_questions
+forbidden_actions
+```
+
+The evidence summary should describe table/gate results and row identifiers, not raw private drawings. If real private data is used inside an approved private Runner environment, public reports must mention only artifact types, gate categories, and next safe steps.
+
+## Gemini output handling
+
+Gemini output must pass the Gemini Auditor adapter validation before ChatGPT/Skeleton uses it.
+
+Fail closed if the response:
+
+```text
+sets canon_claim=true
+returns non-empty commands
+returns live access references
+contains secret/private leakage
+violates the output schema
+claims final authority over quantities
+```
+
+After validation, ChatGPT/Skeleton must synthesize Gemini's findings into:
+
+```text
+confirmed observations
+possible conflicts
+review items
+questions for Oleksii
+next safe private runner step
+```
+
+Gemini notes may become REVIEW_ITEMS or ASSUMPTIONS only after ChatGPT/Skeleton review. They are not canon by themselves.
 
 ## Table schemas
 
@@ -413,6 +514,8 @@ opening subtraction gate
 DG/sloped ceiling section gate
 façade separation gate
 privacy/publication gate
+Gemini packet privacy gate, if second-brain review is used
+Gemini output validation gate, if second-brain review is used
 ```
 
 A preliminary workbook is not reviewable unless each relevant gate is either passed or represented as a REVIEW_ITEMS row.
@@ -437,9 +540,22 @@ never upload private drawings or real extracted quantities to public GitHub
 ## Runner / Codex handoff roles
 
 ```text
-ChatGPT/Skeleton: method, schema, gates, review framing
-Runner/Codex: local/offline extraction scripts, parser execution, CSV/XLSX artifacts, logs
+ChatGPT/Skeleton: method, schema, gates, review framing, Gemini packet framing, synthesis
+Runner/Codex: local/offline extraction scripts, parser execution, CSV/XLSX artifacts, logs, optional Gemini adapter call when explicitly approved
+Gemini: stateless second-brain auditor over the prepared packet, evidence only
 Oleksii: final review/acceptance of ambiguous construction facts
+```
+
+## Promotion criteria after private pilot
+
+This skill may be promoted only after a private pilot demonstrates:
+
+```text
+local/private extraction produced a preliminary workbook
+validation gates produced review items for uncertainties
+optional Gemini review, if used, remained evidence-only and fail-closed
+ChatGPT/Skeleton synthesized the findings without leaking private data
+Oleksii reviewed one floor/object end-to-end
 ```
 
 ## Definition of done
@@ -454,6 +570,7 @@ Done requires:
 - privacy route is explicit;
 - table schemas and statuses exist;
 - first private pilot run produces a workbook;
+- optional Gemini second-brain review pass is tested safely when the bridge is verified;
 - one floor/object is reviewed end-to-end;
 - gaps are recorded;
 - after review, status may be promoted from LIKELY_NEEDS_REVIEW to CONFIRMED_WORKFLOW.
@@ -467,4 +584,4 @@ Status remains:
 LIKELY_NEEDS_REVIEW
 ```
 
-Promotion requires one successful private pilot floor/object reviewed by Oleksii.
+Promotion requires one successful private pilot floor/object reviewed by Oleksii. If Gemini second-brain review is used, the Runner-side Gemini bridge must be verified first and the output must remain evidence only.
