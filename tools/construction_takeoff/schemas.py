@@ -59,7 +59,11 @@ class PilotConfig:
 @dataclass(frozen=True)
 class ArtifactSet:
     source_inventory_csv: Path
+    pdf_text_blocks_csv: Path
+    dxf_layers_csv: Path
+    dxf_entities_summary_csv: Path
     review_items_csv: Path
+    workbook_manifest_csv: Path
     gemini_intake_packet_json: Path
     notebooklm_handoff_md: Path
     runner_log_md: Path
