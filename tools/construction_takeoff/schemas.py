@@ -12,6 +12,13 @@ from typing import Literal
 
 SourceType = Literal["pdf", "dxf", "dwg", "pln", "scan", "folder", "other"]
 ParseStatus = Literal["pending", "parsed", "unsupported", "failed_parse", "metadata_only"]
+PrelimStatus = Literal[
+    "candidate_review_required",
+    "placeholder_review_required",
+    "unsupported",
+    "failed_parse",
+    "no_candidates",
+]
 
 
 @dataclass(frozen=True)
@@ -46,6 +53,70 @@ class ReviewItem:
 
 
 @dataclass(frozen=True)
+class RoomPrelim:
+    room_prelim_id: str
+    source_ref: str
+    source_entity_id: str
+    source_layer: str
+    area_raw: str
+    area_unit: str
+    confidence: str
+    status: PrelimStatus
+    review_required: str = "yes"
+    version_match_status: str = "not_performed"
+    notes: str = "Preliminary closed-polyline candidate only; not a final quantity claim."
+
+    def to_row(self) -> dict[str, str]:
+        return {key: str(value) for key, value in asdict(self).items()}
+
+
+@dataclass(frozen=True)
+class WallPrelim:
+    wall_prelim_id: str
+    source_ref: str
+    source_entity_id: str
+    source_layer: str
+    length_raw: str
+    height_raw: str
+    area_raw: str
+    unit: str
+    confidence: str
+    status: PrelimStatus = "placeholder_review_required"
+    review_required: str = "yes"
+    version_match_status: str = "not_performed"
+    notes: str = "Wall extraction is not implemented in this public-safe v0 scaffold."
+
+    def to_row(self) -> dict[str, str]:
+        return {key: str(value) for key, value in asdict(self).items()}
+
+
+@dataclass(frozen=True)
+class CrosscheckRow:
+    crosscheck_id: str
+    check_name: str
+    source_refs: str
+    status: str
+    review_required: str
+    notes: str
+
+    def to_row(self) -> dict[str, str]:
+        return {key: str(value) for key, value in asdict(self).items()}
+
+
+@dataclass(frozen=True)
+class AssumptionRow:
+    assumption_id: str
+    scope: str
+    assumption: str
+    status: str
+    review_required: str
+    notes: str = ""
+
+    def to_row(self) -> dict[str, str]:
+        return {key: str(value) for key, value in asdict(self).items()}
+
+
+@dataclass(frozen=True)
 class PilotConfig:
     source_dir: Path
     output_dir: Path
@@ -62,8 +133,13 @@ class ArtifactSet:
     pdf_text_blocks_csv: Path
     dxf_layers_csv: Path
     dxf_entities_summary_csv: Path
+    rooms_prelim_csv: Path
+    walls_prelim_csv: Path
+    crosscheck_matrix_csv: Path
+    assumptions_csv: Path
     review_items_csv: Path
     workbook_manifest_csv: Path
+    workbook_xlsx: Path
     gemini_intake_packet_json: Path
     notebooklm_handoff_md: Path
     runner_log_md: Path
