@@ -2,7 +2,7 @@
 
 Status: CONFIRMED_CANON
 Scope: short public-safe handoff for the next ChatGPT branch working on СК / Skeleton
-Last updated: 2026-05-08
+Last updated: 2026-05-09
 
 ## Active project
 
@@ -16,6 +16,14 @@ Current work is the ChatGPT-side external control/support layer, not Jeeves runt
 
 Skeleton Stage 1 is complete enough for active use.
 Skeleton Stage 2+ is active as practical productivity growth.
+
+The most important recent correction is:
+
+```text
+Skeleton must not guess operational infrastructure facts.
+After `прокинься СК`, use the exact wake source map in START_HERE.md.
+For live runner behavior, public docs are not enough; verify live script evidence or private handoff.
+```
 
 ## Active local/offline Externalizer commands
 
@@ -64,6 +72,7 @@ Priority: HIGH
 Status: LIKELY_NEEDS_REVIEW
 Public GitHub: protocol + mock-first adapter only
 Private/live route: only through Runner environment with GEMINI_API_KEY and GEMINI_API_LIVE_MODE=true
+Live bridge: still needs verified Runner report from #101 or equivalent
 ```
 
 Construction Takeoff / Aufmaß status:
@@ -72,7 +81,72 @@ Construction Takeoff / Aufmaß status:
 Priority: HIGH
 Status: LIKELY_NEEDS_REVIEW
 Public GitHub: generic skill docs/templates only
+Gemini second-brain review pass: documented in main via #105
 Private pilot: real objects/files/outputs stay in Drive/local runner only
+```
+
+## Exact wake source map
+
+`knowledge_base/chatgpt_exoskeleton/START_HERE.md` now contains an exact source map for `прокинься СК` / `СК`.
+
+The wake flow is:
+
+```text
+read exact required files
+-> read topic-specific files
+-> read private Drive handoff if infrastructure is involved
+-> verify live runner facts from live script output or private handoff
+-> claim only verified facts
+```
+
+Core rule:
+
+```text
+verified source -> claim
+no verified source -> unknown_needs_source
+```
+
+Do not say that a live runner will pick up a task unless the queue labels and actual route in the live runner script are verified.
+
+## Live Hetzner yellow runner contract
+
+Confirmed from Oleksii terminal output and private Drive handoff:
+
+```text
+[agent-task-yellow] alone is not enough for live pickup.
+```
+
+The live Hetzner yellow runner searches these repos:
+
+```text
+alanua/bauclock
+alanua/jeeves
+alanua/Knowledge-base
+```
+
+Required labels for pickup:
+
+```text
+agent:task
+agent:queued
+risk:yellow
+runner:hetzner OR runner:any
+```
+
+The issue must also be open.
+
+Known uncertainty:
+
+```text
+The first inspected part of agent-run-next-yellow confirmed label selection and claim behavior.
+The route/case section still needs inspection before treating new task types as runnable.
+Next source needed: sed -n '760,835p' /home/agent/agent-dev/bin/agent-run-next-yellow
+```
+
+Track this in:
+
+```text
+#104 Inventory and source-control live Hetzner runner scripts
 ```
 
 ## Mandatory activation rule
@@ -117,6 +191,8 @@ workflow-gate is mandatory before relevant GitHub write/review/runner/queue acti
 construction-takeoff-from-drawings/#98 docs+template -> merged, SHA 0b71d67f97bcad41bbae7aeacba92d1edec4ffc0
 #99 Gemini Auditor Node bridge protocol -> merged, SHA f2833a19ed658fc1e071ceb3a8a47fb1b2f174ab
 #100 mock-first Gemini auditor adapter -> merged, SHA aca2e71c1543c50b8b1f44474c8d9a3a77500c69
+#103 exact Skeleton wake source map -> merged, merge commit 7f92a657f9036f6b1c7f5c36ec9f771b1903d614
+#105 Construction Takeoff Gemini second-brain review pass -> merged, merge commit 72872e1a1513886a1009fcd6beb83a1d294e8c89
 ```
 
 ## Key results
@@ -149,8 +225,9 @@ Converts public-safe project blocker/manual-step exports into Skeleton skill req
 Construction Takeoff / Aufmaß:
 
 ```text
-Public-safe skill document and generic runner task template now exist in main.
+Public-safe skill document and generic runner task template exist in main.
 Defines source priority, public/private routing, table schemas, statuses, validation gates, DXF/DWG parser expectations, and runner handoff.
+Now includes optional Gemini second-brain review pass: Gemini reviews consistency/anomalies only, not final quantities or geometry source of record.
 No private drawings, real project data, extracted quantities, Drive URLs, parser code, live API calls, or final billable quantity claims were added to public GitHub.
 Remains LIKELY_NEEDS_REVIEW until one real private floor/object pilot is processed end-to-end and reviewed by Oleksii.
 ```
@@ -158,6 +235,8 @@ Remains LIKELY_NEEDS_REVIEW until one real private floor/object pilot is process
 ## Validation records
 
 ```text
+#105 Skeleton Core CI run 25602313369 -> success.
+#103 Skeleton Core CI run 25602241998 -> success.
 #100 Skeleton Core CI run 25565705312 -> success.
 #98 Skeleton Core CI run 25539774958 -> success.
 #92/#96 Skeleton Core CI run 25526615544 -> success.
@@ -169,10 +248,11 @@ Remains LIKELY_NEEDS_REVIEW until one real private floor/object pilot is process
 ## Active queue
 
 ```text
-1. private Gemini live ping — only from Runner/local environment, using public-safe packet and GEMINI_API_LIVE_MODE=true
-2. private construction-takeoff pilot prep — use the public skill on a private Drive/local dataset, without public object data
-3. #89 secrets-preflight — prevent secrets, .env, tokens, keys, and private URLs from entering diffs/outputs
-4. #95 runner-status-check — runner heartbeat/status -> queue pacing so tasks do not advance while runner is still running/blocked/stale
+1. #104 live Hetzner runner script inventory/source-control — blocked until route section is inspected
+2. #101 private Gemini live ping — blocked until Runner route/pickup is verified or a matching live route is added
+3. private construction-takeoff pilot prep — use the public skill on a private Drive/local dataset, without public object data; Gemini review depends on verified bridge
+4. #89 secrets-preflight — prevent secrets, .env, tokens, keys, and private URLs from entering diffs/outputs
+5. #95 runner-status-check — runner heartbeat/status -> queue pacing so tasks do not advance while runner is still running/blocked/stale
 ```
 
 ## Safety boundaries
@@ -197,6 +277,7 @@ No real construction-object drawings, addresses, client data, extracted real qua
 Користуватися короткими коментарями, чеклістами і прямими діями.
 Нові policy docs — тільки за прямою командою.
 Built Skeleton skills must be activated as gates, not just listed as capabilities.
+Technical/infrastructure claims must be verified-or-unknown; no guessing.
 ```
 
 `+` means:
@@ -209,7 +290,7 @@ High-risk or destructive actions still require an explicit named instruction fro
 
 ## Short boot instruction for the next branch
 
-When Oleksii says `прокинься` and the active project is `СК`, load:
+When Oleksii says `прокинься СК`, load:
 
 ```text
 BOOTLOADER.md
@@ -220,8 +301,10 @@ knowledge_base/CHATGPT_BRANCH_CONTINUITY_BOOT.md
 knowledge_base/assistant_diary.md
 knowledge_base/chatgpt_exoskeleton/START_HERE.md
 knowledge_base/chatgpt_exoskeleton/CURRENT_STATE.md
+knowledge_base/chatgpt_exoskeleton/CONTROLLED_GROWTH.md
+knowledge_base/chatgpt_exoskeleton/SKELETON_RUNNER_TASK_TEMPLATE.md
 knowledge_base/CHATGPT_EXOSKELETON.md
 knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md
 ```
 
-Then use Skeleton/Externalizer on the current real task without asking Oleksii to repeat context.
+Then load topic-specific files from the exact wake source map in `START_HERE.md`. If the topic involves Hetzner/Termux/live runner behavior, also read the private Drive handoff and require live runner script evidence when exact behavior matters.
