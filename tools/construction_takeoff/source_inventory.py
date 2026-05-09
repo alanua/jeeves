@@ -71,16 +71,22 @@ def priority_for(source_type: str, name: str, source_priority: str) -> str:
     return "standard_priority"
 
 
-def build_source_inventory(source_dir: Path, scope: str, source_priority: str) -> list[SourceRecord]:
+def build_source_inventory(
+    source_dir: Path, scope: str, source_priority: str
+) -> list[SourceRecord]:
     if not source_dir.exists():
         raise FileNotFoundError(f"source directory does not exist: {source_dir}")
     if not source_dir.is_dir():
         raise NotADirectoryError(f"source path is not a directory: {source_dir}")
 
     records: list[SourceRecord] = []
-    for index, path in enumerate(sorted(source_dir.iterdir(), key=lambda item: item.name.lower()), start=1):
+    for index, path in enumerate(
+        sorted(source_dir.iterdir(), key=lambda item: item.name.lower()), start=1
+    ):
         source_type = classify_source(path)
-        parse_status = "pending" if source_type in {"pdf", "dxf", "dwg"} else "metadata_only"
+        parse_status = (
+            "pending" if source_type in {"pdf", "dxf", "dwg"} else "metadata_only"
+        )
         records.append(
             SourceRecord(
                 source_id=f"SRC-{index:04d}",
@@ -89,7 +95,9 @@ def build_source_inventory(source_dir: Path, scope: str, source_priority: str) -
                 file_format=path.suffix.lower().lstrip(".") if path.suffix else "folder",
                 floor_or_scope=infer_floor_or_scope(path.name, scope),
                 source_role=source_role_for(source_type, path.name),
-                priority_for_this_object=priority_for(source_type, path.name, source_priority),
+                priority_for_this_object=priority_for(
+                    source_type, path.name, source_priority
+                ),
                 parse_status=parse_status,  # type: ignore[arg-type]
                 notes="",
             )
