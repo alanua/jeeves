@@ -6,10 +6,13 @@ import argparse
 import csv
 from pathlib import Path
 
+from .dxf_probe import probe_dxf, write_dxf_entities_summary, write_dxf_layers
 from .gemini_packet import build_gemini_packet, write_gemini_packet
 from .notebooklm_handoff import build_notebooklm_handoff, write_notebooklm_handoff
+from .pdf_extract import extract_pdf_text_blocks, write_pdf_text_blocks
 from .schemas import ArtifactSet, PilotConfig, ReviewItem
 from .source_inventory import build_source_inventory, write_source_inventory
+from .workbook_export import write_workbook_manifest
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -32,7 +35,11 @@ def run_pilot(config: PilotConfig) -> ArtifactSet:
 
     artifacts = ArtifactSet(
         source_inventory_csv=config.output_dir / "source_inventory.csv",
+        pdf_text_blocks_csv=config.output_dir / "pdf_text_blocks.csv",
+        dxf_layers_csv=config.output_dir / "dxf_layers.csv",
+        dxf_entities_summary_csv=config.output_dir / "dxf_entities_summary.csv",
         review_items_csv=config.output_dir / "review_items.csv",
+        workbook_manifest_csv=config.output_dir / "workbook_manifest.csv",
         gemini_intake_packet_json=config.output_dir / "gemini_intake_packet.json",
         notebooklm_handoff_md=config.output_dir / "notebooklm_handoff.md",
         runner_log_md=config.output_dir / "runner_log.md",
@@ -40,6 +47,22 @@ def run_pilot(config: PilotConfig) -> ArtifactSet:
 
     records = build_source_inventory(config.source_dir, config.scope, config.source_priority)
     write_source_inventory(records, artifacts.source_inventory_csv)
+
+    pdf_rows = []
+    dxf_layer_rows = []
+    dxf_entity_rows = []
+    for record in records:
+        source_path = config.source_dir / record.private_source_ref
+        if record.source_type == "pdf" and source_path.is_file():
+            pdf_rows.extend(extract_pdf_text_blocks(source_path))
+        if record.source_type == "dxf" and source_path.is_file():
+            layer_rows, entity_rows = probe_dxf(source_path)
+            dxf_layer_rows.extend(layer_rows)
+            dxf_entity_rows.extend(entity_rows)
+
+    write_pdf_text_blocks(pdf_rows, artifacts.pdf_text_blocks_csv)
+    write_dxf_layers(dxf_layer_rows, artifacts.dxf_layers_csv)
+    write_dxf_entities_summary(dxf_entity_rows, artifacts.dxf_entities_summary_csv)
 
     review_items = _initial_review_items(records)
     _write_review_items(review_items, artifacts.review_items_csv)
@@ -49,6 +72,20 @@ def run_pilot(config: PilotConfig) -> ArtifactSet:
 
     handoff = build_notebooklm_handoff(config, records)
     write_notebooklm_handoff(handoff, artifacts.notebooklm_handoff_md)
+
+    write_workbook_manifest(
+        [
+            artifacts.source_inventory_csv,
+            artifacts.pdf_text_blocks_csv,
+            artifacts.dxf_layers_csv,
+            artifacts.dxf_entities_summary_csv,
+            artifacts.review_items_csv,
+            artifacts.gemini_intake_packet_json,
+            artifacts.notebooklm_handoff_md,
+            artifacts.runner_log_md,
+        ],
+        artifacts.workbook_manifest_csv,
+    )
 
     _write_runner_log(config, artifacts, len(records), len(review_items))
     return artifacts
@@ -146,7 +183,11 @@ def main(argv: list[str] | None = None) -> int:
         )
         artifacts = run_pilot(config)
         print(f"source_inventory={artifacts.source_inventory_csv}")
+        print(f"pdf_text_blocks={artifacts.pdf_text_blocks_csv}")
+        print(f"dxf_layers={artifacts.dxf_layers_csv}")
+        print(f"dxf_entities_summary={artifacts.dxf_entities_summary_csv}")
         print(f"review_items={artifacts.review_items_csv}")
+        print(f"workbook_manifest={artifacts.workbook_manifest_csv}")
         print(f"gemini_packet={artifacts.gemini_intake_packet_json}")
         print(f"notebooklm_handoff={artifacts.notebooklm_handoff_md}")
         print(f"runner_log={artifacts.runner_log_md}")
