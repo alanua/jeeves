@@ -61,6 +61,8 @@ workflow-gate
 ```text
 construction_takeoff_from_drawings
 construction_takeoff_runner_task_template
+semi_automatic_construction_takeoff_with_gemini
+semi_automatic_construction_takeoff_gemini_task_template
 gemini_auditor_node
 gemini_auditor_adapter
 ```
@@ -82,7 +84,20 @@ Priority: HIGH
 Status: LIKELY_NEEDS_REVIEW
 Public GitHub: generic skill docs/templates only
 Gemini second-brain review pass: documented in main via #105
+Semi-automatic takeoff + Gemini workflow: documented in main via #109
 Private pilot: real objects/files/outputs stay in Drive/local runner only
+```
+
+Semi-automatic Construction Takeoff + Gemini status:
+
+```text
+Priority: HIGH
+Status: LIKELY_NEEDS_REVIEW
+Public GitHub: skill/protocol + runner task template merged via #109
+Purpose: coordinate Oleksii + ChatGPT/Skeleton + Runner + Gemini for semi-automatic takeoff without pretending full autonomy
+Activation: use when the user asks for semi-automatic Aufmaß / drawing analysis / room areas / wall areas / Gemini review
+Real extraction: stopped in the prior chat and should continue only in a separate work branch/chat
+Private source folder and object-specific source priority are recorded only in the private Drive pilot handoff
 ```
 
 ## Exact wake source map
@@ -135,12 +150,13 @@ runner:hetzner OR runner:any
 
 The issue must also be open.
 
-Known uncertainty:
+Verified route status:
 
 ```text
-The first inspected part of agent-run-next-yellow confirmed label selection and claim behavior.
-The route/case section still needs inspection before treating new task types as runnable.
-Next source needed: sed -n '760,835p' /home/agent/agent-dev/bin/agent-run-next-yellow
+The live yellow runner is not a fully generic executor for every `[agent-task-yellow]` issue.
+It uses hard-coded run_* route functions and a case "$REPO|$TITLE" dispatch table.
+The only observed generic fallback is scoped to alanua/Knowledge-base with lane:docs.
+There is no verified generic route for arbitrary alanua/jeeves Skeleton tasks.
 ```
 
 Track this in:
@@ -193,6 +209,8 @@ construction-takeoff-from-drawings/#98 docs+template -> merged, SHA 0b71d67f97bc
 #100 mock-first Gemini auditor adapter -> merged, SHA aca2e71c1543c50b8b1f44474c8d9a3a77500c69
 #103 exact Skeleton wake source map -> merged, merge commit 7f92a657f9036f6b1c7f5c36ec9f771b1903d614
 #105 Construction Takeoff Gemini second-brain review pass -> merged, merge commit 72872e1a1513886a1009fcd6beb83a1d294e8c89
+#106 current state update after wake map and takeoff merges -> merged, merge commit df2a399da1e3ee590d0348fb8e16ceeaf8ff2206
+#109 semi-automatic takeoff Gemini workflow -> merged, merge commit 743832965cb667ff26df96b78be400284c319ad9
 ```
 
 ## Key results
@@ -228,6 +246,7 @@ Construction Takeoff / Aufmaß:
 Public-safe skill document and generic runner task template exist in main.
 Defines source priority, public/private routing, table schemas, statuses, validation gates, DXF/DWG parser expectations, and runner handoff.
 Now includes optional Gemini second-brain review pass: Gemini reviews consistency/anomalies only, not final quantities or geometry source of record.
+Semi-automatic takeoff + Gemini workflow exists to coordinate human checkpoints, Runner extraction, Gemini review, stop/resume, and source-priority handling.
 No private drawings, real project data, extracted quantities, Drive URLs, parser code, live API calls, or final billable quantity claims were added to public GitHub.
 Remains LIKELY_NEEDS_REVIEW until one real private floor/object pilot is processed end-to-end and reviewed by Oleksii.
 ```
@@ -235,6 +254,7 @@ Remains LIKELY_NEEDS_REVIEW until one real private floor/object pilot is process
 ## Validation records
 
 ```text
+#109 Skeleton Core CI run 25603296492 -> success.
 #105 Skeleton Core CI run 25602313369 -> success.
 #103 Skeleton Core CI run 25602241998 -> success.
 #100 Skeleton Core CI run 25565705312 -> success.
@@ -248,9 +268,9 @@ Remains LIKELY_NEEDS_REVIEW until one real private floor/object pilot is process
 ## Active queue
 
 ```text
-1. #104 live Hetzner runner script inventory/source-control — blocked until route section is inspected
-2. #101 private Gemini live ping — blocked until Runner route/pickup is verified or a matching live route is added
-3. private construction-takeoff pilot prep — use the public skill on a private Drive/local dataset, without public object data; Gemini review depends on verified bridge
+1. private construction-takeoff pilot — continue in a separate branch/chat using semi_automatic_construction_takeoff_with_gemini; real source folder and object-specific source priority are in private Drive handoff
+2. #101 private Gemini live ping — blocked until Runner route/pickup is verified or a matching live route/manual Runner call is used
+3. #104 live Hetzner runner script inventory/source-control — route contract now verified as hard-coded; next step is source-control/redacted runner-host scripts or add reviewed Skeleton route
 4. #89 secrets-preflight — prevent secrets, .env, tokens, keys, and private URLs from entering diffs/outputs
 5. #95 runner-status-check — runner heartbeat/status -> queue pacing so tasks do not advance while runner is still running/blocked/stale
 ```
@@ -308,3 +328,18 @@ knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md
 ```
 
 Then load topic-specific files from the exact wake source map in `START_HERE.md`. If the topic involves Hetzner/Termux/live runner behavior, also read the private Drive handoff and require live runner script evidence when exact behavior matters.
+
+For Construction Takeoff / Aufmaß, also load:
+
+```text
+knowledge_base/chatgpt_exoskeleton/skills/construction_takeoff_from_drawings.md
+knowledge_base/chatgpt_exoskeleton/runner_tasks/construction_takeoff_runner_task_template.md
+knowledge_base/chatgpt_exoskeleton/skills/semi_automatic_construction_takeoff_with_gemini.md
+knowledge_base/chatgpt_exoskeleton/runner_tasks/semi_automatic_construction_takeoff_gemini_task_template.md
+```
+
+If the active takeoff topic is the private Consum Quartier pilot, also read the private Drive document:
+
+```text
+СК Private Construction Takeoff Gemini Pilot Handoff
+```
