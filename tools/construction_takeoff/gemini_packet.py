@@ -47,7 +47,9 @@ def build_gemini_packet(config: PilotConfig, records: list[SourceRecord]) -> dic
 
 def write_gemini_packet(packet: dict[str, object], output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(json.dumps(packet, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    output_path.write_text(
+        json.dumps(packet, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
 
 
 def _source_counts(records: list[SourceRecord]) -> dict[str, int]:

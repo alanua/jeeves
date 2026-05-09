@@ -7,7 +7,6 @@ from pathlib import Path
 
 from .schemas import SourceRecord
 
-
 SOURCE_TYPE_BY_SUFFIX = {
     ".pdf": "pdf",
     ".dxf": "dxf",
@@ -71,14 +70,18 @@ def priority_for(source_type: str, name: str, source_priority: str) -> str:
     return "standard_priority"
 
 
-def build_source_inventory(source_dir: Path, scope: str, source_priority: str) -> list[SourceRecord]:
+def build_source_inventory(
+    source_dir: Path, scope: str, source_priority: str
+) -> list[SourceRecord]:
     if not source_dir.exists():
         raise FileNotFoundError(f"source directory does not exist: {source_dir}")
     if not source_dir.is_dir():
         raise NotADirectoryError(f"source path is not a directory: {source_dir}")
 
     records: list[SourceRecord] = []
-    for index, path in enumerate(sorted(source_dir.iterdir(), key=lambda item: item.name.lower()), start=1):
+    for index, path in enumerate(
+        sorted(source_dir.iterdir(), key=lambda item: item.name.lower()), start=1
+    ):
         source_type = classify_source(path)
         parse_status = "pending" if source_type in {"pdf", "dxf", "dwg"} else "metadata_only"
         records.append(
