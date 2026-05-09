@@ -1,6 +1,6 @@
 """Source inventory builder for private Construction Takeoff pilots."""
 
-from __future__ import annotations
+from __future__ import annotations  # noqa: I001
 
 import csv
 from pathlib import Path
