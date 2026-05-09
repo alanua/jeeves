@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 import csv
+from pathlib import Path
 
-from .schemas import SourceRecord
+from tools.construction_takeoff.schemas import SourceRecord
 
 
 SOURCE_TYPE_BY_SUFFIX = {
