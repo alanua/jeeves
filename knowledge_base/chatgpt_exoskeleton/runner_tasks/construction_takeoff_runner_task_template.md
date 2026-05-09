@@ -26,6 +26,8 @@ This template is generic. Replace placeholders only in private task packets or p
 <PDF_CONTROL_FILES>
 <SCAN_FOLDER>
 <EXPECTED_WORKBOOK_NAME>
+<OPTIONAL_GEMINI_PACKET_PATH>
+<OPTIONAL_GEMINI_OUTPUT_PATH>
 ```
 
 ## Source priority
@@ -54,6 +56,8 @@ OpenCV
 IfcOpenShell if available
 ```
 
+Optional Gemini second-brain review may use only the existing Gemini Auditor adapter after explicit approval and after the bridge is verified for the Runner environment.
+
 ## Forbidden
 
 ```text
@@ -65,6 +69,7 @@ No final billable quantity claims.
 No live external model/API calls unless separately approved.
 No merge/deploy/server/production changes.
 No secrets, .env, credentials, or tokens.
+No treating Gemini as a geometry source of record or final authority.
 ```
 
 ## Expected private output folder
@@ -83,6 +88,8 @@ No secrets, .env, credentials, or tokens.
 <WORKING_OUTPUT_FOLDER>/assumptions.csv
 <WORKING_OUTPUT_FOLDER>/<EXPECTED_WORKBOOK_NAME>.xlsx
 <WORKING_OUTPUT_FOLDER>/runner_log.md
+<WORKING_OUTPUT_FOLDER>/gemini_intake_packet.json optional, private/local only
+<WORKING_OUTPUT_FOLDER>/gemini_auditor_output.json optional, private/local only
 ```
 
 ## Runner workflow
@@ -97,8 +104,77 @@ No secrets, .env, credentials, or tokens.
 7. Build preliminary tables.
 8. Run validation gates.
 9. Write CSV/XLSX/log artifacts.
-10. Report status and review items.
+10. Optionally build a Gemini Intake Packet from summarized table/gate results.
+11. Optionally run the Gemini Auditor adapter if explicitly approved and verified.
+12. Validate Gemini output fail-closed.
+13. Convert Gemini findings into review items/questions only after ChatGPT/Skeleton synthesis.
+14. Report status and review items.
 ```
+
+## Optional Gemini second-brain stage
+
+Use this stage only when explicitly approved for the private pilot and only through the Runner-mediated Gemini Auditor adapter.
+
+Allowed use:
+
+```text
+preliminary tables + validation-gate summaries
+-> Gemini Intake Packet
+-> stateless anomaly/consistency review
+-> adapter output validation
+-> ChatGPT/Skeleton synthesis
+-> Oleksii review
+```
+
+Gemini review questions may include:
+
+```text
+Are source priorities applied consistently?
+Are room, wall, opening, height, façade, and slope values internally consistent?
+Which table rows look suspicious or need human review?
+Which validation gates failed or need better evidence?
+Are assumptions separated from extracted facts?
+Are conflicts between DXF/DWG, IFC, PDF, sections, façades, and scans represented in CROSSCHECK_MATRIX or REVIEW_ITEMS?
+```
+
+Gemini must not:
+
+```text
+execute commands
+access files outside the prepared packet
+update canon
+produce final billable quantities
+merge or deploy
+publish private project material
+be treated as the geometry source of record
+```
+
+## Gemini packet privacy gate
+
+Before any Gemini packet is created, choose one route:
+
+```text
+PUBLIC_SAFE = synthetic/redacted example only.
+STRICT_REDACTION = real-derived summary after deterministic redaction.
+INTERNAL_BHK = private/internal working packet only inside approved Runner/server environment.
+```
+
+The packet should include table and gate summaries, source-role labels, row identifiers, conflict categories, and exact review questions. It should not include raw drawings or unnecessary private context.
+
+## Gemini output validation gate
+
+The adapter output must fail closed if Gemini:
+
+```text
+sets canon_claim=true
+returns commands
+returns live access references
+violates schema
+claims final authority over quantities
+contains private leakage in a public report path
+```
+
+Gemini results may become candidate REVIEW_ITEMS, ASSUMPTIONS, or cross-check notes only after ChatGPT/Skeleton synthesis.
 
 ## DXF/DWG parser expectations
 
@@ -129,6 +205,8 @@ opening subtraction gate
 DG/sloped ceiling section gate
 façade separation gate
 privacy/publication gate
+Gemini packet privacy gate, if second-brain review is used
+Gemini output validation gate, if second-brain review is used
 ```
 
 Every failed or uncertain gate must create a REVIEW_ITEMS row.
@@ -140,6 +218,7 @@ What changed:
 What was extracted:
 What was not extracted:
 Validation gates:
+Gemini review status, if used:
 Conflicts:
 Review items:
 Private outputs created:
@@ -156,6 +235,7 @@ This runner task is done only when:
 - preliminary workbook exists;
 - runner log exists;
 - review items exist for unresolved gates;
+- optional Gemini review, if used, produced only evidence/review output;
 - no private files/data were committed to public GitHub;
 - Oleksii has enough information to review one floor/object.
 ```
@@ -168,6 +248,7 @@ A public GitHub report may say only:
 private pilot run completed / blocked / needs review
 artifact types created
 validation gates passed/failed by category
+Gemini review used / not used / blocked by bridge status
 next safe step
 ```
 
