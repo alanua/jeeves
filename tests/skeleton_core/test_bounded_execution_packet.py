@@ -4,9 +4,9 @@ import pytest
 from pydantic import ValidationError
 
 from tools.skeleton_core.bounded_execution_packet import (
+    ExecutionDecision,
     ExecutionPacket,
     ExecutionReportPacket,
-    ExecutionDecision,
 )
 
 
