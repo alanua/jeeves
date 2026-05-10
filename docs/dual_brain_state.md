@@ -1,62 +1,28 @@
-# Skeleton Dual-Brain Externalizer v0.1 — State Anchor
+# Skeleton Dual-Brain Externalizer v0.1 — Architectural Anchor
 
-Status: implemented in `main`.
+Status: **v0.1 + Sprint 4 autonomous daemon verified**
 
-This file anchors the practical state of the Skeleton Dual-Brain Externalizer so ChatGPT, Gemini, Runner, and Oleksii keep the same map.
+This document anchors the practical state of the Skeleton Dual-Brain Externalizer after the successful live hands-off systemd test.
 
-## 1. Base Camp
+## 1. Current Implementation Status
+
+Skeleton has moved from manual bridge tests to a working autonomous 24/7 pre-execution audit gate.
 
 Implemented and verified:
 
-- `tools/skeleton_core/gemini_auditor_adapter.py`
-- `tools/skeleton_core/dual_brain_task_packet.py`
-- `tools/skeleton_core/issue_to_gemini_audit.py`
-- `tools/skeleton_core/yellow_gemini_audit_route.py`
+- Foundation v0.1: typed Pydantic contracts and Gemini adapter.
+- Dual-Brain issue bridge: GitHub Issue JSON -> DualBrainTaskPacket -> GeminiAuditorInput -> GeminiAdapterPacket.
+- Autonomous once-route: `yellow_gemini_audit_route.py`.
+- Continuous daemon: `yellow_runnerd.py`.
+- Systemd service: `jeeves-runner.service` installed, enabled, and running on Hetzner.
+- Live Gemini audit path: verified.
+- Hands-off systemd processing: verified on Issue #126.
 
-Merged:
+## 2. Core Components
 
-- PR #118: Dual-Brain issue bridge.
-- PR #119: Autonomous YELLOW Gemini audit once-route.
+### `tools/skeleton_core/dual_brain_task_packet.py`
 
-Verified:
-
-- Issue #121: mock route passed with `mock_accept`.
-- Issue #122: live route passed with `live_accept`.
-- CI passed.
-- Local validation passed.
-
-Current boundary:
-
-- The system has an autonomous once-route.
-- It is not yet a 24/7 daemon.
-- Next step is daemonization, not more architecture.
-
-## 2. Roles
-
-Oleksii is final authority.
-
-ChatGPT / Skeleton is the architect, control plane, synthesis node, and canon gate.
-
-Gemini Auditor Node is a stateless evidence source only.
-
-Gemini is not:
-
-- executor
-- manager
-- canon writer
-- merger
-- deployer
-- final authority
-
-Hetzner Runner is the deterministic execution and routing environment.
-
-GitHub Issues are the public-safe queue, state machine, and audit trail.
-
-## 3. Core Components
-
-### `dual_brain_task_packet.py`
-
-Defines typed Pydantic contracts:
+Defines the typed contracts for bounded dual-brain work:
 
 - `DualBrainTaskPacket`
 - `DualBrainReviewPacket`
@@ -66,16 +32,9 @@ Defines typed Pydantic contracts:
 - `DualBrainExpectedOutput`
 - `DualBrainForbiddenAction`
 
-Important defaults:
+This file is the contract layer. It does not call Gemini, GitHub, or Runner.
 
-- `executor_allowed = False`
-- `approval_mode = BEFORE_PERSISTENCE`
-- `persistence_target = RUNNER_TRACE_ONLY`
-- allowed nodes are ChatGPT/Skeleton, Gemini Auditor, and Runner.
-
-This file is only a contract layer. It does not call Gemini, GitHub, or Runner.
-
-### `gemini_auditor_adapter.py`
+### `tools/skeleton_core/gemini_auditor_adapter.py`
 
 Provides the mock/live Gemini bridge.
 
@@ -100,135 +59,174 @@ Hard output rules:
 - merge/deploy are always false.
 - Gemini output is evidence only.
 
-## 4. Bridge
+### `tools/skeleton_core/issue_to_gemini_audit.py`
 
-### `issue_to_gemini_audit.py`
+Translates GitHub issue JSON into strict Pydantic models.
 
 Flow:
 
-GitHub Issue JSON
--> `GitHubIssueExport`
--> `DualBrainTaskPacket`
--> `GeminiAuditorInput`
--> `gemini_auditor_adapter`
--> `GeminiAdapterPacket`
-
-Expected GitHub input:
-
-`gh issue view <number> --repo alanua/jeeves --json number,title,body,labels,url,state`
-
-Default forbidden actions:
-
-- merge
-- deploy
-- print_secrets
-- write_canon
+GitHub Issue JSON -> `GitHubIssueExport` -> `DualBrainTaskPacket` -> `GeminiAuditorInput` -> `gemini_auditor_adapter` -> `GeminiAdapterPacket`
 
 The bridge does not execute issue tasks. It only prepares and routes them for audit.
 
-## 5. Autonomous Once-Route
+### `tools/skeleton_core/yellow_gemini_audit_route.py`
 
-### `yellow_gemini_audit_route.py`
+Autonomous once-route for queued YELLOW issues.
 
 Flow:
 
-GitHub queued YELLOW issue
--> verify labels
--> local secret/PII/poison scan
--> sanitize issue body if needed
--> run `issue_to_gemini_audit.py`
--> capture `GeminiAdapterPacket`
--> post public-safe GitHub comment
--> transition labels
--> remove issue from active queue
+Queued GitHub issue -> label verification -> local secret/PII/poison scan -> sanitized Gemini audit -> GitHub comment -> label transition -> remove from active queue
 
-Candidate issue must have:
+This is the verified pre-execution audit route.
+
+### `tools/skeleton_core/yellow_runnerd.py`
+
+Continuous daemon for the Hetzner runner.
+
+Responsibilities:
+
+- Poll GitHub every 60 seconds.
+- Find open issues with `agent:task`, `agent:queued`, `risk:yellow`, and `runner:hetzner` or `runner:any`.
+- Call `yellow_gemini_audit_route.py`.
+- Use Gemini audit as the pre-execution gate.
+- Handle SIGINT/SIGTERM gracefully.
+- Use a lock file to avoid duplicate daemon instances.
+- Apply basic error backoff.
+- Validate live Gemini environment before consuming the queue.
+
+### `jeeves-runner.service`
+
+Systemd service installed on Hetzner.
+
+Role:
+
+- Keeps `yellow_runnerd.py` running 24/7.
+- Starts automatically after server reboot.
+- Loads secrets from `/home/agent/agent-dev/.runner.env`.
+- Writes logs to journald.
+
+Current service state after verification:
+
+- installed
+- enabled
+- active/running
+- live mode
+- model `gemini-2.5-flash`
+- polling interval 60 seconds
+
+## 3. GitHub Label State Machine
+
+Candidate input labels:
 
 - `agent:task`
 - `agent:queued`
 - `risk:yellow`
 - `runner:hetzner` or `runner:any`
 
-Skip labels:
-
-- `agent:auditing`
-- `agent:audited`
-- `agent:blocked`
-- `agent:audit-error`
-- `agent:needs-revision`
-
-## 6. Label State Machine
-
-Initial queued state:
-
-- `agent:task`
-- `agent:queued`
-- `risk:yellow`
-- `runner:hetzner` or `runner:any`
-
-Processing:
+Temporary processing label:
 
 - add `agent:auditing`
 
-If `live_accept` or `mock_accept`:
+If Gemini returns `live_accept` or mock returns `mock_accept`:
 
 - add `agent:audited`
 - remove `agent:queued`
 - remove `agent:auditing`
 
-If `live_revise` or `mock_revise`:
+If Gemini returns `live_revise` or mock returns `mock_revise`:
 
 - add `agent:needs-revision`
 - remove `agent:queued`
 - remove `agent:auditing`
 
-If `blocked_*`, `live_block`, or `mock_block`:
+If adapter returns `blocked_*`, `live_block`, or `mock_block`:
 
 - add `agent:blocked`
 - remove `agent:queued`
 - remove `agent:auditing`
 
-If route error:
+If route/daemon error occurs:
 
 - add `agent:audit-error`
 - remove `agent:queued`
 - remove `agent:auditing`
 
-Loop prevention:
+Loop prevention rule:
 
 - every terminal state removes `agent:queued`.
 
-## 7. Verified Evidence
+## 4. Verified Evidence
 
-PR #118 added:
+PR #118:
 
-- typed dual-brain packets
-- issue-to-Gemini bridge
+- added typed dual-brain packets
+- added issue-to-Gemini bridge
 - updated Gemini adapter
+- CI passed
+- merged to `main`
 
-PR #119 added:
+PR #119:
 
-- autonomous YELLOW Gemini audit once-route
-- route tests
+- added autonomous YELLOW Gemini audit once-route
+- added route tests
+- CI passed
+- merged to `main`
+
+PR #123:
+
+- added `yellow_runnerd.py`
+- added daemon tests
+- CI passed
+- merged to `main`
 
 Issue #121:
 
-- `mock_accept`
+- mock once-route test
+- result: `mock_accept`
 - `agent:queued` removed
 - `agent:audited` added
 - comment posted
 
 Issue #122:
 
-- `live_accept`
+- live once-route test
+- result: `live_accept`
 - `agent:queued` removed
 - `agent:audited` added
 - comment posted
 - no secrets leaked
-- merge allowed false
-- deploy allowed false
 
-## 8. Security Boundaries
+Issue #124:
+
+- daemon end-to-end mock test
+- result: `mock_accept`
+- daemon processed one queued issue
+- comment posted
+- label transition succeeded
+
+Issue #125:
+
+- daemon end-to-end live test
+- result: `live_accept`
+- daemon processed one queued issue
+- comment posted
+- label transition succeeded
+
+Issue #126:
+
+- full hands-off 24/7 systemd live test
+- no manual script execution after issue creation
+- systemd daemon picked up the issue automatically
+- result: `live_accept`
+- `agent:auditing` added during processing
+- `agent:queued` removed
+- `agent:auditing` removed
+- `agent:audited` added
+- live Gemini audit comment posted
+- no secrets leaked
+- merge/deploy remained false
+
+## 5. Security Boundaries
 
 Gemini must not:
 
@@ -261,36 +259,49 @@ Secrets must not be stored in:
 
 Secrets belong only in protected runner environment, encrypted local storage, or a secret manager.
 
-## 9. Pending Work
+## 6. Current Implementation Boundary
 
-Not yet implemented:
+The system currently provides a reliable **pre-execution audit gate**.
 
-- `yellow_runnerd.py`
-- continuous daemon loop
-- systemd service
-- production runner heartbeat
-- post-audit execution handoff
+It does not yet execute the actual task described in the issue.
 
-## 10. Next Sprint
+The system currently does not:
 
-Sprint 4 should implement:
+- run arbitrary commands from issue bodies
+- change repository files based on issue body
+- create PRs from audited issues
+- merge
+- deploy
+- promote canon automatically
 
-- `tools/skeleton_core/yellow_runnerd.py`
-- `tests/skeleton_core/test_yellow_runnerd.py`
-- systemd service for Hetzner runner
-- graceful shutdown
-- poll interval
-- lock file
-- basic exponential error backoff
-- live env validation
+## 7. Next Sprint: Sprint 5 Execution Handoff
 
-The daemon must call the existing route:
+Goal:
 
-- `yellow_gemini_audit_route.py`
+Create a safe mechanism for moving from audit to bounded execution.
 
-It must not duplicate Gemini adapter logic.
+Sprint 5 should define and implement:
 
-## 11. Minimal Mental Model
+- `ExecutionPacket`
+- post-audit execution dispatcher
+- strict command allowlist
+- workspace isolation
+- trace logging
+- execution result comment
+- new labels for execution state
+- human approval gates for file writes, PR creation, merge, deploy, or canon promotion
+
+Possible next labels:
+
+- `agent:execution-ready`
+- `agent:executing`
+- `agent:execution-complete`
+- `agent:execution-blocked`
+- `agent:needs-human-approval`
+
+The execution dispatcher must consume only issues that already passed the audit gate.
+
+## 8. Minimal Mental Model
 
 `dual_brain_task_packet.py`
 = typed contract
@@ -305,16 +316,23 @@ It must not duplicate Gemini adapter logic.
 = queued YELLOW issue -> audit comment + label transition
 
 `yellow_runnerd.py`
-= future continuous loop calling the route
+= continuous daemon calling the audit route
 
-## 12. Current State
+`jeeves-runner.service`
+= 24/7 systemd wrapper around `yellow_runnerd.py`
+
+## 9. Current State
 
 Skeleton Dual-Brain Externalizer v0.1 is real code in `main`.
 
-Gemini live bridge is verified.
+The live Gemini bridge is verified.
 
 GitHub issue to Gemini audit is verified.
 
 Autonomous YELLOW once-route is verified.
 
-Next step is daemonization, not more architecture.
+Yellow runner daemon is verified.
+
+Systemd 24/7 hands-off live processing is verified.
+
+Next step is Sprint 5: bounded execution handoff.
