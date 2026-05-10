@@ -20,10 +20,11 @@ import os
 import subprocess
 import sys
 import tempfile
+from contextlib import suppress
 from pathlib import Path
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field
 
 from tools.skeleton_core.gemini_auditor_adapter import scan_sensitive_text
 
@@ -204,16 +205,15 @@ def sanitize_issue_for_gemini(issue: GitHubIssueExport) -> tuple[GitHubIssueExpo
 
 
 def _write_temp_issue_json(issue: GitHubIssueExport) -> Path:
-    handle = tempfile.NamedTemporaryFile(
+    with tempfile.NamedTemporaryFile(
         mode="w",
         suffix=".json",
         prefix=f"issue-{issue.number}-safe-",
         delete=False,
         encoding="utf-8",
-    )
-    with handle:
+    ) as handle:
         handle.write(json.dumps(issue.model_dump(mode="json"), ensure_ascii=False, indent=2))
-    return Path(handle.name)
+        return Path(handle.name)
 
 
 def run_gemini_audit(
@@ -241,10 +241,8 @@ def run_gemini_audit(
             check=False,
         )
     finally:
-        try:
+        with suppress(FileNotFoundError):
             issue_json.unlink()
-        except FileNotFoundError:
-            pass
 
     stdout = completed.stdout.strip()
     stderr = completed.stderr.strip()
@@ -368,10 +366,8 @@ def _post_comment(
         )
         return completed.stdout.strip()
     finally:
-        try:
+        with suppress(FileNotFoundError):
             payload_path.unlink()
-        except FileNotFoundError:
-            pass
 
 
 def _safe_json_tail(data: dict[str, Any], *, limit: int = 6000) -> str:
@@ -417,11 +413,7 @@ def process_issue(
     dry_run: bool,
 ) -> RouteResult:
     """Process one issue through Gemini audit and GitHub state transition."""
-    added: list[str] = []
-    removed: list[str] = []
-
     _edit_labels(repo, issue.number, add=["agent:auditing"], dry_run=dry_run)
-    added.append("agent:auditing")
 
     try:
         safe_issue, sanitized_flags = sanitize_issue_for_gemini(issue)
