@@ -11,7 +11,6 @@ import fcntl
 import json
 import os
 import signal
-import sys
 import time
 from pathlib import Path
 
@@ -64,7 +63,7 @@ def _acquire_lock(lock_path: Path):
     except BlockingIOError:
         _log("lock_busy", lock_path=str(lock_path))
         handle.close()
-        raise SystemExit(0)
+        raise SystemExit(0) from None
 
     handle.seek(0)
     handle.truncate()
