@@ -58,6 +58,16 @@ ALLOWED_WRITE_PATHS = [
     "knowledge_base/reports/",
 ]
 
+SAFE_COMMAND_PREFIXES = (
+    ("python", "-m", "pytest"),
+    ("python", "-m", "ruff", "check"),
+    ("python", "-m", "black", "--check"),
+    ("python", "-m", "tools.skeleton_core.cli", "validate-state"),
+    ("python", "-m", "tools.skeleton_core.cli", "create-report"),
+    ("git", "status", "--short"),
+    ("git", "diff", "--stat"),
+)
+
 FORBIDDEN_COMMAND_TOKENS = {
     "rm",
     "rmdir",
@@ -160,8 +170,9 @@ def command_is_allowed(command: str, allowed_commands: list[str] | None = None) 
     if stripped in allowed_exact:
         return True, ""
 
-    if parts[:4] == ["python", "-m", "tools.skeleton_core.cli", "create-report"]:
-        return True, ""
+    for prefix in SAFE_COMMAND_PREFIXES:
+        if tuple(parts[: len(prefix)]) == prefix:
+            return True, ""
 
     return False, "command_not_whitelisted"
 
@@ -471,12 +482,19 @@ def _update_current_state_execution_block(
 
 
 def execute_packet(
-    issue: GitHubIssueExport,
-    packet: ExecutionPacket,
+    issue_or_packet: GitHubIssueExport | ExecutionPacket,
+    packet: ExecutionPacket | None = None,
     *,
     repo_root: Path | None = None,
 ) -> tuple[ExecutionDecision, list[CommandResult], list[str]]:
     root = repo_root or Path.cwd()
+
+    if packet is None:
+        issue: GitHubIssueExport | None = None
+        packet = issue_or_packet  # type: ignore[assignment]
+    else:
+        issue = issue_or_packet  # type: ignore[assignment]
+
     blocked = validate_active_packet(packet)
 
     if blocked:
@@ -505,7 +523,19 @@ def execute_packet(
         )
 
         if action.command == CREATE_REPORT_COMMAND:
-            result = run_create_report_command(issue=issue, packet=packet, repo_root=root)
+            if issue is None:
+                result = CommandResult(
+                    command=CREATE_REPORT_COMMAND,
+                    returncode=51,
+                    stdout_tail="",
+                    stderr_tail="missing_issue_for_create_report",
+                )
+            else:
+                result = run_create_report_command(
+                    issue=issue,
+                    packet=packet,
+                    repo_root=root,
+                )
         else:
             result = run_shell_command(action.command, cwd=root)
 
