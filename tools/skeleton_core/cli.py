@@ -9,6 +9,11 @@ if len(sys.argv) > 1 and sys.argv[1] == "create-report":
 
     raise SystemExit(_create_report_main(sys.argv[2:]))
 
+if len(sys.argv) > 1 and sys.argv[1] == "create-pr":
+    from tools.skeleton_core.cli_create_pr import main as _create_pr_main
+
+    raise SystemExit(_create_pr_main(sys.argv[2:]))
+
 import argparse
 import json
 import sys
