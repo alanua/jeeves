@@ -2,6 +2,13 @@
 
 from __future__ import annotations
 
+import sys
+
+if len(sys.argv) > 1 and sys.argv[1] == "create-report":
+    from tools.skeleton_core.cli_create_report import main as _create_report_main
+
+    raise SystemExit(_create_report_main(sys.argv[2:]))
+
 import argparse
 import json
 import sys

@@ -1,11 +1,15 @@
 """Active bounded executor.
 
-Sprint 7 phase 1:
-- still fail-closed
-- only executes commands from a strict allowlist
-- only acts on already audited issues
-- logs every real action to Skeleton diary
-- records failure state in current_state.json via memory_service
+Sprint 8 Atomic Actions:
+- fail-closed
+- real mode allows only:
+  1. python -m tools.skeleton_core.cli validate-state
+  2. python -m tools.skeleton_core.cli create-report
+- atomic writes are restricted to Green Zone:
+  knowledge_base/active_tasks/
+  knowledge_base/reports/
+- src/, tests/, canon/ are immutable
+- every real write is logged with [REAL_WRITE]
 """
 
 from __future__ import annotations
@@ -21,6 +25,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from tools.skeleton_core.atomic_writer import AtomicWritePanic
+from tools.skeleton_core.atomic_writer import safe_write as atomic_safe_write
 from tools.skeleton_core.bounded_execution_packet import (
     ExecutionAction,
     ExecutionActionType,
@@ -39,24 +45,18 @@ from tools.skeleton_core.dry_run_execution_route import (
 from tools.skeleton_core.memory_service import (
     append_to_skeleton_diary,
     create_system_snapshot,
+    utc_now_iso,
 )
 
 ExecutorMode = Literal["plan", "real"]
 
-SAFE_COMMAND_PREFIXES = (
-    ("python", "-m", "pytest"),
-    ("python", "-m", "ruff", "check"),
-    ("python", "-m", "black", "--check"),
-    ("python", "-m", "tools.skeleton_core.cli", "validate-state"),
-    ("git", "status", "--short"),
-    ("git", "diff", "--stat"),
-    ("git", "add"),
-    ("git", "commit", "-m"),
-    ("git", "push", "-u", "origin"),
-    ("gh", "pr", "create"),
-    ("gh", "issue", "edit"),
-    ("gh", "api"),
-)
+VALIDATE_STATE_COMMAND = "python -m tools.skeleton_core.cli validate-state"
+CREATE_REPORT_COMMAND = "python -m tools.skeleton_core.cli create-report"
+
+ALLOWED_WRITE_PATHS = [
+    "knowledge_base/active_tasks/",
+    "knowledge_base/reports/",
+]
 
 FORBIDDEN_COMMAND_TOKENS = {
     "rm",
@@ -99,6 +99,15 @@ FORBIDDEN_SUBSTRINGS = {
     "`",
     "$(",
 }
+
+
+class ActiveTaskPayload(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    id: int
+    type: Literal["integrity_check"]
+    command: str
+    safety_level: Literal["green"]
 
 
 class CommandResult(BaseModel):
@@ -147,18 +156,103 @@ def command_is_allowed(command: str, allowed_commands: list[str] | None = None) 
     if parts[0] in FORBIDDEN_COMMAND_TOKENS:
         return False, f"forbidden_command_token:{parts[0]}"
 
-    if parts[:3] == ["git", "push", "--force"] or parts[:3] == ["git", "push", "-f"]:
-        return False, "git_force_push_blocked"
-
     allowed_exact = set(allowed_commands or [])
     if stripped in allowed_exact:
         return True, ""
 
-    for prefix in SAFE_COMMAND_PREFIXES:
-        if tuple(parts[: len(prefix)]) == prefix:
-            return True, ""
+    if parts[:4] == ["python", "-m", "tools.skeleton_core.cli", "create-report"]:
+        return True, ""
 
     return False, "command_not_whitelisted"
+
+
+def active_task_path(issue_number: int, repo_root: Path | None = None) -> Path:
+    root = repo_root or Path.cwd()
+    return root / "knowledge_base" / "active_tasks" / f"task_{issue_number}.json"
+
+
+def load_active_task_payload(
+    issue_number: int,
+    *,
+    repo_root: Path | None = None,
+) -> tuple[ActiveTaskPayload | None, list[str]]:
+    path = active_task_path(issue_number, repo_root=repo_root)
+
+    if not path.exists():
+        return None, [f"missing_active_task_payload:{path}"]
+
+    try:
+        payload = ActiveTaskPayload.model_validate_json(path.read_text(encoding="utf-8"))
+    except Exception as err:
+        return None, [f"invalid_active_task_payload:{err}"]
+
+    if payload.id != issue_number:
+        return None, [f"task_payload_id_mismatch:{payload.id}!={issue_number}"]
+
+    if payload.command not in {VALIDATE_STATE_COMMAND, CREATE_REPORT_COMMAND}:
+        return None, [f"task_payload_command_not_allowed:{payload.command}"]
+
+    return payload, []
+
+
+def safe_write(target_path: str | Path, content: str, *, repo_root: Path | None = None) -> Path:
+    written = atomic_safe_write(target_path, content, repo_root=repo_root)
+    append_to_skeleton_diary(
+        f"[REAL_WRITE] Module active_executor atomically wrote {written}.",
+        repo_root=repo_root,
+    )
+    return written
+
+
+def report_target_path(issue_number: int) -> str:
+    return f"knowledge_base/reports/self_integrity_report_{issue_number}.json"
+
+
+def build_self_integrity_report(issue: GitHubIssueExport, packet: ExecutionPacket) -> str:
+    return (
+        json.dumps(
+            {
+                "schema_version": "skeleton_self_integrity_report.v1",
+                "issue_number": issue.number,
+                "issue_url": issue.url,
+                "title": issue.title,
+                "generated_at_utc": utc_now_iso(),
+                "mode": "real",
+                "action": "atomic_green_zone_write",
+                "target": report_target_path(issue.number),
+                "audit_verified": packet.audit_verified,
+                "audit_status": packet.audit_status,
+                "allowed_write_paths": ALLOWED_WRITE_PATHS,
+                "immutability": {
+                    "src": "read_only",
+                    "tests": "read_only",
+                    "canon": "read_only",
+                },
+                "git_mutation": False,
+                "merge_allowed": False,
+                "deploy_allowed": False,
+                "canon_write_allowed": False,
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n"
+    )
+
+
+def fetch_issue(repo: str, issue_number: int) -> GitHubIssueExport:
+    raw = _gh_json(
+        [
+            "issue",
+            "view",
+            str(issue_number),
+            "--repo",
+            repo,
+            "--json",
+            "number,title,body,labels,comments,url,state",
+        ]
+    )
+    return GitHubIssueExport.model_validate(raw)
 
 
 def fetch_execution_candidates(repo: str, *, limit: int) -> list[GitHubIssueExport]:
@@ -183,19 +277,7 @@ def fetch_execution_candidates(repo: str, *, limit: int) -> list[GitHubIssueExpo
 
     issues: list[GitHubIssueExport] = []
     for item in raw_items:
-        number = int(item["number"])
-        full = _gh_json(
-            [
-                "issue",
-                "view",
-                str(number),
-                "--repo",
-                repo,
-                "--json",
-                "number,title,body,labels,comments,url,state",
-            ]
-        )
-        issue = GitHubIssueExport.model_validate(full)
+        issue = fetch_issue(repo, int(item["number"]))
         labels = {label.name for label in issue.labels}
         if "agent:audited" in labels and "agent:executed" not in labels:
             issues.append(issue)
@@ -203,9 +285,23 @@ def fetch_execution_candidates(repo: str, *, limit: int) -> list[GitHubIssueExpo
     return issues
 
 
-def build_active_execution_packet(issue: GitHubIssueExport, *, real_run: bool) -> ExecutionPacket:
+def build_active_execution_packet(
+    issue: GitHubIssueExport,
+    *,
+    real_run: bool,
+    task_payload: ActiveTaskPayload | None = None,
+) -> ExecutionPacket:
     verified, audit_status, audit_comment_url, audit_body = find_verified_audit_comment(issue)
     labels = sorted(label.name for label in issue.labels)
+
+    command = task_payload.command if task_payload else VALIDATE_STATE_COMMAND
+
+    writes_files = command == CREATE_REPORT_COMMAND
+    action_id = (
+        "atomic-write-self-integrity-report" if writes_files else "first-breath-validate-state"
+    )
+
+    planned_command = command if real_run else ""
 
     return ExecutionPacket(
         issue_number=issue.number,
@@ -213,13 +309,7 @@ def build_active_execution_packet(issue: GitHubIssueExport, *, real_run: bool) -
         title=issue.title,
         mode=ExecutionMode.REAL if real_run else ExecutionMode.DRY_RUN,
         real_run=real_run,
-        allowed_commands=[
-            "python -m pytest -q",
-            "python -m ruff check tools/skeleton_core tests/skeleton_core",
-            "python -m tools.skeleton_core.cli validate-state",
-            "git status --short",
-            "git diff --stat",
-        ],
+        allowed_commands=[VALIDATE_STATE_COMMAND, CREATE_REPORT_COMMAND],
         target_branch=f"skeleton-exec-issue-{issue.number}",
         trigger_labels=labels,
         audit_verified=verified,
@@ -229,36 +319,18 @@ def build_active_execution_packet(issue: GitHubIssueExport, *, real_run: bool) -
         objective=issue.body[:2000],
         planned_actions=[
             ExecutionAction(
-                action_id="validate-pytest",
+                action_id=action_id,
                 action_type=ExecutionActionType.NOOP,
-                description="Run test suite validation only if explicitly authorized by packet.",
-                dry_run_only=not real_run,
-                command="python -m pytest -q" if real_run else "",
-                writes_files=False,
-                network_access=False,
-            ),
-            ExecutionAction(
-                action_id="validate-ruff",
-                action_type=ExecutionActionType.NOOP,
-                description="Run ruff validation only if explicitly authorized by packet.",
-                dry_run_only=not real_run,
-                command=(
-                    "python -m ruff check tools/skeleton_core tests/skeleton_core"
-                    if real_run
-                    else ""
+                description=(
+                    "Sprint 8 atomic Green Zone report write."
+                    if writes_files
+                    else "Read-only Skeleton integrity check."
                 ),
-                writes_files=False,
-                network_access=False,
-            ),
-            ExecutionAction(
-                action_id="validate-state",
-                action_type=ExecutionActionType.NOOP,
-                description="Run Skeleton state validation only if explicitly authorized by packet.",
                 dry_run_only=not real_run,
-                command=("python -m tools.skeleton_core.cli validate-state" if real_run else ""),
-                writes_files=False,
+                command=planned_command,
+                writes_files=writes_files,
                 network_access=False,
-            ),
+            )
         ],
         sources=[
             ExecutionSource(
@@ -275,21 +347,29 @@ def build_active_execution_packet(issue: GitHubIssueExport, *, real_run: bool) -
             ),
         ],
         executor_allowed=real_run,
-        file_writes_allowed=False,
+        file_writes_allowed=writes_files,
         pr_creation_allowed=False,
         merge_allowed=False,
         deploy_allowed=False,
         canon_write_allowed=False,
         next_safe_step=(
-            "Run whitelisted validation commands only."
-            if real_run
-            else "Plan-only active execution packet created."
+            "Run atomic Green Zone report write."
+            if writes_files
+            else "Run read-only validate-state command."
         ),
     )
 
 
 def validate_active_packet(packet: ExecutionPacket) -> list[str]:
     reasons: list[str] = []
+
+    labels = set(packet.trigger_labels)
+    if "agent:task" not in labels:
+        reasons.append("missing_label_agent_task")
+    if "agent:audited" not in labels:
+        reasons.append("missing_label_agent_audited")
+    if not ({"runner:hetzner", "runner:any"} & labels):
+        reasons.append("missing_runner_label")
 
     if not packet.audit_verified:
         reasons.append("missing_verified_accept_audit_comment")
@@ -299,10 +379,8 @@ def validate_active_packet(packet: ExecutionPacket) -> list[str]:
     if packet.real_run and not packet.executor_allowed:
         reasons.append("real_run_requires_executor_allowed")
 
-    if packet.file_writes_allowed:
-        reasons.append("file_writes_not_allowed_in_sprint_7_phase_1")
     if packet.pr_creation_allowed:
-        reasons.append("pr_creation_not_allowed_in_sprint_7_phase_1")
+        reasons.append("pr_creation_not_allowed")
     if packet.merge_allowed:
         reasons.append("merge_not_allowed")
     if packet.deploy_allowed:
@@ -311,29 +389,20 @@ def validate_active_packet(packet: ExecutionPacket) -> list[str]:
         reasons.append("canon_write_not_allowed")
 
     for action in packet.planned_actions:
-        if action.writes_files:
-            reasons.append(f"action_{action.action_id}_writes_files")
-        if action.action_type not in {
-            ExecutionActionType.NOOP,
-            ExecutionActionType.COMMENT_ONLY,
-            ExecutionActionType.LABEL_TRANSITION_ONLY,
-        }:
-            reasons.append(f"action_{action.action_id}_unsupported_action_type")
         if action.command:
-            allowed, reason = command_is_allowed(
-                action.command,
-                packet.allowed_commands,
-            )
+            allowed, reason = command_is_allowed(action.command, packet.allowed_commands)
             if not allowed:
                 reasons.append(f"action_{action.action_id}_{reason}")
+
+        if action.writes_files and action.command != CREATE_REPORT_COMMAND:
+            reasons.append(f"action_{action.action_id}_write_requires_create_report_command")
 
     return sorted(set(reasons))
 
 
-def run_command(command: str, *, cwd: Path) -> CommandResult:
-    parts = parse_command(command)
+def run_shell_command(command: str, *, cwd: Path) -> CommandResult:
     completed = subprocess.run(
-        parts,
+        parse_command(command),
         cwd=cwd,
         text=True,
         capture_output=True,
@@ -345,6 +414,128 @@ def run_command(command: str, *, cwd: Path) -> CommandResult:
         stdout_tail=completed.stdout[-2000:],
         stderr_tail=completed.stderr[-2000:],
     )
+
+
+def run_create_report_command(
+    *,
+    issue: GitHubIssueExport,
+    packet: ExecutionPacket,
+    repo_root: Path,
+) -> CommandResult:
+    target = report_target_path(issue.number)
+    content = build_self_integrity_report(issue, packet)
+
+    try:
+        written = safe_write(target, content, repo_root=repo_root)
+    except AtomicWritePanic as err:
+        return CommandResult(
+            command=CREATE_REPORT_COMMAND,
+            returncode=50,
+            stdout_tail="",
+            stderr_tail=str(err),
+        )
+
+    return CommandResult(
+        command=CREATE_REPORT_COMMAND,
+        returncode=0,
+        stdout_tail=f"atomic_write_ok:{written}\n",
+        stderr_tail="",
+    )
+
+
+def _update_current_state_execution_block(
+    *,
+    issue_number: int,
+    state: str,
+    blocked_reasons: list[str],
+    command_results: list[CommandResult],
+    repo_root: Path,
+) -> None:
+    snapshot_path = create_system_snapshot(
+        last_processed_issue_id=issue_number,
+        repo_root=repo_root,
+    )
+
+    data = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    data["active_executor_state"] = {
+        "issue_number": issue_number,
+        "state": state,
+        "updated_at_utc": utc_now_iso(),
+        "blocked_reasons": blocked_reasons,
+        "command_results": [result.model_dump(mode="json") for result in command_results],
+    }
+    snapshot_path.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+
+def execute_packet(
+    issue: GitHubIssueExport,
+    packet: ExecutionPacket,
+    *,
+    repo_root: Path | None = None,
+) -> tuple[ExecutionDecision, list[CommandResult], list[str]]:
+    root = repo_root or Path.cwd()
+    blocked = validate_active_packet(packet)
+
+    if blocked:
+        _update_current_state_execution_block(
+            issue_number=packet.issue_number,
+            state="blocked",
+            blocked_reasons=blocked,
+            command_results=[],
+            repo_root=root,
+        )
+        return ExecutionDecision.BLOCKED, [], blocked
+
+    if not packet.real_run:
+        return ExecutionDecision.WOULD_EXECUTE, [], []
+
+    results: list[CommandResult] = []
+
+    for action in packet.planned_actions:
+        if not action.command:
+            continue
+
+        append_to_skeleton_diary(
+            f"[REAL_EXECUTION] Module active_executor starting action for "
+            f"Issue #{packet.issue_number}: {action.command}",
+            repo_root=root,
+        )
+
+        if action.command == CREATE_REPORT_COMMAND:
+            result = run_create_report_command(issue=issue, packet=packet, repo_root=root)
+        else:
+            result = run_shell_command(action.command, cwd=root)
+
+        results.append(result)
+
+        append_to_skeleton_diary(
+            f"[REAL_EXECUTION] Module active_executor completed action for "
+            f"Issue #{packet.issue_number}: {action.command}; returncode={result.returncode}",
+            repo_root=root,
+        )
+
+        if result.returncode != 0:
+            reasons = [f"command_failed:{action.action_id}:{result.returncode}"]
+            _update_current_state_execution_block(
+                issue_number=packet.issue_number,
+                state="failed",
+                blocked_reasons=reasons,
+                command_results=results,
+                repo_root=root,
+            )
+            return ExecutionDecision.FAILED, results, reasons
+
+    _update_current_state_execution_block(
+        issue_number=packet.issue_number,
+        state="real_complete",
+        blocked_reasons=[],
+        command_results=results,
+        repo_root=root,
+    )
+    return ExecutionDecision.WOULD_EXECUTE, results, []
 
 
 def _post_comment(repo: str, issue_number: int, body: str) -> str:
@@ -403,59 +594,17 @@ def _comment_body(result: ActiveExecutionResult) -> str:
         f"Status: `{result.status}`\n"
         f"Blocked reasons: `{result.blocked_reasons}`\n\n"
         "Safety:\n"
-        "- no file writes allowed\n"
+        "- Atomic Green Zone writes only\n"
+        "- allowed write paths: knowledge_base/active_tasks/, knowledge_base/reports/\n"
+        "- src/, tests/, canon/ immutable\n"
         "- no PR creation allowed\n"
         "- no merge allowed\n"
         "- no deploy allowed\n"
-        "- no canon write allowed\n\n"
+        "- no git commit or git push performed by executor\n\n"
         "```json\n"
         f"{payload[-6000:]}\n"
         "```\n"
     )
-
-
-def execute_packet(
-    packet: ExecutionPacket,
-    *,
-    repo_root: Path | None = None,
-) -> tuple[ExecutionDecision, list[CommandResult], list[str]]:
-    """Execute a packet if and only if it passes all active-executor gates."""
-    root = repo_root or Path.cwd()
-    blocked = validate_active_packet(packet)
-    if blocked:
-        return ExecutionDecision.BLOCKED, [], blocked
-
-    if not packet.real_run:
-        return ExecutionDecision.WOULD_EXECUTE, [], []
-
-    results: list[CommandResult] = []
-    for action in packet.planned_actions:
-        if not action.command:
-            continue
-
-        append_to_skeleton_diary(
-            f"[REAL_EXECUTION] Module active_executor starting command for "
-            f"Issue #{packet.issue_number}: {action.command}"
-        )
-
-        result = run_command(action.command, cwd=root)
-        results.append(result)
-
-        append_to_skeleton_diary(
-            f"[REAL_EXECUTION] Module active_executor completed command for "
-            f"Issue #{packet.issue_number}: {action.command}; returncode={result.returncode}"
-        )
-
-        if result.returncode != 0:
-            create_system_snapshot(last_processed_issue_id=packet.issue_number)
-            return (
-                ExecutionDecision.FAILED,
-                results,
-                [f"command_failed:{action.action_id}:{result.returncode}"],
-            )
-
-    create_system_snapshot(last_processed_issue_id=packet.issue_number)
-    return ExecutionDecision.WOULD_EXECUTE, results, []
 
 
 def process_issue(
@@ -465,9 +614,40 @@ def process_issue(
     mode: ExecutorMode,
     repo_root: Path | None = None,
 ) -> ActiveExecutionResult:
+    root = repo_root or Path.cwd()
     real_run = mode == "real"
-    packet = build_active_execution_packet(issue, real_run=real_run)
-    decision, command_results, blocked_reasons = execute_packet(packet, repo_root=repo_root)
+
+    task_payload: ActiveTaskPayload | None = None
+    pre_blocked: list[str] = []
+
+    if real_run:
+        task_payload, pre_blocked = load_active_task_payload(issue.number, repo_root=root)
+
+    packet = build_active_execution_packet(
+        issue,
+        real_run=real_run,
+        task_payload=task_payload,
+    )
+
+    if pre_blocked:
+        decision = ExecutionDecision.BLOCKED
+        command_results: list[CommandResult] = []
+        blocked_reasons = pre_blocked
+        _update_current_state_execution_block(
+            issue_number=issue.number,
+            state="blocked",
+            blocked_reasons=blocked_reasons,
+            command_results=command_results,
+            repo_root=root,
+        )
+    else:
+        if real_run:
+            _edit_labels(repo, issue.number, add=["agent:executing"])
+        decision, command_results, blocked_reasons = execute_packet(
+            issue,
+            packet,
+            repo_root=root,
+        )
 
     if blocked_reasons:
         status: Literal["planned", "real_complete", "blocked", "failed"] = (
@@ -506,9 +686,12 @@ def process_issue(
         append_to_skeleton_diary(
             f"[REAL_EXECUTION] Module active_executor processed "
             f"Issue #{issue.number} with status={status}; "
-            f"decision={decision}; comment_url={comment_url}"
+            f"decision={decision}; comment_url={comment_url}",
+            repo_root=root,
         )
-        create_system_snapshot(last_processed_issue_id=issue.number)
+        # Do not call create_system_snapshot() here:
+        # execute_packet() already writes active_executor_state, and a plain snapshot
+        # would overwrite that execution block.
 
     return result
 
@@ -529,9 +712,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--repo", default="alanua/jeeves")
     parser.add_argument("--limit", type=int, default=1)
     parser.add_argument("--mode", choices=["plan", "real"], default="plan")
+    parser.add_argument("--issue", type=int, default=None)
     args = parser.parse_args(argv)
 
-    results = process_queue(args.repo, limit=args.limit, mode=args.mode)
+    if args.issue is not None:
+        issue = fetch_issue(args.repo, args.issue)
+        results = [process_issue(args.repo, issue, mode=args.mode)]
+    else:
+        results = process_queue(args.repo, limit=args.limit, mode=args.mode)
 
     print(
         json.dumps(
