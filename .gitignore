@@ -58,3 +58,7 @@ temp.sh
 knowledge_base/active_tasks/*.json
 knowledge_base/reports/*.json
 knowledge_base/current_state.json
+
+# Local secrets
+.env.*
+!.env.example
