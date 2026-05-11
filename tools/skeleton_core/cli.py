@@ -14,6 +14,11 @@ if len(sys.argv) > 1 and sys.argv[1] == "create-pr":
 
     raise SystemExit(_create_pr_main(sys.argv[2:]))
 
+if len(sys.argv) > 1 and sys.argv[1] == "ai-ping":
+    from tools.skeleton_core.cli_ai_ping import main as _ai_ping_main
+
+    raise SystemExit(_ai_ping_main(sys.argv[2:]))
+
 import argparse
 import json
 import sys
