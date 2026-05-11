@@ -19,6 +19,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class ExecutionMode(StrEnum):
     DRY_RUN = "dry_run"
+    REAL = "real"
 
 
 class ExecutionDecision(StrEnum):
@@ -64,6 +65,9 @@ class ExecutionPacket(BaseModel):
     title: str
 
     mode: ExecutionMode = ExecutionMode.DRY_RUN
+    real_run: bool = False
+    allowed_commands: list[str] = Field(default_factory=list)
+    target_branch: str = ""
     trigger_labels: list[str] = Field(default_factory=list)
 
     audit_verified: bool
