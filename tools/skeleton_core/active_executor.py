@@ -52,6 +52,7 @@ ExecutorMode = Literal["plan", "real"]
 
 VALIDATE_STATE_COMMAND = "python -m tools.skeleton_core.cli validate-state"
 CREATE_REPORT_COMMAND = "python -m tools.skeleton_core.cli create-report"
+CREATE_PR_COMMAND = "python -m tools.skeleton_core.cli create-pr"
 
 ALLOWED_WRITE_PATHS = [
     "knowledge_base/active_tasks/",
@@ -64,6 +65,7 @@ SAFE_COMMAND_PREFIXES = (
     ("python", "-m", "black", "--check"),
     ("python", "-m", "tools.skeleton_core.cli", "validate-state"),
     ("python", "-m", "tools.skeleton_core.cli", "create-report"),
+    ("python", "-m", "tools.skeleton_core.cli", "create-pr"),
     ("git", "status", "--short"),
     ("git", "diff", "--stat"),
 )
@@ -115,9 +117,13 @@ class ActiveTaskPayload(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     id: int
-    type: Literal["integrity_check"]
+    type: Literal["integrity_check", "pr_creation"]
     command: str
     safety_level: Literal["green"]
+    pr_creation_allowed: bool = False
+    target_files: list[str] = Field(default_factory=list)
+    pr_title: str = ""
+    pr_body: str = ""
 
 
 class CommandResult(BaseModel):
@@ -200,8 +206,27 @@ def load_active_task_payload(
     if payload.id != issue_number:
         return None, [f"task_payload_id_mismatch:{payload.id}!={issue_number}"]
 
-    if payload.command not in {VALIDATE_STATE_COMMAND, CREATE_REPORT_COMMAND}:
+    if payload.command not in {
+        VALIDATE_STATE_COMMAND,
+        CREATE_REPORT_COMMAND,
+        CREATE_PR_COMMAND,
+    }:
         return None, [f"task_payload_command_not_allowed:{payload.command}"]
+
+    if payload.command == CREATE_PR_COMMAND:
+        blocked: list[str] = []
+        if payload.type != "pr_creation":
+            blocked.append("create_pr_requires_pr_creation_type")
+        if not payload.pr_creation_allowed:
+            blocked.append("create_pr_requires_pr_creation_allowed_true")
+        if not payload.target_files:
+            blocked.append("create_pr_requires_target_files")
+        if not payload.pr_title.strip():
+            blocked.append("create_pr_requires_pr_title")
+        if not payload.pr_body.strip():
+            blocked.append("create_pr_requires_pr_body")
+        if blocked:
+            return None, blocked
 
     return payload, []
 
@@ -217,6 +242,23 @@ def safe_write(target_path: str | Path, content: str, *, repo_root: Path | None 
 
 def report_target_path(issue_number: int) -> str:
     return f"knowledge_base/reports/self_integrity_report_{issue_number}.json"
+
+
+def build_create_pr_command(issue_number: int, task_payload: ActiveTaskPayload) -> str:
+    target_files = ",".join(task_payload.target_files)
+    return " ".join(
+        [
+            CREATE_PR_COMMAND,
+            "--issue",
+            str(issue_number),
+            "--target-files",
+            shlex.quote(target_files),
+            "--title",
+            shlex.quote(task_payload.pr_title),
+            "--body",
+            shlex.quote(task_payload.pr_body),
+        ]
+    )
 
 
 def build_self_integrity_report(issue: GitHubIssueExport, packet: ExecutionPacket) -> str:
@@ -308,11 +350,19 @@ def build_active_execution_packet(
     command = task_payload.command if task_payload else VALIDATE_STATE_COMMAND
 
     writes_files = command == CREATE_REPORT_COMMAND
-    action_id = (
-        "atomic-write-self-integrity-report" if writes_files else "first-breath-validate-state"
-    )
+    creates_pr = command == CREATE_PR_COMMAND
 
-    planned_command = command if real_run else ""
+    if creates_pr:
+        action_id = "create-pr-for-green-zone-artifacts"
+    elif writes_files:
+        action_id = "atomic-write-self-integrity-report"
+    else:
+        action_id = "first-breath-validate-state"
+
+    if creates_pr and task_payload is not None:
+        planned_command = build_create_pr_command(issue.number, task_payload) if real_run else ""
+    else:
+        planned_command = command if real_run else ""
 
     return ExecutionPacket(
         issue_number=issue.number,
@@ -320,7 +370,7 @@ def build_active_execution_packet(
         title=issue.title,
         mode=ExecutionMode.REAL if real_run else ExecutionMode.DRY_RUN,
         real_run=real_run,
-        allowed_commands=[VALIDATE_STATE_COMMAND, CREATE_REPORT_COMMAND],
+        allowed_commands=[VALIDATE_STATE_COMMAND, CREATE_REPORT_COMMAND, CREATE_PR_COMMAND],
         target_branch=f"skeleton-exec-issue-{issue.number}",
         trigger_labels=labels,
         audit_verified=verified,
@@ -333,9 +383,13 @@ def build_active_execution_packet(
                 action_id=action_id,
                 action_type=ExecutionActionType.NOOP,
                 description=(
-                    "Sprint 8 atomic Green Zone report write."
-                    if writes_files
-                    else "Read-only Skeleton integrity check."
+                    "Sprint 9 bounded PR creation for explicit target files."
+                    if creates_pr
+                    else (
+                        "Sprint 8 atomic Green Zone report write."
+                        if writes_files
+                        else "Read-only Skeleton integrity check."
+                    )
                 ),
                 dry_run_only=not real_run,
                 command=planned_command,
@@ -359,7 +413,7 @@ def build_active_execution_packet(
         ],
         executor_allowed=real_run,
         file_writes_allowed=writes_files,
-        pr_creation_allowed=False,
+        pr_creation_allowed=creates_pr,
         merge_allowed=False,
         deploy_allowed=False,
         canon_write_allowed=False,
@@ -390,8 +444,14 @@ def validate_active_packet(packet: ExecutionPacket) -> list[str]:
     if packet.real_run and not packet.executor_allowed:
         reasons.append("real_run_requires_executor_allowed")
 
-    if packet.pr_creation_allowed:
-        reasons.append("pr_creation_not_allowed")
+    create_pr_actions = [
+        action for action in packet.planned_actions if action.command.startswith(CREATE_PR_COMMAND)
+    ]
+
+    if packet.pr_creation_allowed and not create_pr_actions:
+        reasons.append("pr_creation_allowed_without_create_pr_action")
+    if create_pr_actions and not packet.pr_creation_allowed:
+        reasons.append("create_pr_action_requires_pr_creation_allowed")
     if packet.merge_allowed:
         reasons.append("merge_not_allowed")
     if packet.deploy_allowed:
