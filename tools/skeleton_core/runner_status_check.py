@@ -8,7 +8,7 @@ It must not mutate GitHub labels, restart services, kill processes, merge, or de
 from __future__ import annotations
 
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -56,7 +56,12 @@ FAILURE_WORDS = (
 COMPLETION_STATUSES = {"complete", "completed", "done", "success", "succeeded", "audit_complete"}
 FAILED_STATUSES = {"failed", "failure", "error", "crashed", "blocked"}
 RUNNING_LABELS = {"agent:running", "agent:executing", "agent:auditing", "agent:queued"}
-FINAL_LABELS = {"agent:executed", "agent:audit-complete", "agent:blocked", "agent:needs-revision"}
+FINAL_LABELS = {
+    "agent:executed",
+    "agent:audit-complete",
+    "agent:blocked",
+    "agent:needs-revision",
+}
 
 
 class RunnerStatusCheckInput(BaseModel):
@@ -129,8 +134,8 @@ def _parse_datetime(value: str | None) -> datetime | None:
     except ValueError:
         return None
     if parsed.tzinfo is None:
-        return parsed.replace(tzinfo=timezone.utc)
-    return parsed.astimezone(timezone.utc)
+        return parsed.replace(tzinfo=UTC)
+    return parsed.astimezone(UTC)
 
 
 def _contains_secret_like_text(*values: str) -> bool:
@@ -149,7 +154,7 @@ def _age_seconds(start_value: str | None, now_value: str | None) -> int | None:
     start = _parse_datetime(start_value)
     if start is None:
         return None
-    now = _parse_datetime(now_value) or datetime.now(timezone.utc)
+    now = _parse_datetime(now_value) or datetime.now(UTC)
     return max(0, int((now - start).total_seconds()))
 
 
@@ -189,9 +194,16 @@ def _staleness_reason(packet: RunnerStatusCheckInput) -> str:
     if running_age is not None and running_age > packet.stale_after_seconds:
         return f"running evidence is older than {packet.stale_after_seconds} seconds"
     event_age = _age_seconds(packet.latest_event_at, packet.current_time)
-    if event_age is not None and _has_running_label(packet.issue_labels):
-        if event_age > packet.stale_after_seconds and packet.lock_pid_alive is not True:
-            return f"latest event is older than {packet.stale_after_seconds} seconds without live PID evidence"
+    if (
+        event_age is not None
+        and _has_running_label(packet.issue_labels)
+        and event_age > packet.stale_after_seconds
+        and packet.lock_pid_alive is not True
+    ):
+        return (
+            f"latest event is older than {packet.stale_after_seconds} seconds "
+            "without live PID evidence"
+        )
     return ""
 
 
@@ -282,6 +294,9 @@ def build_unavailable_live_check(*, repository: str, issue_number: int | None) -
         RunnerStatusCheckInput(
             repository=repository,
             issue_number=issue_number,
-            blocker_summary="live runner-status-check collection is not configured; provide --input fixture or a bounded collector",
+            blocker_summary=(
+                "live runner-status-check collection is not configured; provide --input "
+                "fixture or a bounded collector"
+            ),
         )
     )
