@@ -19,6 +19,11 @@ if len(sys.argv) > 1 and sys.argv[1] == "ai-ping":
 
     raise SystemExit(_ai_ping_main(sys.argv[2:]))
 
+if len(sys.argv) > 1 and sys.argv[1] == "canon-audit":
+    from tools.skeleton_core.canon_audit_route import main as _canon_audit_main
+
+    raise SystemExit(_canon_audit_main(sys.argv[2:]))
+
 import argparse
 import json
 import sys
