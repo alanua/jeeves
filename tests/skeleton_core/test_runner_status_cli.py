@@ -47,3 +47,36 @@ def test_runner_status_check_cli_no_input_fails_closed() -> None:
     assert payload["recommended_queue_action"] == "needs_manual_review"
     assert payload["merge_allowed"] is False
     assert payload["deploy_allowed"] is False
+
+
+def test_runner_status_check_cli_live_with_temp_run_dir(tmp_path) -> None:
+    run_id = "20260512-091344-yellow-alanua-bauclock-48"
+    run_dir = tmp_path / "agent-runs" / run_id
+    run_dir.mkdir(parents=True)
+    (run_dir / "log.txt").write_text(
+        "=== YELLOW AGENT RUN START ===\n" "Run ID: 20260512-091344-yellow-alanua-bauclock-48\n",
+        encoding="utf-8",
+    )
+
+    payload = _run_cli(
+        "runner-status-check",
+        "--repo",
+        "alanua/bauclock",
+        "--issue",
+        "48",
+        "--run-id",
+        run_id,
+        "--live",
+        "--lock-file",
+        str(tmp_path / "missing.lock"),
+        "--agent-runs-dir",
+        str(tmp_path / "agent-runs"),
+        "--logs-dir",
+        str(tmp_path / "logs"),
+    )
+
+    assert payload["repository"] == "alanua/bauclock"
+    assert payload["issue_number"] == 48
+    assert payload["latest_run_id"] == run_id
+    assert payload["merge_allowed"] is False
+    assert payload["deploy_allowed"] is False
