@@ -53,6 +53,12 @@ from tools.skeleton_core.issue_dispatch import IssueDispatchInput, build_issue_d
 from tools.skeleton_core.issue_runner_bridge import IssueRunnerInput, build_issue_runner_packet
 from tools.skeleton_core.job_log_summary import summarize_job_log
 from tools.skeleton_core.models import EvidencePolicy, TaskPacket
+from tools.skeleton_core.module_registry import (
+    get_module_entry,
+    list_module_entries,
+    module_registry_payload,
+    render_module_registry_markdown,
+)
 from tools.skeleton_core.pr_review_gate import PRReviewGateInput, build_pr_review_gate
 from tools.skeleton_core.pr_status import PRStatusInput, build_pr_status
 from tools.skeleton_core.project_profile import (
@@ -94,6 +100,7 @@ SUBCOMMANDS = {
     "issue-dispatch",
     "issue-runner-bridge",
     "job-log-summary",
+    "module-registry",
     "pr-review-gate",
     "pr-status",
     "project-skeleton-profile",
@@ -430,6 +437,23 @@ def _subcommand_parser() -> argparse.ArgumentParser:
     )
     _add_input_arg(job_log_parser, "Path to public-safe job log text")
 
+    module_registry_parser = subparsers.add_parser(
+        "module-registry",
+        help="List static Skeleton module registry entries",
+    )
+    module_registry_parser.add_argument(
+        "--format",
+        choices=["json", "markdown"],
+        default="json",
+        help="Output format",
+    )
+    module_registry_parser.add_argument(
+        "--command",
+        dest="module_name",
+        default=None,
+        help="Return only one registry entry by module name",
+    )
+
     pr_review_parser = subparsers.add_parser(
         "pr-review-gate",
         help="Decide whether a public-safe PR export is ready for ChatGPT review",
@@ -715,6 +739,32 @@ def _run_job_log_summary(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_module_registry(args: argparse.Namespace) -> int:
+    if args.module_name is not None:
+        entry = get_module_entry(args.module_name)
+        if entry is None:
+            print(
+                json.dumps(
+                    {"error": "module_not_found", "command": args.module_name},
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                flush=True,
+            )
+            return 1
+        entries = [entry]
+    else:
+        entries = list_module_entries()
+
+    if args.format == "markdown":
+        print(render_module_registry_markdown(entries), flush=True)
+        return 0
+
+    payload = module_registry_payload(command=args.module_name)
+    print(json.dumps(payload, ensure_ascii=False, indent=2), flush=True)
+    return 0
+
+
 def _run_pr_review_gate(args: argparse.Namespace) -> int:
     try:
         result = build_pr_review_gate(load_pr_review_gate_input(args.input))
@@ -948,6 +998,8 @@ def main(argv: list[str] | None = None) -> int:
         return _run_issue_runner_bridge(args)
     if args.command == "job-log-summary":
         return _run_job_log_summary(args)
+    if args.command == "module-registry":
+        return _run_module_registry(args)
     if args.command == "pr-review-gate":
         return _run_pr_review_gate(args)
     if args.command == "pr-status":
