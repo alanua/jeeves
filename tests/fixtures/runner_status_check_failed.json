@@ -1,0 +1,14 @@
+{
+  "repository": "alanua/bauclock",
+  "issue_number": 48,
+  "runner_name": "hetzner-agent-runner-1",
+  "issue_labels": ["agent:running", "risk:yellow", "runner:hetzner"],
+  "running_since": "2026-05-12T12:00:00Z",
+  "current_time": "2026-05-12T12:10:00Z",
+  "lock_file_seen": false,
+  "latest_run_id": "run-48",
+  "latest_event_status": "failed",
+  "latest_event_at": "2026-05-12T12:09:00Z",
+  "logs_summary": "public-safe summary: command failed with nonzero exit",
+  "blocker_summary": "validation failed"
+}
