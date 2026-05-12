@@ -1,0 +1,16 @@
+{
+  "repository": "alanua/bauclock",
+  "issue_number": 48,
+  "runner_name": "hetzner-agent-runner-1",
+  "issue_labels": ["agent:running", "risk:yellow", "runner:hetzner"],
+  "running_since": "2026-05-12T10:00:00Z",
+  "current_time": "2026-05-12T12:30:00Z",
+  "stale_after_seconds": 3600,
+  "lock_file_seen": true,
+  "lock_pid": 12345,
+  "lock_pid_alive": false,
+  "latest_run_id": "run-48",
+  "latest_event_status": "running",
+  "latest_event_at": "2026-05-12T10:05:00Z",
+  "logs_summary": "last known runner event was old"
+}
