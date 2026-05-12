@@ -1,0 +1,14 @@
+{
+  "repository": "alanua/bauclock",
+  "issue_number": 48,
+  "runner_name": "hetzner-agent-runner-1",
+  "issue_labels": ["agent:running", "risk:yellow", "runner:hetzner"],
+  "running_since": "2026-05-12T12:00:00Z",
+  "current_time": "2026-05-12T12:10:00Z",
+  "latest_run_id": "run-48",
+  "latest_event_status": "completed",
+  "latest_event_at": "2026-05-12T12:09:00Z",
+  "completion_evidence_seen": true,
+  "final_report_seen": false,
+  "logs_summary": "processing appears complete but final GitHub report is missing"
+}
