@@ -19,6 +19,7 @@ dependencies = [
     "tenacity>=8.3.0",
     "structlog>=24.1.0",
     "python-dotenv>=1.0.0",
+    "google-genai>=2.0.1",
     "greenlet>=3.0.0",
 ]
 
