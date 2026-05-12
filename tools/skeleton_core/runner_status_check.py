@@ -172,7 +172,9 @@ def _has_failure_text(packet: RunnerStatusCheckInput) -> bool:
     event_status = (packet.latest_event_status or "").casefold()
     if event_status in FAILED_STATUSES:
         return True
-    text = f"{packet.latest_event_summary}\n{packet.logs_summary}\n{packet.blocker_summary}".casefold()
+    text = (
+        f"{packet.latest_event_summary}\n{packet.logs_summary}\n{packet.blocker_summary}".casefold()
+    )
     return any(word in text for word in FAILURE_WORDS)
 
 
@@ -215,7 +217,9 @@ def _blocker_summary(packet: RunnerStatusCheckInput, *, secret_like: bool) -> st
     return ""
 
 
-def _infer_status(packet: RunnerStatusCheckInput) -> tuple[RunnerStatus, str, RecommendedQueueAction]:
+def _infer_status(
+    packet: RunnerStatusCheckInput,
+) -> tuple[RunnerStatus, str, RecommendedQueueAction]:
     secret_like = _contains_secret_like_text(
         packet.logs_summary,
         packet.latest_event_summary,
@@ -288,7 +292,9 @@ def build_runner_status_check_from_json(raw_json: str) -> RunnerStatusCheckPacke
     return build_runner_status_check(RunnerStatusCheckInput.model_validate_json(raw_json))
 
 
-def build_unavailable_live_check(*, repository: str, issue_number: int | None) -> RunnerStatusCheckPacket:
+def build_unavailable_live_check(
+    *, repository: str, issue_number: int | None
+) -> RunnerStatusCheckPacket:
     """Return a fail-closed packet when live collection is not configured."""
     return build_runner_status_check(
         RunnerStatusCheckInput(
