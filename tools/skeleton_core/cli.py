@@ -77,9 +77,13 @@ from tools.skeleton_core.runner_env_check import (
 )
 from tools.skeleton_core.runner_report_ingest import ingest_runner_report_file_content
 from tools.skeleton_core.runner_status_check import (
+    DEFAULT_AGENT_RUNS_DIR,
+    DEFAULT_LOCK_FILE_PATH,
+    DEFAULT_LOGS_DIR,
     RunnerStatusCheckInput,
     build_runner_status_check,
     build_unavailable_live_check,
+    live_runner_status_check,
 )
 from tools.skeleton_core.state_validator import validate_state
 from tools.skeleton_core.task_lifecycle import build_task_lifecycle_packet
@@ -530,6 +534,34 @@ def _subcommand_parser() -> argparse.ArgumentParser:
         default=None,
         help="Issue number for fail-closed live placeholder",
     )
+    runner_status_parser.add_argument(
+        "--run-id",
+        default=None,
+        help="Optional bounded runner run id for live inspection",
+    )
+    runner_status_parser.add_argument(
+        "--live",
+        action="store_true",
+        help="Enable bounded read-only live inspection",
+    )
+    runner_status_parser.add_argument(
+        "--lock-file",
+        type=Path,
+        default=Path(DEFAULT_LOCK_FILE_PATH),
+        help="Runner lock file path for live inspection",
+    )
+    runner_status_parser.add_argument(
+        "--agent-runs-dir",
+        type=Path,
+        default=Path(DEFAULT_AGENT_RUNS_DIR),
+        help="Bounded agent-runs directory for live inspection",
+    )
+    runner_status_parser.add_argument(
+        "--logs-dir",
+        type=Path,
+        default=Path(DEFAULT_LOGS_DIR),
+        help="Bounded logs directory for live inspection",
+    )
 
     queue_state_parser = subparsers.add_parser(
         "queue-state",
@@ -824,6 +856,15 @@ def _run_runner_status_check(args: argparse.Namespace) -> int:
     try:
         if args.input is not None:
             result = build_runner_status_check(load_runner_status_check_input(args.input))
+        elif args.live:
+            result = live_runner_status_check(
+                repository=args.repo or "",
+                issue_number=args.issue,
+                run_id=args.run_id,
+                lock_file_path=args.lock_file,
+                agent_runs_dir=args.agent_runs_dir,
+                logs_dir=args.logs_dir,
+            )
         else:
             result = build_unavailable_live_check(
                 repository=args.repo or "",

@@ -88,3 +88,82 @@ def test_unavailable_live_check_fails_closed() -> None:
     assert result.recommended_queue_action == "needs_manual_review"
     assert result.merge_allowed is False
     assert result.deploy_allowed is False
+
+
+def test_live_runner_status_check_detects_dead_lock_pid_and_log(tmp_path) -> None:
+    from tools.skeleton_core.runner_status_check import live_runner_status_check
+
+    lock_file = tmp_path / "runner-state" / "yellow_runnerd.lock"
+    lock_file.parent.mkdir()
+    lock_file.write_text("99999999\n", encoding="utf-8")
+
+    run_id = "20260512-091344-yellow-alanua-bauclock-48"
+    run_dir = tmp_path / "agent-runs" / run_id
+    run_dir.mkdir(parents=True)
+    (run_dir / "log.txt").write_text(
+        "=== YELLOW AGENT RUN START ===\n"
+        "Run ID: 20260512-091344-yellow-alanua-bauclock-48\n"
+        "ERROR: unknown YELLOW task mapping\n",
+        encoding="utf-8",
+    )
+
+    packet = live_runner_status_check(
+        repository="alanua/bauclock",
+        issue_number=48,
+        run_id=run_id,
+        lock_file_path=lock_file,
+        agent_runs_dir=tmp_path / "agent-runs",
+        logs_dir=tmp_path / "logs",
+    )
+
+    assert packet.status == "failed"
+    assert packet.lock_file_seen is True
+    assert packet.lock_pid == 99999999
+    assert packet.lock_pid_alive is False
+    assert packet.latest_run_id == run_id
+    assert "unknown YELLOW task mapping" in packet.logs_summary
+    assert packet.merge_allowed is False
+    assert packet.deploy_allowed is False
+
+
+def test_live_runner_status_check_fails_closed_without_evidence(tmp_path) -> None:
+    from tools.skeleton_core.runner_status_check import live_runner_status_check
+
+    packet = live_runner_status_check(
+        repository="alanua/jeeves",
+        issue_number=161,
+        lock_file_path=tmp_path / "missing.lock",
+        agent_runs_dir=tmp_path / "agent-runs",
+        logs_dir=tmp_path / "logs",
+    )
+
+    assert packet.status == "needs_manual_review"
+    assert packet.recommended_queue_action == "needs_manual_review"
+    assert packet.blocker_summary == "no live runner evidence found"
+    assert packet.merge_allowed is False
+    assert packet.deploy_allowed is False
+
+
+def test_live_runner_status_check_redacts_secret_like_log_tail(tmp_path) -> None:
+    from tools.skeleton_core.runner_status_check import live_runner_status_check
+
+    run_id = "20260512-150545-yellow-alanua-jeeves-156"
+    run_dir = tmp_path / "agent-runs" / run_id
+    run_dir.mkdir(parents=True)
+    (run_dir / "log.txt").write_text(
+        "token=abc123\n" "normal public-safe line\n",
+        encoding="utf-8",
+    )
+
+    packet = live_runner_status_check(
+        repository="alanua/jeeves",
+        issue_number=156,
+        run_id=run_id,
+        lock_file_path=tmp_path / "missing.lock",
+        agent_runs_dir=tmp_path / "agent-runs",
+        logs_dir=tmp_path / "logs",
+    )
+
+    assert "abc123" not in packet.logs_summary
+    assert "<redacted-secret-like>" in packet.logs_summary
+    assert packet.status == "needs_manual_review"
