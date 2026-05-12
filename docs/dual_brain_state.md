@@ -406,3 +406,63 @@ Current Sprint 7 boundary:
 - `real` mode is implemented but not verified
 - `real` mode must not run automatically
 - `real` mode requires a separate controlled test issue and explicit human approval
+
+
+## Sprint 11B Canon Audit Route State Clarification
+
+Status: verified after Issue #143 and PR #142.
+
+The Canon Audit Layer is now implemented and has passed a first real route test.
+
+Verified route:
+
+- `python -m tools.skeleton_core.cli canon-audit`
+- reads only predefined allowlisted canon/core files
+- scans issue body and canon bundle for secret patterns
+- calls Gemini as an auditor/evidence source only
+- posts the audit report back to the GitHub Issue
+- performs no local file writes
+- creates no PR during route execution
+- performs no merge or deploy
+- does not promote audit findings to canon automatically
+
+### Label state clarification
+
+The label model separates task type from task state.
+
+Task-type label:
+
+- `agent:canon-audit` means the issue is intended for the specialized canon-audit route.
+
+State labels:
+
+- `agent:queued` means the issue is waiting for the base yellow audit daemon.
+- `agent:audited` means the issue passed the base YELLOW Gemini audit gate.
+- `agent:audit-complete` means the specialized canon-audit route completed and posted its audit report.
+
+Important distinction:
+
+- `agent:audited` is not the same as `agent:audit-complete`.
+- `agent:audited` is the precondition produced by the base audit gate.
+- `agent:audit-complete` is the terminal state for the canon-audit route.
+
+### Real-mode verification status
+
+The following bounded real-mode actions have been verified:
+
+- `validate-state`
+- `create-report`
+- `create-pr`
+- `canon-audit`
+
+This does not grant general autonomous execution rights.
+
+The runner still must not:
+
+- execute arbitrary shell commands
+- merge PRs
+- deploy
+- promote canon automatically
+- write secrets
+- modify policy/canon documents without human-reviewed PR flow
+
