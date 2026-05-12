@@ -70,6 +70,11 @@ from tools.skeleton_core.runner_env_check import (
     live_runner_env_check,
 )
 from tools.skeleton_core.runner_report_ingest import ingest_runner_report_file_content
+from tools.skeleton_core.runner_status_check import (
+    RunnerStatusCheckInput,
+    build_runner_status_check,
+    build_unavailable_live_check,
+)
 from tools.skeleton_core.state_validator import validate_state
 from tools.skeleton_core.task_lifecycle import build_task_lifecycle_packet
 from tools.skeleton_core.templates import render_runner_issue
@@ -96,6 +101,7 @@ SUBCOMMANDS = {
     "queue-summary",
     "runner-command-pack",
     "runner-env-check",
+    "runner-status-check",
     "runner-report-from-trace",
     "runner-report-ingest",
     "task-from-text",
@@ -149,6 +155,11 @@ def load_project_skeleton_profile_input(input_path: Path) -> ProjectSkeletonProf
 def load_runner_env_check_input(input_path: Path) -> RunnerEnvCheckInput:
     """Load public-safe runner environment check input from JSON."""
     return RunnerEnvCheckInput.model_validate_json(input_path.read_text(encoding="utf-8"))
+
+
+def load_runner_status_check_input(input_path: Path) -> RunnerStatusCheckInput:
+    """Load public-safe runner status check input from JSON."""
+    return RunnerStatusCheckInput.model_validate_json(input_path.read_text(encoding="utf-8"))
 
 
 def load_workflow_gate_input(input_path: Path) -> WorkflowGateInput:
@@ -474,6 +485,28 @@ def _subcommand_parser() -> argparse.ArgumentParser:
         help="Compatibility flag; output is always JSON",
     )
 
+    runner_status_parser = subparsers.add_parser(
+        "runner-status-check",
+        help="Build a read-only runner status packet from public-safe JSON",
+    )
+    runner_status_parser.add_argument(
+        "--input",
+        type=Path,
+        default=None,
+        help="Path to offline public-safe runner status fixture JSON",
+    )
+    runner_status_parser.add_argument(
+        "--repo",
+        default="",
+        help="Repository for fail-closed live placeholder",
+    )
+    runner_status_parser.add_argument(
+        "--issue",
+        type=int,
+        default=None,
+        help="Issue number for fail-closed live placeholder",
+    )
+
     queue_state_parser = subparsers.add_parser(
         "queue-state",
         help="Determine the next runnable item from public-safe queue state JSON",
@@ -737,6 +770,22 @@ def _run_runner_env_check(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_runner_status_check(args: argparse.Namespace) -> int:
+    try:
+        if args.input is not None:
+            result = build_runner_status_check(load_runner_status_check_input(args.input))
+        else:
+            result = build_unavailable_live_check(
+                repository=args.repo or "",
+                issue_number=args.issue,
+            )
+    except ValidationError as exc:
+        print(exc.json(), flush=True)
+        return 2
+    print(json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2), flush=True)
+    return 0
+
+
 def _run_queue_state(args: argparse.Namespace) -> int:
     try:
         result = build_queue_state(load_queue_state_input(args.input), project=args.project)
@@ -913,6 +962,8 @@ def main(argv: list[str] | None = None) -> int:
         return _run_runner_command_pack(args)
     if args.command == "runner-env-check":
         return _run_runner_env_check(args)
+    if args.command == "runner-status-check":
+        return _run_runner_status_check(args)
     if args.command == "runner-report-ingest":
         return _run_runner_report_ingest(args)
     if args.command == "runner-report-from-trace":
