@@ -189,3 +189,28 @@ Use:
 - `Jeeves Private Memory - Structured Facts` for structured private indexes and classified facts
 
 A diary/audit entry must be classified before saving.
+
+
+## Skeleton Diary and Canon Writes
+
+`knowledge_base/skeleton_diary.md` is an operational traceability log for Skeleton Core.
+
+It records execution evidence such as:
+
+- `[REAL_EXECUTION]`
+- `[REAL_WRITE]`
+- route completion notes
+- issue-processing traces
+
+These append-only operational entries support the rule that every real action must be traceable.
+
+They are not the same as canon-policy patches.
+
+Canon-policy writes include changes to durable rules, architecture, memory policy, working protocol, or governance documents. Those changes still require human review and PR approval before becoming canon.
+
+Therefore:
+
+- automated append-only diary entries are operational logs;
+- structural changes to the diary format or meaning require review;
+- changes to canon/policy documents require human-reviewed PR flow;
+- audit reports are evidence, not canon, until reviewed and explicitly promoted.
