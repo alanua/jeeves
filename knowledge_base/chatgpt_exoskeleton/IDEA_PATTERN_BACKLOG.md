@@ -13,6 +13,25 @@ It is a review queue, not accepted canon and not implementation approval.
 
 Backlog entries may come from user ideas, external transcripts, audits, project failures, repeated manual work, or architecture discussions.
 
+## Intake rule
+
+All incoming architecture ideas, external patterns, tool patterns, candidate skills, and future-plan suggestions should pass through this backlog before they become canon, issues, or implementation tasks.
+
+Default route:
+
+```text
+incoming idea
+-> record or map to backlog entry
+-> compare with current canon
+-> classify
+-> deep audit if useful or risky
+-> rank priority
+-> queue next action
+-> promote only through a separate reviewed issue/PR
+```
+
+If an idea duplicates an existing backlog entry, update or reference the existing entry instead of creating a parallel one.
+
 ## Core rule
 
 ```text
@@ -73,6 +92,27 @@ For each idea:
 Gemini or any external model may provide evidence, but its output is not canon.
 
 Human review remains required before canon promotion, runner behavior changes, implementation, merge, or deployment.
+
+## Deep audit gate
+
+Use deep audit when an idea would affect any of these:
+
+```text
+runner behavior
+workflow gates
+GitHub label semantics
+PR creation/review/merge boundaries
+Gemini or external-model routing
+Telegram or other human-approval surfaces
+memory/canon loading
+secret/privacy handling
+automation authority
+future Jeeves runtime architecture
+```
+
+Deep audit must compare the idea against current canon, existing issues/PRs, existing files, known risks, and safer smaller alternatives.
+
+A shallow safety-envelope accept is not enough for backlog promotion when the idea changes authority, routing, memory, or execution behavior.
 
 ## Forbidden shortcuts
 
