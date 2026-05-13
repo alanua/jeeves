@@ -343,3 +343,57 @@ If the active takeoff topic is the private Consum Quartier pilot, also read the 
 ```text
 СК Private Construction Takeoff Gemini Pilot Handoff
 ```
+
+## 2026-05-13 continuity checkpoint
+
+```text
+Chat memory is not a reliable source of truth.
+Future branches must recover Skeleton state from GitHub, repo files, KB/runbooks, and explicit runner diagnostics.
+Status labels are not truth by themselves; they require evidence.
+```
+
+Recent Skeleton runner/status milestones:
+
+```text id="px2oxg"
+runner-status-check core module completed
+runner-status-check CLI completed
+static module registry completed
+bounded live runner status collector completed
+```
+
+Current runner state:
+
+```text id="3yvq3d"
+Python/Gemini audit runner remains active.
+Old host-local shell execution loop has been disabled.
+The old shell dispatcher failed newer Skeleton tasks with unknown YELLOW task mapping.
+Do not rely on the old host-local shell mapping path for new Skeleton execution tasks.
+Do not delete old host-local runner scripts yet; keep them as evidence until source-controlled reference copies are reviewed.
+```
+
+Current task state:
+
+```text id="j0cuxv"
+#175 — continuity/current-state guardrail: active, should update this file.
+#178 — deep-diff evidence packet builder: valid, but old shell runner failed it with unknown YELLOW task mapping.
+#179 — false-confidence/shallow-gates audit: valid, currently blocked by Gemini quota/transport, not semantic rejection.
+#180 — blocked subtype semantics: valid, currently blocked by Gemini quota/transport, not semantic rejection.
+```
+
+Guardrail:
+
+```text id="zvkp4j"
+agent:running does not prove a task is actually running.
+agent:blocked does not prove semantic rejection.
+agent:audited may mean safety-envelope accepted, not deep substance validated.
+For exact state, inspect issue comments, adapter_status, runner-status-check output, PR state, and repo state.
+```
+
+Next safe order:
+
+```text id="qkehog"
+1. Finish #175 as a controlled docs-only PR.
+2. Continue #178 through a controlled path, not the old shell runner.
+3. Return to #179/#180 after quota reset or by manual controlled PR.
+4. Normalize dispatcher/source-controlled runner path only after evidence/reference work is reviewed.
+```
