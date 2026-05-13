@@ -55,9 +55,18 @@ IDEA_BACKLOG
 BLOCKED_OR_PREMATURE
 -> do not implement now; revisit only after prerequisites or a smaller version proves useful
 
+PARKED_ARCHIVE
+-> not in the active queue, but intentionally preserved for periodic review because it may become useful later
+
 OUTDATED_REJECTED
--> recorded for traceability but not pursued
+-> recorded for traceability but not pursued because it is unsafe, contradicted, superseded, or no longer relevant
 ```
+
+Premature is not the same as rejected.
+
+Only unsafe, contradictory, superseded, or clearly obsolete ideas should become `OUTDATED_REJECTED`.
+
+Potentially useful ideas that are not currently actionable should move to `PARKED_ARCHIVE` instead of being deleted.
 
 ## Priority levels
 
@@ -73,6 +82,9 @@ P2
 
 P3
 -> future Jeeves/runtime direction, broad architecture, or high-complexity idea
+
+ARCHIVE
+-> parked outside the active queue until a review trigger occurs
 ```
 
 ## Audit workflow
@@ -113,6 +125,35 @@ future Jeeves runtime architecture
 Deep audit must compare the idea against current canon, existing issues/PRs, existing files, known risks, and safer smaller alternatives.
 
 A shallow safety-envelope accept is not enough for backlog promotion when the idea changes authority, routing, memory, or execution behavior.
+
+## Idea archive / parking lot
+
+Old, premature, or temporarily inactive ideas should not be deleted by default.
+
+Use `PARKED_ARCHIVE` when an idea is potentially useful but should not remain in the active queue.
+
+Each parked idea should record:
+
+```text
+why parked
+what must change before reconsidering
+review trigger
+last reviewed date, if known
+```
+
+Suggested review triggers:
+
+```text
+after Worktree Protocol implementation
+after runner route/mapping stabilization
+after secrets-preflight is active
+after PR reviewer meta-skill exists
+after Telegram notification-only pilot
+when a parked idea becomes relevant to a real blocker
+periodic backlog review after major Skeleton milestones
+```
+
+Parking an idea does not approve it. It only preserves it for possible future reconsideration.
 
 ## Forbidden shortcuts
 
@@ -159,7 +200,15 @@ P3. Full graph memory / Infinite Brain only after smaller index proves useful.
 | IPB-008 | Canon Graph Index v0 | IDEA_BACKLOG | P2 | Reduces context noise by mapping intents to required canon sections. | Graph/index errors may hide mandatory safety rules. | Needs concept audit. | Audit a read-only index over existing Markdown canon; do not replace canon. | future issue |
 | IPB-009 | Directory-specific overrides | IDEA_BACKLOG | P2 | Allows local conventions for docs, tests, mocks, or project folders. | Local overrides can create canon drift or conflict with global safety rules. | Needs audit. | Define priority order: global canon > project profile > local override > task packet. | future issue |
 | IPB-010 | LLM Router / provider fallback | IDEA_BACKLOG | P3 | Reduces dependency on one model/provider and may handle quota/rate-limit failures. | Adds complexity, inconsistent behavior, cost risk, and authority confusion. | Future Jeeves/runtime audit needed. | Postpone until control plane, secrets, PR review, and runner routes are stable. | future issue |
-| IPB-011 | Full Infinite Brain / graph-memory rewrite | BLOCKED_OR_PREMATURE | P3 | Could eventually support richer machine-readable memory. | Full rewrite would fragment human-readable canon and increase drift. | Not approved. | Do not implement; first test smaller Canon Graph Index v0. | future issue |
+| IPB-011 | Full Infinite Brain / graph-memory rewrite | BLOCKED_OR_PREMATURE | P3 | Could eventually support richer machine-readable memory. | Full rewrite would fragment human-readable canon and increase drift. | Not approved. | Do not implement; first test smaller Canon Graph Index v0. Move to PARKED_ARCHIVE after v0 decision if still premature. | future issue |
+
+## Parking lot entries
+
+| ID | Idea / Pattern | Why parked | Reconsider when | Review trigger | Last reviewed | Links |
+|---|---|---|---|---|---|---|
+| PARK-001 | Full autonomous multi-agent orchestrator | Too much authority and complexity before worktree, runner mapping, secrets, and PR review are stable. | Control plane is stable and worktree execution is implemented safely. | After Worktree Protocol implementation and skeleton_pr_reviewer audit. | 2026-05-13 | IPB-011 |
+| PARK-002 | Telegram approval buttons with real actions | Notification-only mode must prove safe first; approval buttons can bypass GitHub trace if implemented too early. | Telegram v1 is only a GitHub-visible mirror and audit trail rules are proven. | After notification-only pilot. | 2026-05-13 | IPB-007 |
+| PARK-003 | Full knowledge-base graph rewrite | Full rewrite risks fragmenting human-readable canon and increasing drift. | Canon Graph Index v0 proves useful and safe. | After Canon Graph Index v0 audit and pilot. | 2026-05-13 | IPB-008, IPB-011 |
 
 ## Automation level rule candidate
 
