@@ -40,6 +40,46 @@ idea -> compare with canon -> classify -> audit if needed -> prioritize -> queue
 
 No item in this backlog grants authority to write code, change runner behavior, merge, deploy, access production, read secrets, or update canon automatically.
 
+## Bureaucracy boundary
+
+Bureaucracy is required only where there is authority risk.
+
+Use the lightest safe path:
+
+```text
+Low risk
+-> do the small safe action directly and report briefly
+
+Medium risk
+-> use an issue and reviewable PR/diff
+
+High authority risk
+-> backlog entry + deep audit + separate reviewed issue/PR
+```
+
+Deep audit is required when an idea or action changes or could bypass:
+
+```text
+runner behavior
+secret/privacy handling
+GitHub label or queue semantics
+merge, deploy, server, SSH, database, or production boundaries
+memory or canon loading
+external model routing
+Telegram or other approval surfaces
+automatic execution authority
+new executors such as OpenHands
+```
+
+Deep audit is not required for every thought, small documentation cleanup, narrow local test, one-off sandbox experiment without secrets, or small worktree diff.
+
+Operational test:
+
+```text
+A document or process step is useful only if it changes behavior, reduces a real risk, or speeds up future work.
+If it does none of these, it is decorative armor and should be avoided, shortened, or parked.
+```
+
 ## Classification
 
 ```text
