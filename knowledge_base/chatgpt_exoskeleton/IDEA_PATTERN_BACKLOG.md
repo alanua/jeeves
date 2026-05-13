@@ -162,7 +162,7 @@ Do not treat this backlog as canon.
 Do not implement a backlog idea directly from this file.
 Do not merge multiple unrelated ideas into one implementation task.
 Do not bypass GitHub issue/PR audit trail.
-Do not give Telegram, Gemini, Codex, or runner hidden authority.
+Do not give Telegram, Gemini, Codex, OpenHands, or runner hidden authority.
 Do not store secrets, .env values, tokens, private infrastructure data, or private user data here.
 Do not rewrite existing canon from external trend evidence without audit and review.
 ```
@@ -176,6 +176,7 @@ P0. Review #162 runner status live collector.
 
 P1. Create Secrets Preflight audit/design issue.
 P1. Create skeleton_pr_reviewer audit/design issue.
+P1. Create OpenHands executor adapter audit/pilot issue.
 P1. Finish #163 Gemini audit for controlled agentic engineering principles.
 
 P2. Telegram notification-only pilot via @Jeeveshelp_bot.
@@ -201,6 +202,7 @@ P3. Full graph memory / Infinite Brain only after smaller index proves useful.
 | IPB-009 | Directory-specific overrides | IDEA_BACKLOG | P2 | Allows local conventions for docs, tests, mocks, or project folders. | Local overrides can create canon drift or conflict with global safety rules. | Needs audit. | Define priority order: global canon > project profile > local override > task packet. | future issue |
 | IPB-010 | LLM Router / provider fallback | IDEA_BACKLOG | P3 | Reduces dependency on one model/provider and may handle quota/rate-limit failures. | Adds complexity, inconsistent behavior, cost risk, and authority confusion. | Future Jeeves/runtime audit needed. | Postpone until control plane, secrets, PR review, and runner routes are stable. | future issue |
 | IPB-011 | Full Infinite Brain / graph-memory rewrite | BLOCKED_OR_PREMATURE | P3 | Could eventually support richer machine-readable memory. | Full rewrite would fragment human-readable canon and increase drift. | Not approved. | Do not implement; first test smaller Canon Graph Index v0. Move to PARKED_ARCHIVE after v0 decision if still premature. | future issue |
+| IPB-012 | OpenHands executor adapter | LIKELY_NEEDS_REVIEW | P1 | May accelerate controlled code-writing and test tasks as a bounded software-agent executor inside worktrees. | Could become a second control plane, receive excessive permissions, conflict with runner, or expose secrets if integrated too broadly. | Needs deep audit and tiny pilot issue. | Audit OpenHands only as a bounded executor: no secrets, no merge, no deploy, no production access, worktree-only, PR/diff output only. | future issue |
 
 ## Parking lot entries
 
