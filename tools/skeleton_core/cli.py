@@ -39,6 +39,11 @@ if len(sys.argv) > 1 and sys.argv[1] == "local-tool":
 
     raise SystemExit(_local_tool_main(sys.argv[2:]))
 
+if len(sys.argv) > 1 and sys.argv[1] == "queue-commit":
+    from tools.skeleton_core.queue_commit_executor import main as _queue_commit_main
+
+    raise SystemExit(_queue_commit_main(sys.argv[2:]))
+
 import argparse
 import json
 import sys
