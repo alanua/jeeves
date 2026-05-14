@@ -25,6 +25,11 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from tools.skeleton_core.local_tool_runner import (
+    LocalToolReport,
+    LocalToolRequest,
+    run_local_tool,
+)
 from tools.skeleton_core.openhands_dispatch_cli import build_run_report
 
 OPENHANDS_QUEUE_RUNNER_VERSION = "openhands_queue_runner.v0"
@@ -46,6 +51,8 @@ class OpenHandsQueueRunReport(BaseModel):
     stop_reason: str = ""
     changed_files: list[str] = Field(default_factory=list)
     outside_allowed_changes: list[str] = Field(default_factory=list)
+    validation_status: str = "not_run"
+    validation_reports: list[LocalToolReport] = Field(default_factory=list)
     error_type: str = ""
     error: str = ""
 
@@ -89,6 +96,39 @@ def _as_jsonable(value: Any) -> dict[str, Any]:
     if isinstance(value, dict):
         return value
     raise TypeError(f"Unsupported dispatch report type: {type(value).__name__}")
+
+
+QUEUE_ONLY_PAYLOAD_KEYS = {"local_validations"}
+
+
+def _payload_for_dispatch(payload: dict[str, Any]) -> dict[str, Any]:
+    """Remove queue-runner-only fields before OpenHands issue dispatch validation."""
+
+    return {key: value for key, value in payload.items() if key not in QUEUE_ONLY_PAYLOAD_KEYS}
+
+
+def _validation_requests_from_payload(payload: dict[str, Any]) -> list[LocalToolRequest]:
+    raw_items = payload.get("local_validations") or []
+    if not isinstance(raw_items, list):
+        raise ValueError("local_validations must be a list")
+
+    requests: list[LocalToolRequest] = []
+    for raw_item in raw_items:
+        if not isinstance(raw_item, dict):
+            raise ValueError("local_validations items must be objects")
+        requests.append(LocalToolRequest.model_validate(raw_item))
+    return requests
+
+
+def _run_local_validations(payload: dict[str, Any]) -> tuple[str, list[LocalToolReport]]:
+    requests = _validation_requests_from_payload(payload)
+    if not requests:
+        return "not_run", []
+
+    reports = [run_local_tool(request) for request in requests]
+    if all(report.status == "success" for report in reports):
+        return "passed", reports
+    return "failed", reports
 
 
 def _extract_summary(report: dict[str, Any]) -> dict[str, Any]:
@@ -160,25 +200,37 @@ def run_queue_once(
     try:
         payload = json.loads(running_file.read_text(encoding="utf-8"))
         dispatch_report = dispatch(
-            payload,
+            _payload_for_dispatch(payload),
             headless_json=headless_json,
             timeout_seconds=timeout_seconds,
             exit_without_confirmation=exit_without_confirmation,
         )
         dispatch_json = _as_jsonable(dispatch_report)
+        validation_status, validation_reports = _run_local_validations(payload)
+
+        combined_report = {
+            "dispatch_report": dispatch_json,
+            "validation_status": validation_status,
+            "validation_reports": [report.model_dump(mode="json") for report in validation_reports],
+        }
         report_file.write_text(
-            json.dumps(dispatch_json, indent=2, sort_keys=True),
+            json.dumps(combined_report, indent=2, sort_keys=True),
             encoding="utf-8",
         )
 
-        done_file = _move_payload(running_file, resolved_done_dir)
         summary = _extract_summary(dispatch_json)
+        final_status = "done" if validation_status in {"not_run", "passed"} else "failed"
+        final_dir = resolved_done_dir if final_status == "done" else resolved_failed_dir
+        final_file = _move_payload(running_file, final_dir)
+
         return OpenHandsQueueRunReport(
-            status="done",
+            status=final_status,
             payload_file=str(payload_file),
             running_file=str(running_file),
-            final_payload_file=str(done_file),
+            final_payload_file=str(final_file),
             report_file=str(report_file),
+            validation_status=validation_status,
+            validation_reports=validation_reports,
             **summary,
         )
     except Exception as exc:

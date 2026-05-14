@@ -37,6 +37,7 @@ def fake_dispatch(
     exit_without_confirmation: bool,
 ) -> dict:
     assert payload_dict["issue_number"] == 211
+    assert "local_validations" not in payload_dict
     assert headless_json is True
     assert timeout_seconds == 17
     assert exit_without_confirmation is True
@@ -296,3 +297,146 @@ def test_queue_runner_main_rejects_invalid_max_items(tmp_path: Path, capsys) -> 
     output = json.loads(capsys.readouterr().out)
     assert output["status"] == "failed"
     assert "--max-items must be positive" in output["error"]
+
+
+def test_run_queue_once_runs_local_validations_and_keeps_done_on_pass(tmp_path: Path) -> None:
+    queue_dir = tmp_path / "queue"
+    done_dir = tmp_path / "done"
+    report_dir = tmp_path / "reports"
+    payload_file = write_payload(queue_dir)
+
+    payload_data = json.loads(payload_file.read_text(encoding="utf-8"))
+    payload_data["local_validations"] = [
+        {
+            "tool": "py_compile",
+            "targets": ["tools/skeleton_core/local_tool_runner.py"],
+        }
+    ]
+    payload_file.write_text(json.dumps(payload_data), encoding="utf-8")
+
+    report = run_queue_once(
+        queue_dir=queue_dir,
+        report_dir=report_dir,
+        done_dir=done_dir,
+        headless_json=True,
+        timeout_seconds=17,
+        exit_without_confirmation=True,
+        dispatch=fake_dispatch,
+    )
+
+    assert report.status == "done"
+    assert report.validation_status == "passed"
+    assert len(report.validation_reports) == 1
+    assert report.validation_reports[0].tool == "py_compile"
+    assert report.validation_reports[0].status == "success"
+    assert Path(report.final_payload_file).parent == done_dir
+
+    report_json = json.loads(Path(report.report_file).read_text(encoding="utf-8"))
+    assert report_json["validation_status"] == "passed"
+    assert report_json["dispatch_report"]["status"] == "dispatched"
+
+
+def test_run_queue_once_moves_to_failed_when_local_validation_fails(tmp_path: Path) -> None:
+    queue_dir = tmp_path / "queue"
+    failed_dir = tmp_path / "failed"
+    report_dir = tmp_path / "reports"
+    payload_file = write_payload(queue_dir)
+
+    payload_data = json.loads(payload_file.read_text(encoding="utf-8"))
+    payload_data["local_validations"] = [
+        {
+            "tool": "pytest",
+            "targets": ["../unsafe.py"],
+        }
+    ]
+    payload_file.write_text(json.dumps(payload_data), encoding="utf-8")
+
+    report = run_queue_once(
+        queue_dir=queue_dir,
+        report_dir=report_dir,
+        failed_dir=failed_dir,
+        headless_json=True,
+        timeout_seconds=17,
+        exit_without_confirmation=True,
+        dispatch=fake_dispatch,
+    )
+
+    assert report.status == "failed"
+    assert report.validation_status == "failed"
+    assert len(report.validation_reports) == 1
+    assert report.validation_reports[0].status == "blocked"
+    assert "path_traversal" in report.validation_reports[0].blocked_reasons
+    assert Path(report.final_payload_file).parent == failed_dir
+
+
+def test_run_queue_once_rejects_malformed_local_validations(tmp_path: Path) -> None:
+    queue_dir = tmp_path / "queue"
+    failed_dir = tmp_path / "failed"
+    report_dir = tmp_path / "reports"
+    payload_file = write_payload(queue_dir)
+
+    payload_data = json.loads(payload_file.read_text(encoding="utf-8"))
+    payload_data["local_validations"] = {"tool": "py_compile"}
+    payload_file.write_text(json.dumps(payload_data), encoding="utf-8")
+
+    report = run_queue_once(
+        queue_dir=queue_dir,
+        report_dir=report_dir,
+        failed_dir=failed_dir,
+        headless_json=True,
+        timeout_seconds=17,
+        exit_without_confirmation=True,
+        dispatch=fake_dispatch,
+    )
+
+    assert report.status == "failed"
+    assert report.error_type == "ValueError"
+    assert "local_validations must be a list" in report.error
+    assert Path(report.final_payload_file).parent == failed_dir
+
+
+def test_queue_only_local_validations_are_not_sent_to_dispatch(tmp_path: Path) -> None:
+    queue_dir = tmp_path / "queue"
+    done_dir = tmp_path / "done"
+    report_dir = tmp_path / "reports"
+    payload_file = write_payload(queue_dir)
+
+    payload_data = json.loads(payload_file.read_text(encoding="utf-8"))
+    payload_data["local_validations"] = [
+        {
+            "tool": "py_compile",
+            "targets": ["tools/skeleton_core/local_tool_runner.py"],
+        }
+    ]
+    payload_file.write_text(json.dumps(payload_data), encoding="utf-8")
+
+    seen_payload = {}
+
+    def dispatch_without_queue_fields(
+        payload_dict: dict,
+        *,
+        headless_json: bool,
+        timeout_seconds: int,
+        exit_without_confirmation: bool,
+    ) -> dict:
+        seen_payload.update(payload_dict)
+        return fake_dispatch(
+            payload_dict,
+            headless_json=headless_json,
+            timeout_seconds=timeout_seconds,
+            exit_without_confirmation=exit_without_confirmation,
+        )
+
+    report = run_queue_once(
+        queue_dir=queue_dir,
+        report_dir=report_dir,
+        done_dir=done_dir,
+        headless_json=True,
+        timeout_seconds=17,
+        exit_without_confirmation=True,
+        dispatch=dispatch_without_queue_fields,
+    )
+
+    assert report.status == "done"
+    assert "local_validations" not in seen_payload
+    assert report.validation_status == "passed"
