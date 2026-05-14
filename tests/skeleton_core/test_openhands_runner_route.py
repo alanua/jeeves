@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from tools.skeleton_core.adapter_contract import AdapterTaskPacket, FuelPolicy
+from tools.skeleton_core.openhands_result_collector import OpenHandsResultCollectorConfig
 from tools.skeleton_core.openhands_runner_route import (
     OpenHandsRunnerRouteConfig,
     load_openrouter_key,
@@ -22,6 +23,7 @@ def valid_packet() -> AdapterTaskPacket:
         authority_level="level_2_local_diff",
         risk_level="yellow",
         expected_artifact="diff",
+        task_instructions="Run bounded OpenHands runner route v0.",
         fuel_policy=FuelPolicy(
             provider="openrouter",
             model="deepseek/deepseek-v4-flash:free",
@@ -113,3 +115,45 @@ def test_route_failed_runner_returns_failed_result(tmp_path: Path) -> None:
     assert report.result.result.status == "failed"
     assert report.result.result_validation.status == "valid_adapter_result"
     assert report.stderr_tail == "failed"
+
+
+def test_route_uses_collector_when_no_explicit_changed_files(tmp_path: Path) -> None:
+    secret_file = tmp_path / "openrouter.env"
+    task_file = tmp_path / "task.md"
+    artifact_file = tmp_path / "result.diff"
+    secret_file.write_text("OPENROUTER_API_KEY='sk-or-test-value'\n", encoding="utf-8")
+
+    def fake_runner(command: list[str], env: dict[str, str]) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(command, 0, stdout="done", stderr="")
+
+    def fake_git_runner(command: list[str]) -> subprocess.CompletedProcess[str]:
+        if "status" in command and "--short" in command:
+            return subprocess.CompletedProcess(
+                command,
+                0,
+                stdout=" M tools/skeleton_core/openhands_runner_route.py\n",
+                stderr="",
+            )
+        if "diff" in command:
+            return subprocess.CompletedProcess(command, 0, stdout="+route change\n", stderr="")
+        return subprocess.CompletedProcess(command, 1, stdout="", stderr="unexpected command")
+
+    packet = valid_packet().model_copy(
+        update={"allowed_files": ["tools/skeleton_core/openhands_runner_route.py"]}
+    )
+
+    report = run_openhands_route(
+        packet,
+        config=OpenHandsRunnerRouteConfig(task_file=task_file, secret_file=secret_file),
+        runner=fake_runner,
+        collector_config=OpenHandsResultCollectorConfig(diff_artifact_file=artifact_file),
+        git_runner=fake_git_runner,
+    )
+
+    assert report.collector_report is not None
+    assert report.collector_report.changed_files == [
+        "tools/skeleton_core/openhands_runner_route.py"
+    ]
+    assert report.collector_report.diff_artifact_written is True
+    assert artifact_file.exists()
+    assert report.result.result_validation.status == "valid_adapter_result"
