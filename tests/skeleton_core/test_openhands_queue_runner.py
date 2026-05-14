@@ -440,3 +440,104 @@ def test_queue_only_local_validations_are_not_sent_to_dispatch(tmp_path: Path) -
     assert report.status == "done"
     assert "local_validations" not in seen_payload
     assert report.validation_status == "passed"
+
+
+def test_queue_done_result_includes_commit_preparation_ready(tmp_path: Path) -> None:
+    queue_dir = tmp_path / "queue"
+    done_dir = tmp_path / "done"
+    report_dir = tmp_path / "reports"
+    write_payload(queue_dir)
+
+    report = run_queue_once(
+        queue_dir=queue_dir,
+        report_dir=report_dir,
+        done_dir=done_dir,
+        headless_json=True,
+        timeout_seconds=17,
+        exit_without_confirmation=True,
+        dispatch=fake_dispatch,
+    )
+
+    assert report.status == "done"
+    assert report.commit_preparation.status == "ready"
+    assert report.commit_preparation.commit_files == ["QUEUE_TEST.md"]
+    assert report.commit_preparation.suggested_commit_message == (
+        "chore(skeleton): Queue runner test payload"
+    )
+    assert report.commit_preparation.blocked_reasons == []
+
+    report_json = json.loads(Path(report.report_file).read_text(encoding="utf-8"))
+    assert report_json["commit_preparation"]["status"] == "ready"
+    assert report_json["commit_preparation"]["commit_files"] == ["QUEUE_TEST.md"]
+
+
+def test_queue_failed_validation_blocks_commit_preparation(tmp_path: Path) -> None:
+    queue_dir = tmp_path / "queue"
+    failed_dir = tmp_path / "failed"
+    report_dir = tmp_path / "reports"
+    payload_file = write_payload(queue_dir)
+
+    payload_data = json.loads(payload_file.read_text(encoding="utf-8"))
+    payload_data["local_validations"] = [
+        {
+            "tool": "pytest",
+            "targets": ["../unsafe.py"],
+        }
+    ]
+    payload_file.write_text(json.dumps(payload_data), encoding="utf-8")
+
+    report = run_queue_once(
+        queue_dir=queue_dir,
+        report_dir=report_dir,
+        failed_dir=failed_dir,
+        headless_json=True,
+        timeout_seconds=17,
+        exit_without_confirmation=True,
+        dispatch=fake_dispatch,
+    )
+
+    assert report.status == "failed"
+    assert report.commit_preparation.status == "blocked"
+    assert "queue_status_not_done" in report.commit_preparation.blocked_reasons
+    assert "local_validations_not_passed" in report.commit_preparation.blocked_reasons
+
+
+def test_queue_no_changed_files_blocks_commit_preparation(tmp_path: Path) -> None:
+    queue_dir = tmp_path / "queue"
+    done_dir = tmp_path / "done"
+    report_dir = tmp_path / "reports"
+    write_payload(queue_dir)
+
+    def no_change_dispatch(
+        payload_dict: dict,
+        *,
+        headless_json: bool,
+        timeout_seconds: int,
+        exit_without_confirmation: bool,
+    ) -> dict:
+        return {
+            "status": "dispatched",
+            "route_report": {
+                "result": {
+                    "result": {
+                        "status": "blocked",
+                        "stop_reason": "no_allowed_file_changes",
+                        "changed_files": [],
+                    }
+                },
+                "collector_report": {
+                    "outside_allowed_changes": [],
+                },
+            },
+        }
+
+    report = run_queue_once(
+        queue_dir=queue_dir,
+        report_dir=report_dir,
+        done_dir=done_dir,
+        dispatch=no_change_dispatch,
+    )
+
+    assert report.commit_preparation.status == "blocked"
+    assert "dispatch_result_not_success" in report.commit_preparation.blocked_reasons
+    assert "no_changed_files" in report.commit_preparation.blocked_reasons

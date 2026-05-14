@@ -35,6 +35,21 @@ from tools.skeleton_core.openhands_dispatch_cli import build_run_report
 OPENHANDS_QUEUE_RUNNER_VERSION = "openhands_queue_runner.v0"
 
 
+class OpenHandsQueueCommitPreparationReport(BaseModel):
+    """Public-safe commit preparation report.
+
+    This does not commit, push, merge, or open a PR. It only says whether the
+    queue result is ready for a later explicit commit step.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    status: str = "not_ready"
+    commit_files: list[str] = Field(default_factory=list)
+    suggested_commit_message: str = ""
+    blocked_reasons: list[str] = Field(default_factory=list)
+
+
 class OpenHandsQueueRunReport(BaseModel):
     """Public-safe report for one local queue item."""
 
@@ -53,6 +68,9 @@ class OpenHandsQueueRunReport(BaseModel):
     outside_allowed_changes: list[str] = Field(default_factory=list)
     validation_status: str = "not_run"
     validation_reports: list[LocalToolReport] = Field(default_factory=list)
+    commit_preparation: OpenHandsQueueCommitPreparationReport = Field(
+        default_factory=OpenHandsQueueCommitPreparationReport
+    )
     error_type: str = ""
     error: str = ""
 
@@ -131,6 +149,53 @@ def _run_local_validations(payload: dict[str, Any]) -> tuple[str, list[LocalTool
     return "failed", reports
 
 
+def _suggest_commit_message(payload: dict[str, Any]) -> str:
+    title = str(payload.get("title") or "").strip()
+    if not title:
+        return "chore(skeleton): apply queued OpenHands task"
+    cleaned = " ".join(title.split())
+    return f"chore(skeleton): {cleaned[:80]}"
+
+
+def _prepare_commit_report(
+    *,
+    payload: dict[str, Any],
+    final_status: str,
+    summary: dict[str, Any],
+    validation_status: str,
+) -> OpenHandsQueueCommitPreparationReport:
+    blocked_reasons: list[str] = []
+    changed_files = list(summary.get("changed_files") or [])
+    outside_allowed_changes = list(summary.get("outside_allowed_changes") or [])
+    result_status = str(summary.get("result_status") or "")
+
+    if final_status != "done":
+        blocked_reasons.append("queue_status_not_done")
+    if result_status != "success":
+        blocked_reasons.append("dispatch_result_not_success")
+    if validation_status not in {"not_run", "passed"}:
+        blocked_reasons.append("local_validations_not_passed")
+    if not changed_files:
+        blocked_reasons.append("no_changed_files")
+    if outside_allowed_changes:
+        blocked_reasons.append("outside_allowed_changes")
+
+    if blocked_reasons:
+        return OpenHandsQueueCommitPreparationReport(
+            status="blocked",
+            commit_files=changed_files,
+            suggested_commit_message="",
+            blocked_reasons=sorted(set(blocked_reasons)),
+        )
+
+    return OpenHandsQueueCommitPreparationReport(
+        status="ready",
+        commit_files=changed_files,
+        suggested_commit_message=_suggest_commit_message(payload),
+        blocked_reasons=[],
+    )
+
+
 def _extract_summary(report: dict[str, Any]) -> dict[str, Any]:
     route = report.get("route_report") or {}
     result_packet = route.get("result") or {}
@@ -199,6 +264,7 @@ def run_queue_once(
 
     try:
         payload = json.loads(running_file.read_text(encoding="utf-8"))
+
         dispatch_report = dispatch(
             _payload_for_dispatch(payload),
             headless_json=headless_json,
@@ -206,20 +272,36 @@ def run_queue_once(
             exit_without_confirmation=exit_without_confirmation,
         )
         dispatch_json = _as_jsonable(dispatch_report)
+
         validation_status, validation_reports = _run_local_validations(payload)
+        summary = _extract_summary(dispatch_json)
+
+        result_status = str(summary.get("result_status") or "")
+        outside_allowed_changes = list(summary.get("outside_allowed_changes") or [])
+        validation_ok = validation_status in {"not_run", "passed"}
+        dispatch_ok = result_status == "success"
+        scope_ok = not outside_allowed_changes
+
+        final_status = "done" if validation_ok and dispatch_ok and scope_ok else "failed"
+
+        commit_preparation = _prepare_commit_report(
+            payload=payload,
+            final_status=final_status,
+            summary=summary,
+            validation_status=validation_status,
+        )
 
         combined_report = {
             "dispatch_report": dispatch_json,
             "validation_status": validation_status,
             "validation_reports": [report.model_dump(mode="json") for report in validation_reports],
+            "commit_preparation": commit_preparation.model_dump(mode="json"),
         }
         report_file.write_text(
             json.dumps(combined_report, indent=2, sort_keys=True),
             encoding="utf-8",
         )
 
-        summary = _extract_summary(dispatch_json)
-        final_status = "done" if validation_status in {"not_run", "passed"} else "failed"
         final_dir = resolved_done_dir if final_status == "done" else resolved_failed_dir
         final_file = _move_payload(running_file, final_dir)
 
@@ -231,6 +313,7 @@ def run_queue_once(
             report_file=str(report_file),
             validation_status=validation_status,
             validation_reports=validation_reports,
+            commit_preparation=commit_preparation,
             **summary,
         )
     except Exception as exc:
