@@ -46,8 +46,7 @@ def run_cli(payload_path: Path) -> subprocess.CompletedProcess[str]:
             str(payload_path),
         ],
         text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         check=False,
     )
 
