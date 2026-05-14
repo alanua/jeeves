@@ -31,6 +31,7 @@ class OpenHandsAdapterConfig(BaseModel):
     model: str = "deepseek/deepseek-v4-flash:free"
     base_url: str = "https://openrouter.ai/api/v1"
     suppress_banner: bool = True
+    headless_json: bool = False
 
 
 class OpenHandsPreparedTask(BaseModel):
@@ -119,12 +120,14 @@ def build_openhands_command(
     """Build the OpenHands CLI command."""
 
     resolved = config or OpenHandsAdapterConfig()
-    return [
+    command = [
         resolved.executable,
         "--override-with-envs",
-        "-f",
-        task_file,
     ]
+    if resolved.headless_json:
+        command.extend(["--headless", "--json"])
+    command.extend(["-f", task_file])
+    return command
 
 
 def build_openhands_env(
