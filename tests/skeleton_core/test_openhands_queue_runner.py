@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from tools.skeleton_core.openhands_queue_runner import main, run_queue_once
+from tools.skeleton_core.openhands_queue_runner import main, run_queue_loop, run_queue_once
 
 
 def payload() -> dict:
@@ -211,3 +211,88 @@ def test_queue_runner_main_rejects_invalid_timeout(tmp_path: Path, capsys) -> No
     output = json.loads(capsys.readouterr().out)
     assert output["status"] == "failed"
     assert "--timeout must be positive" in output["error"]
+
+
+def test_run_queue_loop_processes_multiple_payloads(tmp_path: Path) -> None:
+    queue_dir = tmp_path / "queue"
+    report_dir = tmp_path / "reports"
+    done_dir = tmp_path / "done"
+    write_payload(queue_dir, "001-payload.json")
+    write_payload(queue_dir, "002-payload.json")
+
+    loop_report = run_queue_loop(
+        queue_dir=queue_dir,
+        report_dir=report_dir,
+        done_dir=done_dir,
+        headless_json=True,
+        timeout_seconds=17,
+        exit_without_confirmation=True,
+        max_items=5,
+        dispatch=fake_dispatch,
+    )
+
+    assert loop_report.status == "completed"
+    assert loop_report.processed_count == 2
+    assert loop_report.done_count == 2
+    assert loop_report.failed_count == 0
+    assert loop_report.empty_count == 1
+    assert len(loop_report.reports) == 3
+    assert not list(queue_dir.glob("*.json"))
+    assert (done_dir / "001-payload.json").exists()
+    assert (done_dir / "002-payload.json").exists()
+
+
+def test_queue_runner_main_loop_outputs_loop_report(tmp_path: Path, capsys) -> None:
+    queue_dir = tmp_path / "queue"
+    report_dir = tmp_path / "reports"
+    done_dir = tmp_path / "done"
+    write_payload(queue_dir, "001-payload.json")
+    write_payload(queue_dir, "002-payload.json")
+
+    code = main(
+        [
+            "--queue-dir",
+            str(queue_dir),
+            "--report-dir",
+            str(report_dir),
+            "--done-dir",
+            str(done_dir),
+            "--headless-json",
+            "--exit-without-confirmation",
+            "--timeout",
+            "17",
+            "--loop",
+            "--max-items",
+            "2",
+            "--pretty",
+        ],
+        dispatch=fake_dispatch,
+    )
+
+    assert code == 0
+    output = json.loads(capsys.readouterr().out)
+    assert output["status"] == "completed"
+    assert output["processed_count"] == 2
+    assert output["done_count"] == 2
+    assert output["failed_count"] == 0
+    assert len(output["reports"]) == 2
+
+
+def test_queue_runner_main_rejects_invalid_max_items(tmp_path: Path, capsys) -> None:
+    code = main(
+        [
+            "--queue-dir",
+            str(tmp_path / "queue"),
+            "--report-dir",
+            str(tmp_path / "reports"),
+            "--loop",
+            "--max-items",
+            "0",
+        ],
+        dispatch=fake_dispatch,
+    )
+
+    assert code == 2
+    output = json.loads(capsys.readouterr().out)
+    assert output["status"] == "failed"
+    assert "--max-items must be positive" in output["error"]
