@@ -24,6 +24,12 @@ from tools.skeleton_core.openhands_adapter import (
     build_openhands_result,
     prepare_openhands_task,
 )
+from tools.skeleton_core.openhands_result_collector import (
+    GitRunner,
+    OpenHandsResultCollectorConfig,
+    OpenHandsResultCollectorReport,
+    collect_openhands_result,
+)
 
 OPENHANDS_RUNNER_ROUTE_VERSION = "openhands_runner_route.v0"
 
@@ -51,6 +57,7 @@ class OpenHandsRunnerRouteReport(BaseModel):
     returncode: int
     stdout_tail: str = ""
     stderr_tail: str = ""
+    collector_report: OpenHandsResultCollectorReport | None = None
 
 
 RunnerFn = Callable[[list[str], dict[str, str]], subprocess.CompletedProcess[str]]
@@ -111,11 +118,13 @@ def run_openhands_route(
     runner: RunnerFn = default_runner,
     changed_files: list[str] | None = None,
     artifact_paths: list[str] | None = None,
+    collector_config: OpenHandsResultCollectorConfig | None = None,
+    git_runner: GitRunner | None = None,
 ) -> OpenHandsRunnerRouteReport:
-    """Prepare, run, and validate a bounded OpenHands task.
+    """Prepare, run, collect, and validate a bounded OpenHands task.
 
-    `changed_files` and `artifact_paths` are supplied by the caller or a later
-    collector layer. This v0 route intentionally avoids scanning arbitrary files.
+    If `changed_files` or `artifact_paths` are supplied, they are used directly.
+    Otherwise, a bounded result collector inspects only packet.allowed_files.
     """
 
     resolved = config or OpenHandsRunnerRouteConfig()
@@ -127,18 +136,29 @@ def run_openhands_route(
     env = build_openhands_env(api_key, resolved.adapter_config)
     completed = runner(prepared.command, env)
 
-    executor_status = "success" if completed.returncode == 0 else "failed"
-    validation_status = "passed" if completed.returncode == 0 else "failed"
+    collector_report = None
+    if changed_files is None and artifact_paths is None:
+        collector_kwargs = {}
+        if collector_config is not None:
+            collector_kwargs["config"] = collector_config
+        if git_runner is not None:
+            collector_kwargs["git_runner"] = git_runner
 
-    validated = build_openhands_result(
-        packet,
-        executor_status=executor_status,
-        changed_files=changed_files or [],
-        artifact_paths=artifact_paths or [],
-        validation_status=validation_status,
-        risk_flags=[],
-        stop_reason=f"openhands_returncode={completed.returncode}",
-    )
+        collector_report = collect_openhands_result(packet, **collector_kwargs)
+        validated = collector_report.result
+    else:
+        executor_status = "success" if completed.returncode == 0 else "failed"
+        validation_status = "passed" if completed.returncode == 0 else "failed"
+
+        validated = build_openhands_result(
+            packet,
+            executor_status=executor_status,
+            changed_files=changed_files or [],
+            artifact_paths=artifact_paths or [],
+            validation_status=validation_status,
+            risk_flags=[],
+            stop_reason=f"openhands_returncode={completed.returncode}",
+        )
 
     return OpenHandsRunnerRouteReport(
         prepared=prepared,
@@ -146,4 +166,5 @@ def run_openhands_route(
         returncode=completed.returncode,
         stdout_tail=_tail(completed.stdout or ""),
         stderr_tail=_tail(completed.stderr or ""),
+        collector_report=collector_report,
     )
