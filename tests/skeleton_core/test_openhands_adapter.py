@@ -138,3 +138,22 @@ def test_result_builder_blocks_success_without_artifact() -> None:
 
     assert result.result_validation.status == "blocked"
     assert "success_without_artifact" in result.result_validation.blocked_reasons
+
+
+def test_headless_json_command_is_explicit_opt_in() -> None:
+    safe_default = build_openhands_command("/tmp/task.md", OpenHandsAdapterConfig())
+    headless = build_openhands_command(
+        "/tmp/task.md",
+        OpenHandsAdapterConfig(executable="/bin/openhands", headless_json=True),
+    )
+
+    assert "--headless" not in safe_default
+    assert "--json" not in safe_default
+    assert headless == [
+        "/bin/openhands",
+        "--override-with-envs",
+        "--headless",
+        "--json",
+        "-f",
+        "/tmp/task.md",
+    ]
