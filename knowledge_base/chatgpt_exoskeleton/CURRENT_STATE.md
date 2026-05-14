@@ -2,7 +2,7 @@
 
 Status: CONFIRMED_CANON
 Scope: short public-safe handoff for the next ChatGPT branch working on СК / Skeleton
-Last updated: 2026-05-09
+Last updated: 2026-05-12
 
 ## Active project
 
@@ -65,6 +65,17 @@ semi_automatic_construction_takeoff_with_gemini
 semi_automatic_construction_takeoff_gemini_task_template
 gemini_auditor_node
 gemini_auditor_adapter
+agent_worktree_protocol
+```
+
+Agent Worktree Protocol status:
+
+```text
+Priority: HIGH
+Status: LIKELY_NEEDS_REVIEW
+Public GitHub: docs-only protocol in knowledge_base/chatgpt_exoskeleton/AGENT_WORKTREE_PROTOCOL.md via #166
+Purpose: define one issue = one branch = one worktree = one reviewable PR/diff for parallel agent work
+Runner behavior: not implemented; separate reviewed implementation task required before yellow_runnerd or runner wrappers create worktrees automatically
 ```
 
 Gemini Auditor Node status:

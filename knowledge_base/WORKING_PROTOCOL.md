@@ -127,6 +127,24 @@ For Skeleton tasks, prefer:
 knowledge_base/chatgpt_exoskeleton/SKELETON_RUNNER_TASK_TEMPLATE.md
 ```
 
+## Agent worktree protocol
+
+For parallel or long-running agent development work, use:
+
+```text
+knowledge_base/chatgpt_exoskeleton/AGENT_WORKTREE_PROTOCOL.md
+```
+
+Core rule:
+
+```text
+One issue = one branch = one worktree = one reviewable PR/diff.
+```
+
+Git worktrees isolate Git working directories and branch state only. They do not isolate runtime resources such as databases, ports, Docker, Redis, caches, `.venv`, secrets, or environment variables.
+
+Read-only audits do not require a worktree when they only read GitHub/files and post a report. Test-only and code-changing tasks require a worktree.
+
 ## Response compression rule
 
 For direct chat with Oleksii, use one short human Ukrainian sentence by default: what changed, what matters, or the next step.
