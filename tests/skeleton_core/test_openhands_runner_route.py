@@ -157,3 +157,37 @@ def test_route_uses_collector_when_no_explicit_changed_files(tmp_path: Path) -> 
     assert report.collector_report.diff_artifact_written is True
     assert artifact_file.exists()
     assert report.result.result_validation.status == "valid_adapter_result"
+
+
+def test_route_blocks_interactive_confirmation_without_changes(tmp_path: Path) -> None:
+    secret_file = tmp_path / "openrouter.env"
+    task_file = tmp_path / "task.md"
+    secret_file.write_text("OPENROUTER_API_KEY='sk-or-test-value'\n", encoding="utf-8")
+
+    def fake_runner(command: list[str], env: dict[str, str]) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(
+            command,
+            0,
+            stdout="OpenHands CLI terminal UI may not work correctly",
+            stderr="Confirm 1 action? Yes, proceed / No, dismiss",
+        )
+
+    def fake_git_runner(command: list[str]) -> subprocess.CompletedProcess[str]:
+        if "status" in command and "--short" in command:
+            return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
+        return subprocess.CompletedProcess(command, 1, stdout="", stderr="unexpected command")
+
+    report = run_openhands_route(
+        valid_packet(),
+        config=OpenHandsRunnerRouteConfig(task_file=task_file, secret_file=secret_file),
+        runner=fake_runner,
+        git_runner=fake_git_runner,
+    )
+
+    assert report.collector_report is not None
+    assert report.collector_report.changed_files == []
+    assert report.result.result.status == "blocked"
+    assert report.result.result.stop_reason == "interactive_confirmation_required"
+    assert report.result.result.validation_status == "blocked"
+    assert "interactive_confirmation_required" in report.result.result.risk_flags
+    assert report.result.result_validation.status == "valid_adapter_result"

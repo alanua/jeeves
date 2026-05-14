@@ -62,6 +62,22 @@ class OpenHandsRunnerRouteReport(BaseModel):
 
 RunnerFn = Callable[[list[str], dict[str, str]], subprocess.CompletedProcess[str]]
 
+INTERACTIVE_CONFIRMATION_MARKERS = (
+    "Yes, proceed",
+    "No, dismiss",
+    "Confirm",
+    "Confirm 1 action",
+    "Confirm 2 action",
+    "OpenHands CLI terminal UI may not work correctly",
+    "interactive UI may not render correctly",
+    "TTY_INTERACTIVE",
+)
+
+
+def _looks_like_interactive_confirmation(stdout: str, stderr: str) -> bool:
+    combined = f"{stdout}\n{stderr}"
+    return any(marker in combined for marker in INTERACTIVE_CONFIRMATION_MARKERS)
+
 
 def _tail(value: str, limit: int = 4000) -> str:
     return value[-limit:]
@@ -158,6 +174,23 @@ def run_openhands_route(
             validation_status=validation_status,
             risk_flags=[],
             stop_reason=f"openhands_returncode={completed.returncode}",
+        )
+
+    if (
+        collector_report is not None
+        and completed.returncode == 0
+        and validated.result.status == "blocked"
+        and validated.result.stop_reason == "no_allowed_file_changes"
+        and _looks_like_interactive_confirmation(completed.stdout or "", completed.stderr or "")
+    ):
+        validated = build_openhands_result(
+            packet,
+            executor_status="blocked",
+            changed_files=[],
+            artifact_paths=[],
+            validation_status="blocked",
+            risk_flags=["interactive_confirmation_required"],
+            stop_reason="interactive_confirmation_required",
         )
 
     return OpenHandsRunnerRouteReport(
