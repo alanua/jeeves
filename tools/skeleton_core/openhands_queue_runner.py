@@ -20,7 +20,8 @@ import json
 import shutil
 import time
 from pathlib import Path
-from typing import Any, Callable, Sequence
+from collections.abc import Callable, Sequence
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
