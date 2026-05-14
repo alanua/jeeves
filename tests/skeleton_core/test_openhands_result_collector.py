@@ -76,6 +76,7 @@ def test_blocks_when_no_allowed_file_changes(tmp_path: Path) -> None:
     assert report.changed_files == []
     assert report.artifact_paths == []
     assert report.diff_artifact_written is False
+    assert report.outside_allowed_changes == []
     assert report.result.result.status == "blocked"
     assert report.result.result.stop_reason == "no_allowed_file_changes"
     assert report.result.result_validation.status == "valid_adapter_result"
@@ -101,7 +102,7 @@ def test_invalid_packet_blocks_without_git_calls(tmp_path: Path) -> None:
     assert "missing_allowed_files" in report.result.result_validation.blocked_reasons
 
 
-def test_status_outside_allowed_is_ignored(tmp_path: Path) -> None:
+def test_status_outside_allowed_is_blocked(tmp_path: Path) -> None:
     def git_runner(command: list[str]) -> subprocess.CompletedProcess[str]:
         if "status" in command and "--short" in command:
             return subprocess.CompletedProcess(
@@ -117,4 +118,42 @@ def test_status_outside_allowed_is_ignored(tmp_path: Path) -> None:
 
     assert report.changed_files == []
     assert report.result.result.status == "blocked"
-    assert report.result.result.stop_reason == "no_allowed_file_changes"
+    assert report.result.result.stop_reason == "outside_allowed_changes"
+    assert report.outside_allowed_changes == ["tools/skeleton_core/other.py"]
+
+
+def test_blocks_outside_allowed_changes_even_when_allowed_file_changed(tmp_path: Path) -> None:
+    artifact_file = tmp_path / "openhands-result.diff"
+
+    def git_runner(command: list[str]) -> subprocess.CompletedProcess[str]:
+        if "status" in command and "--short" in command and "--" not in command:
+            return subprocess.CompletedProcess(
+                command,
+                0,
+                stdout=(
+                    " M tools/skeleton_core/openhands_result_collector.py\n"
+                    " M tools/skeleton_core/other.py\n"
+                ),
+                stderr="",
+            )
+        if "status" in command and "--short" in command:
+            return subprocess.CompletedProcess(
+                command,
+                0,
+                stdout=" M tools/skeleton_core/openhands_result_collector.py\n",
+                stderr="",
+            )
+        if "diff" in command:
+            return subprocess.CompletedProcess(command, 0, stdout="+change\n", stderr="")
+        return subprocess.CompletedProcess(command, 1, stdout="", stderr="unexpected command")
+
+    report = collect_openhands_result(
+        valid_packet(),
+        config=OpenHandsResultCollectorConfig(diff_artifact_file=artifact_file),
+        git_runner=git_runner,
+    )
+
+    assert report.changed_files == ["tools/skeleton_core/openhands_result_collector.py"]
+    assert report.outside_allowed_changes == ["tools/skeleton_core/other.py"]
+    assert report.result.result.status == "blocked"
+    assert report.result.result.stop_reason == "outside_allowed_changes"
