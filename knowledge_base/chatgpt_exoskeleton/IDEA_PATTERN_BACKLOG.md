@@ -80,6 +80,209 @@ A document or process step is useful only if it changes behavior, reduces a real
 If it does none of these, it is decorative armor and should be avoided, shortened, or parked.
 ```
 
+## Skeleton vs Jeeves boundary
+
+Working distinction:
+
+```text
+Skeleton / king's armor = external trust/control exoskeleton.
+Jeeves = future personal assistant/runtime that may use the armor.
+```
+
+Skeleton answers control questions:
+
+```text
+What is allowed?
+What is forbidden?
+What is the scope?
+Which files may be touched?
+Is audit needed?
+Are secrets involved?
+May an executor run?
+May a PR be created?
+Are production/server/merge/deploy boundaries protected?
+```
+
+Jeeves answers assistant questions:
+
+```text
+What does Oleksii want to do?
+What private/work/life context matters?
+What is the next useful action?
+Who should be contacted?
+Which document/task/process should be prepared?
+What should be remembered?
+Where is human judgment needed?
+```
+
+Boundary rule:
+
+```text
+Skeleton must not grow into a heavy substitute for Jeeves.
+Jeeves must not bypass Skeleton's trust/control layer when performing risky actions.
+Skeleton should stay light, public-safe, technical, and control-oriented.
+Jeeves will be more private, contextual, and assistant-oriented.
+```
+
+## Adapter-based core requirements
+
+Skeleton should not become a fully custom monolith.
+
+Working model:
+
+```text
+small strict Skeleton core
++ replaceable external projects/tools
++ narrow adapters
++ GitHub-visible artifacts
++ human approval for authority-bearing actions
+```
+
+External tools may become parts of the armor only if they are constrained by the Skeleton model.
+
+Minimum core needed to safely host external components:
+
+```text
+1. Adapter contract
+2. Capability registry
+3. Authority levels
+4. Workspace/worktree manager
+5. Secrets preflight
+6. Artifact gate
+7. Trace format
+8. Stop conditions
+9. Queue/backpressure rules
+10. Tiny adapter test harness
+```
+
+Adapter contract:
+
+```text
+input:
+- task_id
+- repo/project
+- allowed files
+- forbidden files/actions
+- risk level
+- timeout
+- secrets policy
+- expected output
+
+output:
+- status
+- changed files
+- diff/report
+- logs summary
+- validation result
+- risk flags
+- next suggested action
+```
+
+Capability registry records what each external component can and cannot do.
+
+Examples:
+
+```text
+OpenHands:
+- can_read_files: yes
+- can_edit_files: yes
+- can_run_commands: only with approval
+- can_push: no
+- can_merge: no
+- can_deploy: no
+- can_access_secrets: no
+
+Gemini:
+- can_audit: yes
+- can_edit_files: no
+- can_execute: no
+- can_write_canon: no
+
+Telegram v1:
+- can_notify: yes
+- can_approve: no
+- can_run_command: no
+```
+
+Authority levels:
+
+```text
+LEVEL 0 — read/report only
+LEVEL 1 — draft text/artifact only
+LEVEL 2 — local diff in worktree
+LEVEL 3 — draft PR
+LEVEL 4 — human-approved action with GitHub-visible trace
+LEVEL 5 — forbidden for agents: secrets, merge, deploy, production/server authority
+```
+
+Workspace rule:
+
+```text
+one task = one disposable workspace/worktree
+main checkout = control plane
+executor never works in main
+workspace cleanup is part of the task lifecycle
+```
+
+Artifact gate:
+
+```text
+No vague "done" result is accepted.
+Every external component must return a concrete artifact: diff, PR, audit report, trace, log summary, or task-result packet.
+```
+
+Trace minimum:
+
+```text
+task_id
+executor/tool
+model, if any
+start/end time
+input packet hash or reference
+allowed scope
+actions attempted
+actions approved/rejected
+files changed
+validation result
+human decision
+```
+
+Universal stop conditions:
+
+```text
+executor touched forbidden path
+executor requested secrets
+executor tried to push/merge/deploy
+executor tried to use server/SSH/database/production resources
+executor installed unexpected packages
+executor ignored task scope
+executor produced too broad a diff
+executor entered a loop or stale state
+```
+
+Backpressure rule:
+
+```text
+Do not run multiple executors on the same repo/scope when an active worktree or PR already owns that scope.
+```
+
+Adapter test harness:
+
+```text
+dry run
+tiny docs task
+tiny test task
+forbidden-path refusal test
+secret-access refusal test
+cleanup test
+```
+
+Core design rule:
+
+```text
+Skeleton core should be stricter than all modules, not smarter than all modules.
+```
+
 ## Classification
 
 ```text
@@ -215,6 +418,7 @@ P0. Fix #157 unknown YELLOW task mapping.
 P0. Review #162 runner status live collector.
 
 P1. Create Secrets Preflight audit/design issue.
+P1. Create minimal adapter-core hardening design issue.
 P1. Create skeleton_pr_reviewer audit/design issue.
 P1. Create OpenHands executor adapter audit/pilot issue.
 P1. Finish #163 Gemini audit for controlled agentic engineering principles.
@@ -243,6 +447,8 @@ P3. Full graph memory / Infinite Brain only after smaller index proves useful.
 | IPB-010 | LLM Router / provider fallback | IDEA_BACKLOG | P3 | Reduces dependency on one model/provider and may handle quota/rate-limit failures. | Adds complexity, inconsistent behavior, cost risk, and authority confusion. | Future Jeeves/runtime audit needed. | Postpone until control plane, secrets, PR review, and runner routes are stable. | future issue |
 | IPB-011 | Full Infinite Brain / graph-memory rewrite | BLOCKED_OR_PREMATURE | P3 | Could eventually support richer machine-readable memory. | Full rewrite would fragment human-readable canon and increase drift. | Not approved. | Do not implement; first test smaller Canon Graph Index v0. Move to PARKED_ARCHIVE after v0 decision if still premature. | future issue |
 | IPB-012 | OpenHands executor adapter | LIKELY_NEEDS_REVIEW | P1 | May accelerate controlled code-writing and test tasks as a bounded software-agent executor inside worktrees. | Could become a second control plane, receive excessive permissions, conflict with runner, or expose secrets if integrated too broadly. | Needs deep audit and tiny pilot issue. | Audit OpenHands only as a bounded executor: no secrets, no merge, no deploy, no production access, worktree-only, PR/diff output only. | future issue |
+| IPB-013 | Skeleton vs Jeeves boundary / king's armor distinction | ACCEPT_FOR_DOCS | P0 | Prevents Skeleton from becoming a heavy substitute for Jeeves and prevents Jeeves from bypassing Skeleton's trust layer. | If ignored, Skeleton may become decorative bureaucracy or Jeeves may inherit unsafe authority. | User-approved working distinction recorded here. | Promote a concise boundary into core docs after current docs PRs are merged or rebased. | future docs |
+| IPB-014 | Minimal adapter-based Skeleton core hardening | LIKELY_NEEDS_REVIEW | P1 | Lets Skeleton safely host external tools as replaceable modules without becoming a fully custom monolith. | Too much core design can become another bureaucracy layer; too little lets external tools become hidden control planes. | Working requirements recorded here. | Create one narrow design issue only after OpenHands pilot or when a second external executor is added. | future issue |
 
 ## Parking lot entries
 
