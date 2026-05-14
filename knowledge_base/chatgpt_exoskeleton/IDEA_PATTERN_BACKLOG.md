@@ -283,6 +283,69 @@ Core design rule:
 Skeleton core should be stricter than all modules, not smarter than all modules.
 ```
 
+## Self-assembly rule
+
+Skeleton should use already-mounted safe parts to help mount the next parts.
+
+Assembly flow:
+
+```text
+human/ChatGPT defines the boundary and authority
+-> Skeleton creates a bounded task packet
+-> executor works only in a disposable worktree/workspace
+-> executor returns a concrete artifact
+-> Skeleton checks scope, paths, secrets, validation, and trace
+-> human reviews and accepts/rejects
+-> accepted component becomes available for future assembly
+```
+
+Responsibility split:
+
+```text
+Human + ChatGPT/Skeleton decide:
+- architecture boundaries
+- authority levels
+- safety constraints
+- what counts as accepted behavior
+- whether to promote a component
+
+External executor may do:
+- schema files
+- validators
+- tests
+- documentation examples
+- narrow helper CLI code
+- draft diffs/PRs
+
+External executor must not decide:
+- its own authority
+- canon promotion
+- merge/deploy access
+- secret access
+- production/server access
+- replacement of Skeleton control plane
+```
+
+Preferred build order for adapter-core work:
+
+```text
+0. Finish tiny OpenHands pilot.
+1. If pilot is acceptable, use OpenHands for a small adapter-packet schema + tests task.
+2. Add a minimal capability registry.
+3. Add authority-level validation.
+4. Add artifact-gate validation.
+5. Add secrets-preflight integration.
+6. Only then consider a semi-regular OpenHands adapter.
+```
+
+Assembly principle:
+
+```text
+Skeleton designs ports, locks, and acceptance checks.
+External tools manufacture small parts inside those constraints.
+Skeleton validates the part before it becomes part of the armor.
+```
+
 ## Classification
 
 ```text
@@ -449,6 +512,7 @@ P3. Full graph memory / Infinite Brain only after smaller index proves useful.
 | IPB-012 | OpenHands executor adapter | LIKELY_NEEDS_REVIEW | P1 | May accelerate controlled code-writing and test tasks as a bounded software-agent executor inside worktrees. | Could become a second control plane, receive excessive permissions, conflict with runner, or expose secrets if integrated too broadly. | Needs deep audit and tiny pilot issue. | Audit OpenHands only as a bounded executor: no secrets, no merge, no deploy, no production access, worktree-only, PR/diff output only. | future issue |
 | IPB-013 | Skeleton vs Jeeves boundary / king's armor distinction | ACCEPT_FOR_DOCS | P0 | Prevents Skeleton from becoming a heavy substitute for Jeeves and prevents Jeeves from bypassing Skeleton's trust layer. | If ignored, Skeleton may become decorative bureaucracy or Jeeves may inherit unsafe authority. | User-approved working distinction recorded here. | Promote a concise boundary into core docs after current docs PRs are merged or rebased. | future docs |
 | IPB-014 | Minimal adapter-based Skeleton core hardening | LIKELY_NEEDS_REVIEW | P1 | Lets Skeleton safely host external tools as replaceable modules without becoming a fully custom monolith. | Too much core design can become another bureaucracy layer; too little lets external tools become hidden control planes. | Working requirements recorded here. | Create one narrow design issue only after OpenHands pilot or when a second external executor is added. | future issue |
+| IPB-015 | Self-assembly workflow for mounting external components | LIKELY_NEEDS_REVIEW | P1 | Lets existing Skeleton parts help install and validate the next external aggregate without giving that aggregate architecture authority. | If done too early, an executor may shape its own control layer; if done too late, Skeleton remains slow and overly manual. | Working assembly rule recorded here. | Use after OpenHands pilot: first real assisted build should be adapter-packet schema plus tests. | future issue |
 
 ## Parking lot entries
 
