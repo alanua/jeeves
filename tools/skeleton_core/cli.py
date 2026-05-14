@@ -34,6 +34,11 @@ if len(sys.argv) > 1 and sys.argv[1] == "openhands-run-queue":
 
     raise SystemExit(_openhands_queue_main(sys.argv[2:]))
 
+if len(sys.argv) > 1 and sys.argv[1] == "local-tool":
+    from tools.skeleton_core.local_tool_runner import main as _local_tool_main
+
+    raise SystemExit(_local_tool_main(sys.argv[2:]))
+
 import argparse
 import json
 import sys
