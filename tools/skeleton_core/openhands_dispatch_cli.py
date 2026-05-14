@@ -12,17 +12,20 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
+from tools.skeleton_core.openhands_adapter import OpenHandsAdapterConfig
 from tools.skeleton_core.openhands_issue_dispatch import (
     OpenHandsIssueDispatchReport,
     build_packet_from_issue,
     dispatch_openhands_issue,
     validate_issue_payload,
 )
-from tools.skeleton_core.openhands_runner_route import run_openhands_route
+from tools.skeleton_core.openhands_runner_route import (
+    OpenHandsRunnerRouteConfig,
+    run_openhands_route,
+)
 
 OPENHANDS_DISPATCH_CLI_VERSION = "openhands_dispatch_cli.v0"
 
@@ -51,14 +54,31 @@ def build_dry_run_report(payload: dict) -> OpenHandsIssueDispatchReport:
     )
 
 
-def build_run_report(payload: dict) -> OpenHandsIssueDispatchReport:
+def build_run_report(
+    payload: dict,
+    *,
+    headless_json: bool = False,
+    timeout_seconds: int = 300,
+) -> OpenHandsIssueDispatchReport:
     """Run the real OpenHands route.
 
     This expects runner-local secret configuration to already exist. It still
     does not call GitHub or mutate labels.
     """
 
-    return dispatch_openhands_issue(payload, route=lambda packet: run_openhands_route(packet))
+    def route(packet):
+        return run_openhands_route(
+            packet,
+            config=OpenHandsRunnerRouteConfig(
+                timeout_seconds=timeout_seconds,
+                adapter_config=OpenHandsAdapterConfig(
+                    model=packet.fuel_policy.model,
+                    headless_json=headless_json,
+                ),
+            ),
+        )
+
+    return dispatch_openhands_issue(payload, route=route)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -74,6 +94,17 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Pretty-print JSON output",
     )
+    parser.add_argument(
+        "--headless-json",
+        action="store_true",
+        help="Use OpenHands --headless --json for real --run mode",
+    )
+    parser.add_argument(
+        "--timeout",
+        type=int,
+        default=300,
+        help="Timeout seconds for real --run mode",
+    )
     return parser
 
 
@@ -83,7 +114,20 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     try:
         payload = _load_payload(Path(args.input))
-        report = build_run_report(payload) if args.run else build_dry_run_report(payload)
+        if args.headless_json and not args.run:
+            raise ValueError("--headless-json requires --run")
+        if args.timeout <= 0:
+            raise ValueError("--timeout must be positive")
+
+        report = (
+            build_run_report(
+                payload,
+                headless_json=args.headless_json,
+                timeout_seconds=args.timeout,
+            )
+            if args.run
+            else build_dry_run_report(payload)
+        )
     except Exception as exc:
         error = {
             "cli_version": OPENHANDS_DISPATCH_CLI_VERSION,

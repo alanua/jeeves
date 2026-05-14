@@ -88,3 +88,65 @@ def test_cli_pretty_outputs_json(tmp_path: Path, capsys) -> None:
     output = capsys.readouterr().out
     assert "\n  " in output
     assert json.loads(output)["status"] == "dispatched"
+
+
+def test_cli_headless_json_requires_run(tmp_path: Path, capsys) -> None:
+    path = write_payload(tmp_path, valid_payload())
+
+    code = main(["--input", str(path), "--headless-json"])
+
+    assert code == 2
+    captured = json.loads(capsys.readouterr().out)
+    assert captured["status"] == "error"
+    assert "--headless-json requires --run" in captured["error"]
+
+
+def test_cli_run_headless_json_passes_config_to_route(tmp_path: Path, capsys, monkeypatch) -> None:
+    from tools.skeleton_core import openhands_dispatch_cli as cli
+    from tools.skeleton_core.openhands_adapter import (
+        build_openhands_result,
+        prepare_openhands_task,
+    )
+    from tools.skeleton_core.openhands_runner_route import OpenHandsRunnerRouteReport
+
+    captured_config = {}
+
+    def fake_run_openhands_route(packet, *, config):
+        captured_config["timeout_seconds"] = config.timeout_seconds
+        captured_config["headless_json"] = config.adapter_config.headless_json
+        captured_config["model"] = config.adapter_config.model
+
+        return OpenHandsRunnerRouteReport(
+            prepared=prepare_openhands_task(packet, "/tmp/task.md", config.adapter_config),
+            result=build_openhands_result(
+                packet,
+                executor_status="blocked",
+                changed_files=[],
+                artifact_paths=[],
+                validation_status="blocked",
+                risk_flags=[],
+                stop_reason="fake_run",
+            ),
+            returncode=0,
+            stdout_tail="",
+            stderr_tail="",
+            collector_report=None,
+        )
+
+    monkeypatch.setattr(cli, "run_openhands_route", fake_run_openhands_route)
+
+    path = write_payload(tmp_path, valid_payload())
+
+    code = main(["--input", str(path), "--run", "--headless-json", "--timeout", "7"])
+
+    assert code == 0
+    output = json.loads(capsys.readouterr().out)
+    assert output["status"] == "dispatched"
+    assert output["route_report"] is not None
+    assert captured_config == {
+        "timeout_seconds": 7,
+        "headless_json": True,
+        "model": "deepseek/deepseek-v4-flash:free",
+    }
+    assert "--headless" in output["route_report"]["prepared"]["command"]
+    assert "--json" in output["route_report"]["prepared"]["command"]

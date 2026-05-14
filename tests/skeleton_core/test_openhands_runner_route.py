@@ -213,12 +213,11 @@ def test_route_blocks_interactive_confirmation_without_changes(tmp_path: Path) -
     assert report.result.result_validation.status == "valid_adapter_result"
 
 
-def test_route_blocks_timeout_before_collector(tmp_path: Path) -> None:
+def test_route_timeout_still_collects_allowed_changes(tmp_path: Path) -> None:
     secret_file = tmp_path / "openrouter.env"
     task_file = tmp_path / "task.md"
+    artifact_file = tmp_path / "result.diff"
     secret_file.write_text("OPENROUTER_API_KEY='sk-or-test-value'\n", encoding="utf-8")
-
-    git_called = False
 
     def fake_runner(
         command: list[str],
@@ -234,25 +233,41 @@ def test_route_blocks_timeout_before_collector(tmp_path: Path) -> None:
         )
 
     def fake_git_runner(command: list[str]) -> subprocess.CompletedProcess[str]:
-        nonlocal git_called
-        git_called = True
-        return subprocess.CompletedProcess(command, 1, stdout="", stderr="must not run")
+        if "status" in command and "--short" in command:
+            return subprocess.CompletedProcess(
+                command,
+                0,
+                stdout=" M tools/skeleton_core/openhands_runner_route.py\n",
+                stderr="",
+            )
+        if "diff" in command:
+            return subprocess.CompletedProcess(command, 0, stdout="+timeout change\n", stderr="")
+        return subprocess.CompletedProcess(command, 1, stdout="", stderr="unexpected command")
+
+    packet = valid_packet().model_copy(
+        update={"allowed_files": ["tools/skeleton_core/openhands_runner_route.py"]}
+    )
 
     report = run_openhands_route(
-        valid_packet(),
+        packet,
         config=OpenHandsRunnerRouteConfig(
             task_file=task_file,
             secret_file=secret_file,
             timeout_seconds=7,
         ),
         runner=fake_runner,
+        collector_config=OpenHandsResultCollectorConfig(diff_artifact_file=artifact_file),
         git_runner=fake_git_runner,
     )
 
-    assert git_called is False
     assert report.returncode == 124
-    assert report.collector_report is None
+    assert report.collector_report is not None
+    assert report.collector_report.changed_files == [
+        "tools/skeleton_core/openhands_runner_route.py"
+    ]
     assert report.result.result.status == "blocked"
     assert report.result.result.stop_reason == "openhands_timeout"
+    assert report.result.result.changed_files == ["tools/skeleton_core/openhands_runner_route.py"]
+    assert report.result.result.artifact_paths == ["artifacts/openhands-result.diff"]
     assert "timeout" in report.result.result.risk_flags
     assert report.result.result_validation.status == "valid_adapter_result"
