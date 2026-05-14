@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import json
 import shutil
+import time
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
@@ -46,6 +47,21 @@ class OpenHandsQueueRunReport(BaseModel):
     outside_allowed_changes: list[str] = Field(default_factory=list)
     error_type: str = ""
     error: str = ""
+
+
+class OpenHandsQueueLoopReport(BaseModel):
+    """Public-safe report for a bounded local queue loop."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    queue_version: str = OPENHANDS_QUEUE_RUNNER_VERSION
+    status: str
+    processed_count: int = 0
+    done_count: int = 0
+    failed_count: int = 0
+    empty_count: int = 0
+    max_items: int = 0
+    reports: list[OpenHandsQueueRunReport] = Field(default_factory=list)
 
 
 DispatchFn = Callable[..., Any]
@@ -193,6 +209,69 @@ def run_queue_once(
         )
 
 
+def run_queue_loop(
+    *,
+    queue_dir: Path,
+    report_dir: Path,
+    running_dir: Path | None = None,
+    done_dir: Path | None = None,
+    failed_dir: Path | None = None,
+    headless_json: bool = False,
+    timeout_seconds: int = 300,
+    exit_without_confirmation: bool = False,
+    max_items: int = 1,
+    sleep_seconds: float = 0.0,
+    dispatch: DispatchFn = _default_dispatch,
+) -> OpenHandsQueueLoopReport:
+    """Run a bounded local queue loop.
+
+    This is intentionally bounded by max_items. Infinite daemon mode remains a
+    later wrapper/service concern.
+    """
+
+    if max_items <= 0:
+        raise ValueError("max_items must be positive")
+    if sleep_seconds < 0:
+        raise ValueError("sleep_seconds must not be negative")
+
+    reports: list[OpenHandsQueueRunReport] = []
+
+    for index in range(max_items):
+        report = run_queue_once(
+            queue_dir=queue_dir,
+            report_dir=report_dir,
+            running_dir=running_dir,
+            done_dir=done_dir,
+            failed_dir=failed_dir,
+            headless_json=headless_json,
+            timeout_seconds=timeout_seconds,
+            exit_without_confirmation=exit_without_confirmation,
+            dispatch=dispatch,
+        )
+        reports.append(report)
+
+        if report.status == "empty":
+            break
+
+        if sleep_seconds and index < max_items - 1:
+            time.sleep(sleep_seconds)
+
+    done_count = sum(1 for report in reports if report.status == "done")
+    failed_count = sum(1 for report in reports if report.status == "failed")
+    empty_count = sum(1 for report in reports if report.status == "empty")
+    processed_count = done_count + failed_count
+
+    return OpenHandsQueueLoopReport(
+        status="completed",
+        processed_count=processed_count,
+        done_count=done_count,
+        failed_count=failed_count,
+        empty_count=empty_count,
+        max_items=max_items,
+        reports=reports,
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run one local OpenHands queue item")
     parser.add_argument("--queue-dir", required=True, help="Directory with JSON payloads")
@@ -209,6 +288,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="Pass OpenHands --exit-without-confirmation",
     )
     parser.add_argument("--timeout", type=int, default=300, help="OpenHands timeout seconds")
+    parser.add_argument("--loop", action="store_true", help="Run a bounded queue loop")
+    parser.add_argument("--max-items", type=int, default=1, help="Maximum queue items for --loop")
+    parser.add_argument(
+        "--sleep-seconds",
+        type=float,
+        default=0.0,
+        help="Sleep between queue items in --loop mode",
+    )
     parser.add_argument("--pretty", action="store_true", help="Pretty-print queue report")
     return parser
 
@@ -217,26 +304,51 @@ def main(argv: Sequence[str] | None = None, *, dispatch: DispatchFn = _default_d
     parser = build_parser()
     args = parser.parse_args(argv)
 
+    error = ""
     if args.timeout <= 0:
+        error = "--timeout must be positive"
+    elif args.max_items <= 0:
+        error = "--max-items must be positive"
+    elif args.sleep_seconds < 0:
+        error = "--sleep-seconds must not be negative"
+
+    if error:
         report = OpenHandsQueueRunReport(
             status="failed",
             error_type="ValueError",
-            error="--timeout must be positive",
+            error=error,
         )
         print(json.dumps(report.model_dump(mode="json"), sort_keys=True))
         return 2
 
-    report = run_queue_once(
-        queue_dir=Path(args.queue_dir),
-        report_dir=Path(args.report_dir),
-        running_dir=Path(args.running_dir) if args.running_dir else None,
-        done_dir=Path(args.done_dir) if args.done_dir else None,
-        failed_dir=Path(args.failed_dir) if args.failed_dir else None,
-        headless_json=args.headless_json,
-        timeout_seconds=args.timeout,
-        exit_without_confirmation=args.exit_without_confirmation,
-        dispatch=dispatch,
-    )
+    common_kwargs = {
+        "queue_dir": Path(args.queue_dir),
+        "report_dir": Path(args.report_dir),
+        "running_dir": Path(args.running_dir) if args.running_dir else None,
+        "done_dir": Path(args.done_dir) if args.done_dir else None,
+        "failed_dir": Path(args.failed_dir) if args.failed_dir else None,
+        "headless_json": args.headless_json,
+        "timeout_seconds": args.timeout,
+        "exit_without_confirmation": args.exit_without_confirmation,
+        "dispatch": dispatch,
+    }
+
+    if args.loop:
+        loop_report = run_queue_loop(
+            **common_kwargs,
+            max_items=args.max_items,
+            sleep_seconds=args.sleep_seconds,
+        )
+        print(
+            json.dumps(
+                loop_report.model_dump(mode="json"),
+                indent=2 if args.pretty else None,
+                sort_keys=True,
+            )
+        )
+        return 2 if loop_report.failed_count else 0
+
+    report = run_queue_once(**common_kwargs)
 
     print(
         json.dumps(
