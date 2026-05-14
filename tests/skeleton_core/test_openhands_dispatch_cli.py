@@ -115,6 +115,9 @@ def test_cli_run_headless_json_passes_config_to_route(tmp_path: Path, capsys, mo
     def fake_run_openhands_route(packet, *, config):
         captured_config["timeout_seconds"] = config.timeout_seconds
         captured_config["headless_json"] = config.adapter_config.headless_json
+        captured_config["exit_without_confirmation"] = (
+            config.adapter_config.exit_without_confirmation
+        )
         captured_config["model"] = config.adapter_config.model
 
         return OpenHandsRunnerRouteReport(
@@ -138,7 +141,17 @@ def test_cli_run_headless_json_passes_config_to_route(tmp_path: Path, capsys, mo
 
     path = write_payload(tmp_path, valid_payload())
 
-    code = main(["--input", str(path), "--run", "--headless-json", "--timeout", "7"])
+    code = main(
+        [
+            "--input",
+            str(path),
+            "--run",
+            "--headless-json",
+            "--exit-without-confirmation",
+            "--timeout",
+            "7",
+        ]
+    )
 
     assert code == 0
     output = json.loads(capsys.readouterr().out)
@@ -147,7 +160,20 @@ def test_cli_run_headless_json_passes_config_to_route(tmp_path: Path, capsys, mo
     assert captured_config == {
         "timeout_seconds": 7,
         "headless_json": True,
+        "exit_without_confirmation": True,
         "model": "deepseek/deepseek-v4-flash:free",
     }
     assert "--headless" in output["route_report"]["prepared"]["command"]
     assert "--json" in output["route_report"]["prepared"]["command"]
+    assert "--exit-without-confirmation" in output["route_report"]["prepared"]["command"]
+
+
+def test_cli_exit_without_confirmation_requires_run(tmp_path: Path, capsys) -> None:
+    path = write_payload(tmp_path, valid_payload())
+
+    code = main(["--input", str(path), "--exit-without-confirmation"])
+
+    assert code == 2
+    captured = json.loads(capsys.readouterr().out)
+    assert captured["status"] == "error"
+    assert "--exit-without-confirmation requires --run" in captured["error"]
