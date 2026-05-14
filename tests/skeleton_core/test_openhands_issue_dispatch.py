@@ -95,7 +95,9 @@ def test_dispatch_calls_injected_route_for_valid_issue(tmp_path: Path) -> None:
     task_file = tmp_path / "task.md"
     secret_file.write_text("OPENROUTER_API_KEY='sk-or-test-value'\n", encoding="utf-8")
 
-    def fake_runner(command: list[str], env: dict[str, str]) -> subprocess.CompletedProcess[str]:
+    def fake_runner(
+        command: list[str], env: dict[str, str], timeout_seconds: int
+    ) -> subprocess.CompletedProcess[str]:
         return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
 
     def route(packet: AdapterTaskPacket):
