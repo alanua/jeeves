@@ -346,6 +346,83 @@ External tools manufacture small parts inside those constraints.
 Skeleton validates the part before it becomes part of the armor.
 ```
 
+## Server hygiene and terminal-minimal operation
+
+Experiments must not leave uncontrolled layers on the server.
+
+Cleanup rule:
+
+```text
+After each pilot or installation experiment:
+1. inventory what changed
+2. classify it as keep / pilot / archive / trash / unknown
+3. preserve a short evidence list before deletion
+4. remove only confirmed trash
+5. verify that active repo/runner state still works
+```
+
+Typical cleanup targets:
+
+```text
+old worktrees
+pilot branches
+temporary task files
+stale venvs
+uv/pip/npm caches from experiments
+test tool installs
+old logs not needed for audit
+unknown scripts or manual runner copies
+obsolete repo clones
+```
+
+Never delete without review:
+
+```text
+live runner scripts
+systemd services
+.env or secret files
+GitHub/token configuration
+active control checkout
+active worktrees with open PRs
+audit/debug logs still needed for investigation
+```
+
+Preferred future server layout:
+
+```text
+/repos          -> clean control checkouts
+/worktrees     -> disposable task workspaces
+/tools         -> approved external tools
+/state         -> runner state
+/logs          -> required logs
+/archive       -> old but preserved material
+/trash_review  -> staged deletion after review
+```
+
+Terminal-minimal rule:
+
+```text
+Oleksii should not be required to manually perform long terminal sequences from phone/Termux.
+Prefer single bounded command packets, runner-mediated actions, scripts with dry-run mode, or GitHub-visible task automation.
+```
+
+When terminal work is unavoidable:
+
+```text
+provide the smallest possible command block
+avoid explanatory lines mixed with commands
+avoid interactive flows from phone when possible
+stop after each risky boundary and inspect output
+```
+
+Goal:
+
+```text
+human decides and approves;
+Skeleton/executors perform repetitive terminal mechanics;
+terminal actions by Oleksii are reduced to the minimum needed for trust, access, or emergency control.
+```
+
 ## Classification
 
 ```text
@@ -485,6 +562,7 @@ P1. Create minimal adapter-core hardening design issue.
 P1. Create skeleton_pr_reviewer audit/design issue.
 P1. Create OpenHands executor adapter audit/pilot issue.
 P1. Finish #163 Gemini audit for controlled agentic engineering principles.
+P1. Create server-hygiene / terminal-minimal workflow only after OpenHands pilot if recurring manual cleanup is needed.
 
 P2. Telegram notification-only pilot via @Jeeveshelp_bot.
 P2. Canon Graph Index v0 audit.
@@ -513,6 +591,8 @@ P3. Full graph memory / Infinite Brain only after smaller index proves useful.
 | IPB-013 | Skeleton vs Jeeves boundary / king's armor distinction | ACCEPT_FOR_DOCS | P0 | Prevents Skeleton from becoming a heavy substitute for Jeeves and prevents Jeeves from bypassing Skeleton's trust layer. | If ignored, Skeleton may become decorative bureaucracy or Jeeves may inherit unsafe authority. | User-approved working distinction recorded here. | Promote a concise boundary into core docs after current docs PRs are merged or rebased. | future docs |
 | IPB-014 | Minimal adapter-based Skeleton core hardening | LIKELY_NEEDS_REVIEW | P1 | Lets Skeleton safely host external tools as replaceable modules without becoming a fully custom monolith. | Too much core design can become another bureaucracy layer; too little lets external tools become hidden control planes. | Working requirements recorded here. | Create one narrow design issue only after OpenHands pilot or when a second external executor is added. | future issue |
 | IPB-015 | Self-assembly workflow for mounting external components | LIKELY_NEEDS_REVIEW | P1 | Lets existing Skeleton parts help install and validate the next external aggregate without giving that aggregate architecture authority. | If done too early, an executor may shape its own control layer; if done too late, Skeleton remains slow and overly manual. | Working assembly rule recorded here. | Use after OpenHands pilot: first real assisted build should be adapter-packet schema plus tests. | future issue |
+| IPB-016 | Server hygiene and controlled cleanup | LIKELY_NEEDS_REVIEW | P1 | Prevents Hetzner/runner host from accumulating unmanaged pilot worktrees, branches, venvs, caches, logs, and tool installs. | Over-eager cleanup can delete live runner scripts, secrets, active worktrees, or audit evidence. | Working cleanup rule recorded here. | After OpenHands pilot, run inventory first; clean only confirmed trash. | future issue |
+| IPB-017 | Terminal-minimal operation for Oleksii | LIKELY_NEEDS_REVIEW | P1 | Reduces manual Termux/phone terminal work and avoids errors from long interactive command sequences. | Too much automation can hide what happened or bypass approval. | Working rule recorded here. | Prefer short bounded command blocks now; later add runner-mediated wrappers only where repeated work appears. | future issue |
 
 ## Parking lot entries
 
