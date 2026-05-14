@@ -97,6 +97,15 @@ def _as_jsonable(value: Any) -> dict[str, Any]:
     raise TypeError(f"Unsupported dispatch report type: {type(value).__name__}")
 
 
+QUEUE_ONLY_PAYLOAD_KEYS = {"local_validations"}
+
+
+def _payload_for_dispatch(payload: dict[str, Any]) -> dict[str, Any]:
+    """Remove queue-runner-only fields before OpenHands issue dispatch validation."""
+
+    return {key: value for key, value in payload.items() if key not in QUEUE_ONLY_PAYLOAD_KEYS}
+
+
 def _validation_requests_from_payload(payload: dict[str, Any]) -> list[LocalToolRequest]:
     raw_items = payload.get("local_validations") or []
     if not isinstance(raw_items, list):
@@ -190,7 +199,7 @@ def run_queue_once(
     try:
         payload = json.loads(running_file.read_text(encoding="utf-8"))
         dispatch_report = dispatch(
-            payload,
+            _payload_for_dispatch(payload),
             headless_json=headless_json,
             timeout_seconds=timeout_seconds,
             exit_without_confirmation=exit_without_confirmation,
