@@ -40,7 +40,9 @@ class OpenHandsResultCollectorReport(BaseModel):
     collector_version: str = OPENHANDS_RESULT_COLLECTOR_VERSION
     changed_files: list[str] = Field(default_factory=list)
     artifact_paths: list[str] = Field(default_factory=list)
+    outside_allowed_changes: list[str] = Field(default_factory=list)
     git_status_short: dict[str, str] = Field(default_factory=dict)
+    full_git_status_short: str = ""
     diff_artifact_written: bool = False
     result: OpenHandsValidatedResult
 
@@ -113,6 +115,40 @@ def _changed_files_from_status(
     return sorted(set(changed))
 
 
+def _full_status(
+    *,
+    repo_root: Path,
+    git_runner: GitRunner,
+) -> str:
+    command = ["git", "-C", str(repo_root), "status", "--short"]
+    completed = git_runner(command)
+    if completed.returncode != 0:
+        raise RuntimeError(f"git status failed: {completed.stderr}")
+    return completed.stdout.strip()
+
+
+def _all_changed_paths_from_status(status_output: str) -> list[str]:
+    paths: list[str] = []
+    for line in status_output.splitlines():
+        path = _status_path_from_line(line)
+        if path:
+            paths.append(path)
+    return sorted(set(paths))
+
+
+def _outside_allowed_changes(
+    *,
+    full_status_output: str,
+    allowed_files: list[str],
+) -> list[str]:
+    allowed_set = set(allowed_files)
+    return [
+        path
+        for path in _all_changed_paths_from_status(full_status_output)
+        if path not in allowed_set
+    ]
+
+
 def _diff_for_file(
     *,
     repo_root: Path,
@@ -166,11 +202,19 @@ def collect_openhands_result(
     task_validation = validate_task_packet(packet)
 
     status_by_file: dict[str, str] = {}
+    full_status_output = ""
+    outside_changes: list[str] = []
     changed_files: list[str] = []
     artifact_paths: list[str] = []
     artifact_written = False
 
     if task_validation.status == "valid_task_packet":
+        full_status_output = _full_status(repo_root=resolved.repo_root, git_runner=git_runner)
+        outside_changes = _outside_allowed_changes(
+            full_status_output=full_status_output,
+            allowed_files=task_validation.normalized_allowed_files,
+        )
+
         for allowed_file in task_validation.normalized_allowed_files:
             status_by_file[allowed_file] = _status_for_allowed_file(
                 repo_root=resolved.repo_root,
@@ -196,6 +240,10 @@ def collect_openhands_result(
         executor_status = "blocked"
         validation_status = "blocked"
         stop_reason = "task_packet_blocked"
+    elif outside_changes:
+        executor_status = "blocked"
+        validation_status = "blocked"
+        stop_reason = "outside_allowed_changes"
     elif not changed_files:
         executor_status = "blocked"
         validation_status = "blocked"
@@ -218,7 +266,9 @@ def collect_openhands_result(
     return OpenHandsResultCollectorReport(
         changed_files=changed_files,
         artifact_paths=artifact_paths,
+        outside_allowed_changes=outside_changes,
         git_status_short=status_by_file,
+        full_git_status_short=full_status_output,
         diff_artifact_written=artifact_written,
         result=result,
     )
