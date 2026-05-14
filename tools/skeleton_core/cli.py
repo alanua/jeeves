@@ -29,6 +29,11 @@ if len(sys.argv) > 1 and sys.argv[1] == "openhands-dispatch":
 
     raise SystemExit(_openhands_dispatch_main(sys.argv[2:]))
 
+if len(sys.argv) > 1 and sys.argv[1] == "openhands-run-queue":
+    from tools.skeleton_core.openhands_queue_runner import main as _openhands_queue_main
+
+    raise SystemExit(_openhands_queue_main(sys.argv[2:]))
+
 import argparse
 import json
 import sys
