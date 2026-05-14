@@ -1,7 +1,13 @@
 """Local OpenHands queue runner v0.
 
-Reads one JSON payload from a local queue directory, runs the existing
-OpenHands dispatch path, and writes a public-safe JSON report.
+Reads one JSON payload from a local queue directory, moves it through a local
+lifecycle, runs the existing OpenHands dispatch path, and writes a public-safe
+JSON report.
+
+Lifecycle:
+
+queue/*.json -> running/*.json -> done/*.json
+queue/*.json -> running/*.json -> failed/*.json
 
 This does not poll GitHub, mutate labels, merge, deploy, restart services,
 or read repo secrets.
@@ -11,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
@@ -29,6 +36,8 @@ class OpenHandsQueueRunReport(BaseModel):
     queue_version: str = OPENHANDS_QUEUE_RUNNER_VERSION
     status: str
     payload_file: str = ""
+    running_file: str = ""
+    final_payload_file: str = ""
     report_file: str = ""
     dispatch_status: str = ""
     result_status: str = ""
@@ -85,10 +94,27 @@ def _first_payload(queue_dir: Path) -> Path | None:
     return payloads[0] if payloads else None
 
 
+def _move_payload(source: Path, target_dir: Path) -> Path:
+    target_dir.mkdir(parents=True, exist_ok=True)
+    target = target_dir / source.name
+    if target.exists():
+        raise FileExistsError(f"Queue target already exists: {target}")
+    shutil.move(str(source), str(target))
+    return target
+
+
+def _default_state_dirs(queue_dir: Path) -> tuple[Path, Path, Path]:
+    base_dir = queue_dir.parent
+    return base_dir / "running", base_dir / "done", base_dir / "failed"
+
+
 def run_queue_once(
     *,
     queue_dir: Path,
     report_dir: Path,
+    running_dir: Path | None = None,
+    done_dir: Path | None = None,
+    failed_dir: Path | None = None,
     headless_json: bool = False,
     timeout_seconds: int = 300,
     exit_without_confirmation: bool = False,
@@ -96,17 +122,26 @@ def run_queue_once(
 ) -> OpenHandsQueueRunReport:
     """Run one local queue payload and write one JSON report."""
 
+    default_running_dir, default_done_dir, default_failed_dir = _default_state_dirs(queue_dir)
+    resolved_running_dir = running_dir or default_running_dir
+    resolved_done_dir = done_dir or default_done_dir
+    resolved_failed_dir = failed_dir or default_failed_dir
+
     queue_dir.mkdir(parents=True, exist_ok=True)
     report_dir.mkdir(parents=True, exist_ok=True)
+    resolved_running_dir.mkdir(parents=True, exist_ok=True)
+    resolved_done_dir.mkdir(parents=True, exist_ok=True)
+    resolved_failed_dir.mkdir(parents=True, exist_ok=True)
 
     payload_file = _first_payload(queue_dir)
     if payload_file is None:
         return OpenHandsQueueRunReport(status="empty")
 
-    report_file = report_dir / f"{payload_file.stem}.report.json"
+    running_file = _move_payload(payload_file, resolved_running_dir)
+    report_file = report_dir / f"{running_file.stem}.report.json"
 
     try:
-        payload = json.loads(payload_file.read_text(encoding="utf-8"))
+        payload = json.loads(running_file.read_text(encoding="utf-8"))
         dispatch_report = dispatch(
             payload,
             headless_json=headless_json,
@@ -119,18 +154,22 @@ def run_queue_once(
             encoding="utf-8",
         )
 
+        done_file = _move_payload(running_file, resolved_done_dir)
         summary = _extract_summary(dispatch_json)
         return OpenHandsQueueRunReport(
-            status="reported",
+            status="done",
             payload_file=str(payload_file),
+            running_file=str(running_file),
+            final_payload_file=str(done_file),
             report_file=str(report_file),
             **summary,
         )
     except Exception as exc:
         error_json = {
             "queue_version": OPENHANDS_QUEUE_RUNNER_VERSION,
-            "status": "error",
+            "status": "failed",
             "payload_file": str(payload_file),
+            "running_file": str(running_file),
             "error_type": type(exc).__name__,
             "error": str(exc),
         }
@@ -138,9 +177,16 @@ def run_queue_once(
             json.dumps(error_json, indent=2, sort_keys=True),
             encoding="utf-8",
         )
+
+        final_payload_file = ""
+        if running_file.exists():
+            final_payload_file = str(_move_payload(running_file, resolved_failed_dir))
+
         return OpenHandsQueueRunReport(
-            status="error",
+            status="failed",
             payload_file=str(payload_file),
+            running_file=str(running_file),
+            final_payload_file=final_payload_file,
             report_file=str(report_file),
             error_type=type(exc).__name__,
             error=str(exc),
@@ -151,6 +197,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run one local OpenHands queue item")
     parser.add_argument("--queue-dir", required=True, help="Directory with JSON payloads")
     parser.add_argument("--report-dir", required=True, help="Directory for JSON reports")
+    parser.add_argument("--running-dir", help="Directory for payload currently being processed")
+    parser.add_argument("--done-dir", help="Directory for successfully processed payloads")
+    parser.add_argument("--failed-dir", help="Directory for failed payloads")
     parser.add_argument(
         "--headless-json", action="store_true", help="Use guarded headless JSON run"
     )
@@ -170,7 +219,7 @@ def main(argv: Sequence[str] | None = None, *, dispatch: DispatchFn = _default_d
 
     if args.timeout <= 0:
         report = OpenHandsQueueRunReport(
-            status="error",
+            status="failed",
             error_type="ValueError",
             error="--timeout must be positive",
         )
@@ -180,6 +229,9 @@ def main(argv: Sequence[str] | None = None, *, dispatch: DispatchFn = _default_d
     report = run_queue_once(
         queue_dir=Path(args.queue_dir),
         report_dir=Path(args.report_dir),
+        running_dir=Path(args.running_dir) if args.running_dir else None,
+        done_dir=Path(args.done_dir) if args.done_dir else None,
+        failed_dir=Path(args.failed_dir) if args.failed_dir else None,
         headless_json=args.headless_json,
         timeout_seconds=args.timeout,
         exit_without_confirmation=args.exit_without_confirmation,
@@ -193,7 +245,7 @@ def main(argv: Sequence[str] | None = None, *, dispatch: DispatchFn = _default_d
             sort_keys=True,
         )
     )
-    return 2 if report.status == "error" else 0
+    return 2 if report.status == "failed" else 0
 
 
 if __name__ == "__main__":
