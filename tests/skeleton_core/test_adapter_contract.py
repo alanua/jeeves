@@ -19,6 +19,7 @@ def valid_packet() -> AdapterTaskPacket:
         authority_level="level_2_local_diff",
         risk_level="yellow",
         expected_artifact="diff",
+        task_instructions="Create a bounded adapter contract patch.",
         fuel_policy=FuelPolicy(provider="none"),
     )
 
@@ -49,6 +50,15 @@ def test_missing_allowed_files_blocks() -> None:
 
     assert result.status == "blocked"
     assert "missing_allowed_files" in result.blocked_reasons
+
+
+def test_missing_task_instructions_blocks() -> None:
+    packet = valid_packet().model_copy(update={"task_instructions": ""})
+
+    result = validate_task_packet(packet)
+
+    assert result.status == "blocked"
+    assert "missing_task_instructions" in result.blocked_reasons
 
 
 def test_env_allowed_file_blocks() -> None:

@@ -140,6 +140,7 @@ def build_packet_from_issue(
         authority_level=issue.authority_level,
         risk_level=issue.risk_level,
         expected_artifact=issue.expected_artifact,
+        task_instructions=f"{issue.title}\n\n{issue.body}".strip(),
         fuel_policy=FuelPolicy(
             provider=issue.fuel_provider,
             model=issue.fuel_model,

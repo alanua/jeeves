@@ -84,6 +84,7 @@ class AdapterTaskPacket(BaseModel):
     authority_level: AuthorityLevel
     risk_level: RiskLevel
     expected_artifact: str
+    task_instructions: str = ""
     fuel_policy: FuelPolicy = Field(default_factory=FuelPolicy)
 
 
@@ -213,6 +214,8 @@ def validate_task_packet(
         blocked.append("missing_allowed_files")
     if not task.expected_artifact.strip():
         blocked.append("missing_expected_artifact")
+    if not task.task_instructions.strip():
+        blocked.append("missing_task_instructions")
     if task.authority_level == "level_5_forbidden":
         blocked.append("authority_level_forbidden")
 

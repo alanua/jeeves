@@ -88,6 +88,9 @@ Risk level:
 Expected artifact:
 {task.expected_artifact}
 
+Task instructions:
+{task.task_instructions}
+
 Allowed files:
 {_format_list(task.allowed_files)}
 

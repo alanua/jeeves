@@ -24,6 +24,11 @@ if len(sys.argv) > 1 and sys.argv[1] == "canon-audit":
 
     raise SystemExit(_canon_audit_main(sys.argv[2:]))
 
+if len(sys.argv) > 1 and sys.argv[1] == "openhands-dispatch":
+    from tools.skeleton_core.openhands_dispatch_cli import main as _openhands_dispatch_main
+
+    raise SystemExit(_openhands_dispatch_main(sys.argv[2:]))
+
 import argparse
 import json
 import sys
