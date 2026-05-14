@@ -58,9 +58,19 @@ def fake_dispatch(
     }
 
 
-def write_payload(queue_dir: Path) -> Path:
+def failing_dispatch(
+    payload_dict: dict,
+    *,
+    headless_json: bool,
+    timeout_seconds: int,
+    exit_without_confirmation: bool,
+) -> dict:
+    raise RuntimeError("dispatch failed")
+
+
+def write_payload(queue_dir: Path, name: str = "001-payload.json") -> Path:
     queue_dir.mkdir(parents=True, exist_ok=True)
-    path = queue_dir / "001-payload.json"
+    path = queue_dir / name
     path.write_text(json.dumps(payload()), encoding="utf-8")
     return path
 
@@ -76,32 +86,44 @@ def test_run_queue_once_empty_queue(tmp_path: Path) -> None:
     assert report.payload_file == ""
 
 
-def test_run_queue_once_writes_report_and_summary(tmp_path: Path) -> None:
+def test_run_queue_once_moves_payload_to_done_and_writes_report(tmp_path: Path) -> None:
     queue_dir = tmp_path / "queue"
+    running_dir = tmp_path / "running"
+    done_dir = tmp_path / "done"
+    failed_dir = tmp_path / "failed"
     report_dir = tmp_path / "reports"
     payload_file = write_payload(queue_dir)
 
     report = run_queue_once(
         queue_dir=queue_dir,
         report_dir=report_dir,
+        running_dir=running_dir,
+        done_dir=done_dir,
+        failed_dir=failed_dir,
         headless_json=True,
         timeout_seconds=17,
         exit_without_confirmation=True,
         dispatch=fake_dispatch,
     )
 
-    assert report.status == "reported"
+    assert report.status == "done"
     assert report.payload_file == str(payload_file)
+    assert report.running_file == str(running_dir / payload_file.name)
+    assert report.final_payload_file == str(done_dir / payload_file.name)
     assert report.dispatch_status == "dispatched"
     assert report.result_status == "success"
     assert report.stop_reason == "allowed_file_changes_collected"
     assert report.changed_files == ["QUEUE_TEST.md"]
     assert report.outside_allowed_changes == []
+    assert not payload_file.exists()
+    assert not (running_dir / payload_file.name).exists()
+    assert (done_dir / payload_file.name).exists()
     assert Path(report.report_file).exists()
 
 
-def test_run_queue_once_invalid_json_writes_error_report(tmp_path: Path) -> None:
+def test_run_queue_once_invalid_json_moves_payload_to_failed(tmp_path: Path) -> None:
     queue_dir = tmp_path / "queue"
+    failed_dir = tmp_path / "failed"
     report_dir = tmp_path / "reports"
     queue_dir.mkdir(parents=True)
     bad_payload = queue_dir / "bad.json"
@@ -110,17 +132,42 @@ def test_run_queue_once_invalid_json_writes_error_report(tmp_path: Path) -> None
     report = run_queue_once(
         queue_dir=queue_dir,
         report_dir=report_dir,
+        failed_dir=failed_dir,
         dispatch=fake_dispatch,
     )
 
-    assert report.status == "error"
+    assert report.status == "failed"
     assert report.error_type == "JSONDecodeError"
+    assert not bad_payload.exists()
+    assert (failed_dir / "bad.json").exists()
+    assert Path(report.report_file).exists()
+
+
+def test_run_queue_once_dispatch_error_moves_payload_to_failed(tmp_path: Path) -> None:
+    queue_dir = tmp_path / "queue"
+    failed_dir = tmp_path / "failed"
+    report_dir = tmp_path / "reports"
+    payload_file = write_payload(queue_dir)
+
+    report = run_queue_once(
+        queue_dir=queue_dir,
+        report_dir=report_dir,
+        failed_dir=failed_dir,
+        dispatch=failing_dispatch,
+    )
+
+    assert report.status == "failed"
+    assert report.error_type == "RuntimeError"
+    assert "dispatch failed" in report.error
+    assert not payload_file.exists()
+    assert (failed_dir / payload_file.name).exists()
     assert Path(report.report_file).exists()
 
 
 def test_queue_runner_main_outputs_json(tmp_path: Path, capsys) -> None:
     queue_dir = tmp_path / "queue"
     report_dir = tmp_path / "reports"
+    done_dir = tmp_path / "done"
     write_payload(queue_dir)
 
     code = main(
@@ -129,6 +176,8 @@ def test_queue_runner_main_outputs_json(tmp_path: Path, capsys) -> None:
             str(queue_dir),
             "--report-dir",
             str(report_dir),
+            "--done-dir",
+            str(done_dir),
             "--headless-json",
             "--exit-without-confirmation",
             "--timeout",
@@ -140,8 +189,9 @@ def test_queue_runner_main_outputs_json(tmp_path: Path, capsys) -> None:
 
     assert code == 0
     output = json.loads(capsys.readouterr().out)
-    assert output["status"] == "reported"
+    assert output["status"] == "done"
     assert output["changed_files"] == ["QUEUE_TEST.md"]
+    assert Path(output["final_payload_file"]).parent == done_dir
 
 
 def test_queue_runner_main_rejects_invalid_timeout(tmp_path: Path, capsys) -> None:
@@ -159,5 +209,5 @@ def test_queue_runner_main_rejects_invalid_timeout(tmp_path: Path, capsys) -> No
 
     assert code == 2
     output = json.loads(capsys.readouterr().out)
-    assert output["status"] == "error"
+    assert output["status"] == "failed"
     assert "--timeout must be positive" in output["error"]
