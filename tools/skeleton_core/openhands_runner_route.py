@@ -176,24 +176,7 @@ def run_openhands_route(
     env = build_openhands_env(api_key, resolved.adapter_config)
     completed = runner(prepared.command, env, resolved.timeout_seconds)
 
-    if completed.returncode == 124:
-        validated = build_openhands_result(
-            packet,
-            executor_status="blocked",
-            changed_files=[],
-            artifact_paths=[],
-            validation_status="blocked",
-            risk_flags=["timeout"],
-            stop_reason="openhands_timeout",
-        )
-        return OpenHandsRunnerRouteReport(
-            prepared=prepared,
-            result=validated,
-            returncode=completed.returncode,
-            stdout_tail=_tail(completed.stdout or ""),
-            stderr_tail=_tail(completed.stderr or ""),
-            collector_report=None,
-        )
+    timeout_occurred = completed.returncode == 124
 
     collector_report = None
     if changed_files is None and artifact_paths is None:
@@ -217,6 +200,30 @@ def run_openhands_route(
             validation_status=validation_status,
             risk_flags=[],
             stop_reason=f"openhands_returncode={completed.returncode}",
+        )
+
+    if timeout_occurred:
+        timeout_changed_files = []
+        timeout_artifact_paths = []
+        timeout_risk_flags = ["timeout"]
+
+        if collector_report is not None:
+            timeout_changed_files = collector_report.changed_files
+            timeout_artifact_paths = collector_report.artifact_paths
+            if collector_report.outside_allowed_changes:
+                timeout_risk_flags.append("outside_allowed_changes")
+        else:
+            timeout_changed_files = changed_files or []
+            timeout_artifact_paths = artifact_paths or []
+
+        validated = build_openhands_result(
+            packet,
+            executor_status="blocked",
+            changed_files=timeout_changed_files,
+            artifact_paths=timeout_artifact_paths,
+            validation_status="blocked",
+            risk_flags=timeout_risk_flags,
+            stop_reason="openhands_timeout",
         )
 
     if (
