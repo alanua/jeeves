@@ -43,6 +43,7 @@ class OpenHandsRunnerRouteConfig(BaseModel):
 
     task_file: Path = Path("/tmp/skeleton-openhands-task.md")
     secret_file: Path = DEFAULT_SECRET_FILE
+    timeout_seconds: int = 300
     adapter_config: OpenHandsAdapterConfig = Field(default_factory=OpenHandsAdapterConfig)
 
 
@@ -60,7 +61,7 @@ class OpenHandsRunnerRouteReport(BaseModel):
     collector_report: OpenHandsResultCollectorReport | None = None
 
 
-RunnerFn = Callable[[list[str], dict[str, str]], subprocess.CompletedProcess[str]]
+RunnerFn = Callable[..., subprocess.CompletedProcess[str]]
 
 INTERACTIVE_CONFIRMATION_MARKERS = (
     "Yes, proceed",
@@ -112,19 +113,42 @@ def load_openrouter_key(secret_file: Path = DEFAULT_SECRET_FILE) -> str:
     return api_key
 
 
-def default_runner(command: list[str], env: dict[str, str]) -> subprocess.CompletedProcess[str]:
-    """Run OpenHands command with a merged environment."""
+def _timeout_completed_process(
+    command: list[str],
+    timeout_seconds: int,
+    exc: subprocess.TimeoutExpired,
+) -> subprocess.CompletedProcess[str]:
+    stdout = exc.stdout or ""
+    stderr = exc.stderr or ""
+    if isinstance(stdout, bytes):
+        stdout = stdout.decode("utf-8", errors="replace")
+    if isinstance(stderr, bytes):
+        stderr = stderr.decode("utf-8", errors="replace")
+    stderr = f"{stderr}\nopenhands_timeout_seconds={timeout_seconds}".strip()
+    return subprocess.CompletedProcess(command, 124, stdout=stdout, stderr=stderr)
+
+
+def default_runner(
+    command: list[str],
+    env: dict[str, str],
+    timeout_seconds: int = 300,
+) -> subprocess.CompletedProcess[str]:
+    """Run OpenHands command with a merged environment and timeout."""
 
     merged_env = os.environ.copy()
     merged_env.update(env)
-    return subprocess.run(
-        command,
-        env=merged_env,
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        check=False,
-    )
+    try:
+        return subprocess.run(
+            command,
+            env=merged_env,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=timeout_seconds,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        return _timeout_completed_process(command, timeout_seconds, exc)
 
 
 def run_openhands_route(
@@ -150,7 +174,26 @@ def run_openhands_route(
 
     api_key = load_openrouter_key(resolved.secret_file)
     env = build_openhands_env(api_key, resolved.adapter_config)
-    completed = runner(prepared.command, env)
+    completed = runner(prepared.command, env, resolved.timeout_seconds)
+
+    if completed.returncode == 124:
+        validated = build_openhands_result(
+            packet,
+            executor_status="blocked",
+            changed_files=[],
+            artifact_paths=[],
+            validation_status="blocked",
+            risk_flags=["timeout"],
+            stop_reason="openhands_timeout",
+        )
+        return OpenHandsRunnerRouteReport(
+            prepared=prepared,
+            result=validated,
+            returncode=completed.returncode,
+            stdout_tail=_tail(completed.stdout or ""),
+            stderr_tail=_tail(completed.stderr or ""),
+            collector_report=None,
+        )
 
     collector_report = None
     if changed_files is None and artifact_paths is None:
