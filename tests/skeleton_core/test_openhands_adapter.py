@@ -21,6 +21,7 @@ def valid_packet() -> AdapterTaskPacket:
         authority_level="level_2_local_diff",
         risk_level="yellow",
         expected_artifact="diff",
+        task_instructions="Create OpenHands adapter v0.",
         fuel_policy=FuelPolicy(
             provider="openrouter",
             model="deepseek/deepseek-v4-flash:free",
@@ -50,6 +51,7 @@ def test_task_text_contains_scope_and_boundaries() -> None:
     text = build_openhands_task_text(valid_packet())
 
     assert "tools/skeleton_core/openhands_adapter.py" in text
+    assert "Create OpenHands adapter v0." in text
     assert ".env" in text
     assert "Do not read .env, .git, .ssh" in text
     assert "Do not install packages" in text
