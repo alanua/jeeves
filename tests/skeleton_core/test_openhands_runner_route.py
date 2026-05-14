@@ -54,7 +54,11 @@ def test_route_writes_task_and_runs_injected_runner(tmp_path: Path) -> None:
 
     calls: list[tuple[list[str], dict[str, str]]] = []
 
-    def fake_runner(command: list[str], env: dict[str, str]) -> subprocess.CompletedProcess[str]:
+    def fake_runner(
+        command: list[str],
+        env: dict[str, str],
+        timeout_seconds: int = 300,
+    ) -> subprocess.CompletedProcess[str]:
         calls.append((command, env))
         return subprocess.CompletedProcess(command, 0, stdout="done", stderr="")
 
@@ -80,7 +84,11 @@ def test_route_blocks_success_without_artifact(tmp_path: Path) -> None:
     task_file = tmp_path / "task.md"
     secret_file.write_text("OPENROUTER_API_KEY='sk-or-test-value'\n", encoding="utf-8")
 
-    def fake_runner(command: list[str], env: dict[str, str]) -> subprocess.CompletedProcess[str]:
+    def fake_runner(
+        command: list[str],
+        env: dict[str, str],
+        timeout_seconds: int = 300,
+    ) -> subprocess.CompletedProcess[str]:
         return subprocess.CompletedProcess(command, 0, stdout="done", stderr="")
 
     report = run_openhands_route(
@@ -100,7 +108,11 @@ def test_route_failed_runner_returns_failed_result(tmp_path: Path) -> None:
     task_file = tmp_path / "task.md"
     secret_file.write_text("OPENROUTER_API_KEY='sk-or-test-value'\n", encoding="utf-8")
 
-    def fake_runner(command: list[str], env: dict[str, str]) -> subprocess.CompletedProcess[str]:
+    def fake_runner(
+        command: list[str],
+        env: dict[str, str],
+        timeout_seconds: int = 300,
+    ) -> subprocess.CompletedProcess[str]:
         return subprocess.CompletedProcess(command, 2, stdout="", stderr="failed")
 
     report = run_openhands_route(
@@ -123,7 +135,11 @@ def test_route_uses_collector_when_no_explicit_changed_files(tmp_path: Path) -> 
     artifact_file = tmp_path / "result.diff"
     secret_file.write_text("OPENROUTER_API_KEY='sk-or-test-value'\n", encoding="utf-8")
 
-    def fake_runner(command: list[str], env: dict[str, str]) -> subprocess.CompletedProcess[str]:
+    def fake_runner(
+        command: list[str],
+        env: dict[str, str],
+        timeout_seconds: int = 300,
+    ) -> subprocess.CompletedProcess[str]:
         return subprocess.CompletedProcess(command, 0, stdout="done", stderr="")
 
     def fake_git_runner(command: list[str]) -> subprocess.CompletedProcess[str]:
@@ -164,7 +180,11 @@ def test_route_blocks_interactive_confirmation_without_changes(tmp_path: Path) -
     task_file = tmp_path / "task.md"
     secret_file.write_text("OPENROUTER_API_KEY='sk-or-test-value'\n", encoding="utf-8")
 
-    def fake_runner(command: list[str], env: dict[str, str]) -> subprocess.CompletedProcess[str]:
+    def fake_runner(
+        command: list[str],
+        env: dict[str, str],
+        timeout_seconds: int = 300,
+    ) -> subprocess.CompletedProcess[str]:
         return subprocess.CompletedProcess(
             command,
             0,
@@ -190,4 +210,49 @@ def test_route_blocks_interactive_confirmation_without_changes(tmp_path: Path) -
     assert report.result.result.stop_reason == "interactive_confirmation_required"
     assert report.result.result.validation_status == "blocked"
     assert "interactive_confirmation_required" in report.result.result.risk_flags
+    assert report.result.result_validation.status == "valid_adapter_result"
+
+
+def test_route_blocks_timeout_before_collector(tmp_path: Path) -> None:
+    secret_file = tmp_path / "openrouter.env"
+    task_file = tmp_path / "task.md"
+    secret_file.write_text("OPENROUTER_API_KEY='sk-or-test-value'\n", encoding="utf-8")
+
+    git_called = False
+
+    def fake_runner(
+        command: list[str],
+        env: dict[str, str],
+        timeout_seconds: int = 300,
+    ) -> subprocess.CompletedProcess[str]:
+        assert timeout_seconds == 7
+        return subprocess.CompletedProcess(
+            command,
+            124,
+            stdout="",
+            stderr="openhands_timeout_seconds=7",
+        )
+
+    def fake_git_runner(command: list[str]) -> subprocess.CompletedProcess[str]:
+        nonlocal git_called
+        git_called = True
+        return subprocess.CompletedProcess(command, 1, stdout="", stderr="must not run")
+
+    report = run_openhands_route(
+        valid_packet(),
+        config=OpenHandsRunnerRouteConfig(
+            task_file=task_file,
+            secret_file=secret_file,
+            timeout_seconds=7,
+        ),
+        runner=fake_runner,
+        git_runner=fake_git_runner,
+    )
+
+    assert git_called is False
+    assert report.returncode == 124
+    assert report.collector_report is None
+    assert report.result.result.status == "blocked"
+    assert report.result.result.stop_reason == "openhands_timeout"
+    assert "timeout" in report.result.result.risk_flags
     assert report.result.result_validation.status == "valid_adapter_result"
