@@ -32,6 +32,7 @@ class OpenHandsAdapterConfig(BaseModel):
     base_url: str = "https://openrouter.ai/api/v1"
     suppress_banner: bool = True
     headless_json: bool = False
+    exit_without_confirmation: bool = False
 
 
 class OpenHandsPreparedTask(BaseModel):
@@ -126,6 +127,8 @@ def build_openhands_command(
     ]
     if resolved.headless_json:
         command.extend(["--headless", "--json"])
+    if resolved.exit_without_confirmation:
+        command.append("--exit-without-confirmation")
     command.extend(["-f", task_file])
     return command
 

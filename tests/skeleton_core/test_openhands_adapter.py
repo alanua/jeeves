@@ -157,3 +157,26 @@ def test_headless_json_command_is_explicit_opt_in() -> None:
         "-f",
         "/tmp/task.md",
     ]
+
+
+def test_exit_without_confirmation_command_is_explicit_opt_in() -> None:
+    safe_default = build_openhands_command("/tmp/task.md", OpenHandsAdapterConfig())
+    command = build_openhands_command(
+        "/tmp/task.md",
+        OpenHandsAdapterConfig(
+            executable="/bin/openhands",
+            headless_json=True,
+            exit_without_confirmation=True,
+        ),
+    )
+
+    assert "--exit-without-confirmation" not in safe_default
+    assert command == [
+        "/bin/openhands",
+        "--override-with-envs",
+        "--headless",
+        "--json",
+        "--exit-without-confirmation",
+        "-f",
+        "/tmp/task.md",
+    ]

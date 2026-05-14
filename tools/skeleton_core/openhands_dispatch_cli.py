@@ -59,6 +59,7 @@ def build_run_report(
     *,
     headless_json: bool = False,
     timeout_seconds: int = 300,
+    exit_without_confirmation: bool = False,
 ) -> OpenHandsIssueDispatchReport:
     """Run the real OpenHands route.
 
@@ -74,6 +75,7 @@ def build_run_report(
                 adapter_config=OpenHandsAdapterConfig(
                     model=packet.fuel_policy.model,
                     headless_json=headless_json,
+                    exit_without_confirmation=exit_without_confirmation,
                 ),
             ),
         )
@@ -105,6 +107,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=300,
         help="Timeout seconds for real --run mode",
     )
+    parser.add_argument(
+        "--exit-without-confirmation",
+        action="store_true",
+        help="Pass OpenHands --exit-without-confirmation in real --run mode",
+    )
     return parser
 
 
@@ -116,6 +123,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         payload = _load_payload(Path(args.input))
         if args.headless_json and not args.run:
             raise ValueError("--headless-json requires --run")
+        if args.exit_without_confirmation and not args.run:
+            raise ValueError("--exit-without-confirmation requires --run")
         if args.timeout <= 0:
             raise ValueError("--timeout must be positive")
 
@@ -124,6 +133,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 payload,
                 headless_json=args.headless_json,
                 timeout_seconds=args.timeout,
+                exit_without_confirmation=args.exit_without_confirmation,
             )
             if args.run
             else build_dry_run_report(payload)
