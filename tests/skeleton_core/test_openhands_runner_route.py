@@ -22,6 +22,7 @@ def valid_packet() -> AdapterTaskPacket:
         authority_level="level_2_local_diff",
         risk_level="yellow",
         expected_artifact="diff",
+        task_instructions="Update the OpenHands runner route in a bounded way.",
         fuel_policy=FuelPolicy(
             provider="openrouter",
             model="deepseek/deepseek-v4-flash:free",
