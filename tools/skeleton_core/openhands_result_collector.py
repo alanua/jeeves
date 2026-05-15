@@ -8,8 +8,8 @@ restart services, or read secrets.
 from __future__ import annotations
 
 import subprocess
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -54,8 +54,7 @@ def default_git_runner(command: list[str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         command,
         text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         check=False,
     )
 
