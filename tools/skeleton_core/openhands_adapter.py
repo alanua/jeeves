@@ -113,7 +113,7 @@ Hard boundaries:
 
 
 def build_openhands_command(
-    task_file: str,
+    task_text: str,
     config: OpenHandsAdapterConfig | None = None,
 ) -> list[str]:
     """Build the OpenHands CLI command."""
@@ -125,8 +125,8 @@ def build_openhands_command(
         "--json",
         "--exit-without-confirmation",
         "--override-with-envs",
-        "-f",
-        task_file,
+        "--task",
+        task_text,
     ]
 
 
@@ -162,9 +162,10 @@ def prepare_openhands_task(
     task_validation = validate_task_packet(packet)
     env_keys = sorted(build_openhands_env("__redacted__", resolved).keys())
 
+    task_text = build_openhands_task_text(packet)
     return OpenHandsPreparedTask(
-        task_text=build_openhands_task_text(packet),
-        command=build_openhands_command(task_file, resolved),
+        task_text=task_text,
+        command=build_openhands_command(task_text, resolved),
         env_keys=env_keys,
         task_validation=task_validation,
     )

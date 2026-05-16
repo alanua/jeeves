@@ -35,7 +35,8 @@ def test_valid_packet_prepares_task() -> None:
 
     assert prepared.adapter_version == OPENHANDS_ADAPTER_VERSION
     assert prepared.task_validation.status == "valid_task_packet"
-    assert prepared.command[-2:] == ["-f", "/tmp/task.md"]
+    assert "--task" in prepared.command
+    assert "Create OpenHands adapter v0." in prepared.command[-1]
 
 
 def test_invalid_packet_returns_blocked_task_validation() -> None:
@@ -69,7 +70,7 @@ def test_command_is_exact_openhands_command() -> None:
         "--json",
         "--exit-without-confirmation",
         "--override-with-envs",
-        "-f",
+        "--task",
         "/tmp/task.md",
     ]
 
