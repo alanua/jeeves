@@ -1,141 +1,151 @@
-# Skeleton Controlled Growth Process
+# Skeleton Controlled Growth Policy
 
 Status: CONFIRMED_CANON
-Scope: rule for adding, activating, auditing, and stopping Skeleton skills
+Scope: durable anti-bloat and admission policy for Skeleton lanes, skills, and workflow gates
 Created: 2026-05-07
+Last consolidated: 2026-05-16
 
 ## Purpose
 
-Skeleton must grow as a real operating layer, not as a paper checklist.
+Skeleton should grow by turning repeated failure or friction into a smaller, safer, more enforceable operating layer.
 
-A new skill is allowed only when it removes repeated work, prevents repeated failure, improves validation, reduces privacy/safety risk, or unlocks a concrete project workflow.
+This file is the durable policy for admitting or rejecting new Skeleton capabilities. It is not a status board, a roadmap dump, or a place to restate every active workflow.
+
+## Ontology gate
+
+```text
+ChatGPT Exoskeleton = historical/current ChatGPT-facing prototype of Skeleton.
+Unified Skeleton Core = target model-neutral external operating layer for LLM-assisted work.
+ChatGPT = current host/interface for the prototype.
+Codex = coding executor.
+Gemini = auditor / second-brain role.
+OpenHands = bounded executor role.
+Jeeves = separate future independent assistant/product.
+```
+
+Critical rule:
+
+```text
+Jeeves is not a Skeleton adapter.
+Jeeves is not runtime under Skeleton.
+Skeleton is the precursor, proving ground, practical toolchain, and construction scaffold used to build Jeeves more safely.
+```
+
+## Core growth rule
+
+```text
+repeated pain or repeated failure
+-> narrow proposal
+-> bounded implementation or rule
+-> explicit safety boundary
+-> validation
+-> activation as a real gate when relevant
+-> evidence of use
+-> periodic audit
+```
+
+If a proposal does not change behavior, reduce risk, or remove repeated work, it should not enter active Skeleton canon.
 
 ## Integrity rule
 
-Skeleton must remain a coherent exoskeleton, not a pile of disconnected helpers.
+Skeleton must remain a coherent external operating layer, not a pile of disconnected helpers.
 
-Every new skill must either strengthen an existing workflow joint, close a repeated failure point, or connect two existing parts into a more reliable process.
-
-If a proposed skill grows sideways, duplicates another skill, weakens enforcement, or creates unmanaged process branches, it must be blocked, merged into an existing skill, or kept as backlog.
-
-The target shape is:
+A new lane, skill, or gate is allowed only when it does at least one of these:
 
 ```text
-few strong connected gates
-not many loose paper capabilities
+strengthens an existing workflow joint
+closes a repeated failure point
+connects existing parts into a safer operating loop
+compresses a noisy process into a smaller enforceable rule
 ```
 
-## Growth rule
+If it duplicates an existing gate, creates a side branch, or exists only as explanation without enforcement, it should be merged, demoted to reference, or kept as backlog.
+
+## Admission criteria
+
+Admit a new Skeleton lane, skill, or gate only if all are true:
 
 ```text
-pain / repeated blocker
--> narrow skill request
--> local/offline public-safe v1
--> tests and fixtures
--> workflow-gate integration or explicit reason why no gate is needed
--> green CI
--> documented activation rule
--> use in real workflow
--> audit after use
+[ ] It solves a concrete repeated blocker, risk, or validation gap.
+[ ] It has narrow inputs, outputs, and stop conditions.
+[ ] It has explicit role boundaries.
+[ ] It is local/offline/public-safe by default unless a separate task authorizes more.
+[ ] It does not create deploy, merge, secret, runtime, or server access by default.
+[ ] It has a clear evidence trail.
+[ ] It attaches to an existing workflow gate, or the task records why no gate is needed.
+[ ] It makes the active operating surface smaller or stronger, not broader or noisier.
 ```
 
-## Admission criteria for a new skill
+For canon or instruction changes, critique-before-action is part of admission. Read the current rule first, identify overlap or contradiction, then patch minimally.
 
-A proposed Skeleton skill is allowed only if all are true:
+## Anti-bloat filter
+
+Block, defer, or demote proposals that are mainly:
 
 ```text
-[ ] It solves a concrete repeated blocker or validation friction.
-[ ] It has a narrow input and output.
-[ ] It has deterministic statuses such as ready/blocked/unknown.
-[ ] It is local/offline/public-safe by default.
-[ ] It does not perform live GitHub writes, runner execution, merge, deploy, server access, or secret handling unless explicitly authorized by a separate task.
-[ ] It has tests and fixtures.
-[ ] It is connected to workflow-gate, or the task records why workflow-gate is not relevant.
-[ ] It strengthens the existing Skeleton flow instead of creating a disconnected side branch.
+duplicate policy
+status snapshot pretending to be canon
+broad orchestration ambition without a bounded workflow
+live executor autonomy by default
+merge or deploy path by default
+secret/runtime/server access path
+unclear input/output
+missing validation or evidence
+unowned backlog disguised as an active lane
 ```
 
-If these are not true, keep the idea as backlog instead of building it.
-
-## Definition of done
-
-A skill is not done when the file exists.
-
-A skill is done only when:
-
-```text
-[ ] CLI command exists.
-[ ] Unit tests exist.
-[ ] CLI tests or fixtures exist.
-[ ] CI is green.
-[ ] Safety boundaries are explicit.
-[ ] It is listed in CURRENT_STATE only after merge.
-[ ] It is activated as a workflow gate when relevant.
-[ ] A real workflow uses it at least once, or a follow-up issue records the integration gap.
-[ ] It is connected to the existing Skeleton workflow map and does not remain a loose helper.
-```
+The default answer to a vague or oversized proposal is not "add another doc." The default answer is "narrow it, attach it to a real gate, or keep it out of active canon."
 
 ## Activation rule
 
 ```text
-ready skill + relevant next action = mandatory gate
-missing ready skill = blocked action
+ready gate + relevant task = mandatory use
+missing ready gate for required work = stop and report
 human override = explicit and recorded
 ```
 
-The default response to a skipped ready skill is not “continue manually”. The default response is:
+Do not keep "ready but optional" active gates around for long. If a gate matters, wire it into behavior. If it does not change behavior, demote it from active status.
+
+## Definition of done
+
+A new Skeleton capability is done only when:
 
 ```text
-stop
--> run the relevant skill
--> inspect the packet/report
--> continue only if action_ready or explicitly approved
+[ ] the boundary and intended trigger are explicit
+[ ] the required evidence is explicit
+[ ] validation exists
+[ ] GitHub issues, PRs, or comments can show real use or justified readiness
+[ ] it is connected to an existing operating lane when relevant
+[ ] it does not expand the default boot or canon surface unnecessarily
+[ ] it is listed in status inventory only after the active rule is real
 ```
 
-## Anti-bloat rule
+## Active-rule boundary
 
-Do not add skills just because they sound useful.
-
-Block or defer skill work if it is:
+Use this split to keep the operating surface compressed:
 
 ```text
-abstract policy only
-broad orchestrator work
-large automation rewrite
-live executor by default
-auto-merge or deploy path
-unclear input/output
-missing tests
-not connected to a real workflow
-disconnected from existing Skeleton gates
-```
-
-## Current enforcement priority
-
-```text
-workflow-gate first
-then capability-request-broker
-then secrets-preflight
-then only skills backed by observed project need
+CONTROLLED_GROWTH.md = durable admission and anti-bloat policy
+coding_lane_template_and_evidence_protocol.md = active Development Lane gate
+skill_inventory_activation_map.md = dated status/inventory snapshot, not core canon
 ```
 
 ## Periodic audit questions
 
-During `АУД СК`, check:
+During lane or canon audits, ask:
 
 ```text
-[ ] Which skills are merged but not used?
-[ ] Which skills are used only manually and need workflow-gate enforcement?
-[ ] Which open issues are abstract or too broad?
-[ ] Which skills should be retired, merged, or kept as backlog?
-[ ] Did any recent failure happen because a ready skill was skipped?
-[ ] Which skills are disconnected helpers rather than parts of one coherent workflow?
-[ ] Which skills should be merged to keep the Skeleton compact and strong?
+[ ] Which active items still change behavior?
+[ ] Which items are status snapshots and should not act as canon?
+[ ] Which gates are merged but not actually used?
+[ ] Which duplicated docs can be compressed into one rule?
+[ ] Did a recent failure happen because a ready gate was skipped?
+[ ] Is any proposal silently widening access or authority?
 ```
 
 ## Canonical principle
 
 ```text
-Skeleton grows by converting repeated failure into enforced workflow.
-A skill that does not change behavior is not a finished skill.
-A disconnected skill is armor clutter, not strength.
+Skeleton should gain enforcement, not paperwork.
+If a capability does not improve behavior, evidence, or safety, it does not belong in the active layer.
 ```
