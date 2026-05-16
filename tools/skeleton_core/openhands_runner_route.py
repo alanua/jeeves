@@ -191,12 +191,13 @@ def run_openhands_route(
     """
 
     resolved = config or OpenHandsRunnerRouteConfig()
-    prepared = prepare_openhands_task(packet, str(resolved.task_file), resolved.adapter_config)
+    adapter_config = resolved.adapter_config.model_copy(update={"model": packet.fuel_policy.model})
+    prepared = prepare_openhands_task(packet, str(resolved.task_file), adapter_config)
 
     resolved.task_file.write_text(prepared.task_text, encoding="utf-8")
 
     api_key = load_openrouter_key(resolved.secret_file)
-    env = build_openhands_env(api_key, resolved.adapter_config)
+    env = build_openhands_env(api_key, adapter_config)
 
     live_report: OpenHandsLiveRunGuardReport | None = None
 

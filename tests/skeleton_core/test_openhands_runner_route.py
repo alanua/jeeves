@@ -118,6 +118,52 @@ def test_route_failed_runner_returns_failed_result(tmp_path: Path) -> None:
     assert report.stderr_tail == "failed"
 
 
+def test_route_uses_packet_fuel_model_for_openhands_env(tmp_path: Path) -> None:
+    secret_file = tmp_path / "openrouter.env"
+    task_file = tmp_path / "task.md"
+    secret_file.write_text("OPENROUTER_API_KEY='sk-or-test-value'\n", encoding="utf-8")
+
+    packet = valid_packet().model_copy(
+        update={
+            "fuel_policy": FuelPolicy(
+                provider="openrouter",
+                model="mistralai/mistral-nemo",
+                max_usd=0.01,
+            )
+        }
+    )
+
+    calls: list[tuple[list[str], dict[str, str], OpenHandsRunnerRouteConfig]] = []
+
+    def fake_live_run(
+        command: list[str],
+        env: dict[str, str],
+        config: OpenHandsRunnerRouteConfig,
+    ) -> OpenHandsLiveRunGuardReport:
+        calls.append((command, env, config))
+        return OpenHandsLiveRunGuardReport(
+            status="completed",
+            returncode=0,
+            timed_out=False,
+            timeout_seconds=config.timeout_seconds,
+            stdout_log_path=str(tmp_path / "stdout.log"),
+            stderr_log_path=str(tmp_path / "stderr.log"),
+            stdout_tail="done",
+            stderr_tail="",
+        )
+
+    run_openhands_route(
+        packet,
+        config=OpenHandsRunnerRouteConfig(task_file=task_file, secret_file=secret_file),
+        live_run=fake_live_run,
+        changed_files=["tools/skeleton_core/openhands_runner_route.py"],
+        artifact_paths=["artifacts/openhands-runner-route-v0.diff"],
+    )
+
+    assert calls
+    assert calls[0][1]["LLM_MODEL"] == "mistralai/mistral-nemo"
+
+
 def test_route_uses_live_run_guard_report_for_success(tmp_path: Path) -> None:
     secret_file = tmp_path / "openrouter.env"
     task_file = tmp_path / "task.md"
