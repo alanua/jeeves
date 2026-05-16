@@ -1,8 +1,30 @@
 # WORKING PROTOCOL
 
 Status: CONFIRMED_CANON
-Scope: compact command aliases for collaboration with ChatGPT, ChatGPT exoskeleton, runner, executors, and future Jeeves design work.
-Last consolidated: 2026-05-04
+Scope: compact active operating protocol for the current ChatGPT-facing Skeleton prototype and project work.
+Last consolidated: 2026-05-16
+
+This is the compact active rules surface. For deeper checklists, boot-level selection, and post-action verification flow, use `knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md`.
+
+## Ontology gate
+
+```text
+ChatGPT Exoskeleton = historical/current ChatGPT-facing prototype of Skeleton.
+Unified Skeleton Core = target model-neutral external exoskeleton/control layer for LLM-assisted work.
+ChatGPT = current host/interface for using the prototype.
+Codex = coding executor.
+Gemini = auditor / second-brain role.
+OpenHands = bounded executor role.
+Jeeves = separate future independent assistant/product.
+```
+
+Critical rule:
+
+```text
+Jeeves is not a Skeleton adapter.
+Jeeves is not runtime under Skeleton.
+Skeleton is the precursor, proving ground, practical toolchain, and construction scaffold used to build Jeeves more safely.
+```
 
 ## Main command
 
@@ -13,131 +35,89 @@ Preferred wake command:
 ```
 
 Meaning:
-- wake up through the ChatGPT exoskeleton;
-- read the global startup files first;
-- load the general context across projects;
-- do not assume the active project yet;
-- wait for Oleksii to name the current project or continue with a global task.
+- use the current ChatGPT-facing startup route
+- do not assume the active project yet
+- wait for Oleksii to name the active project or continue with a global task
 
 Old aliases remain valid, but `прокинься` is the preferred entrypoint.
 
 ## Core command aliases
 
-| Alias | Meaning | Action |
+| Alias | Meaning | Active rule |
 |---|---|---|
-| `прокинься` | main wake command | Load global boot, Skeleton namespace, runbook, diary; wait for active project. |
-| `+` | accepted + permission | Continue the current active task with the next safe practical step. This is permission for bounded safe GitHub/KB actions within the active task. It is not permission for merge/close/delete/secrets/deploy/runtime work unless Oleksii explicitly names that action. |
+| `прокинься` | wake | Load the active startup route, then wait for project selection. |
+| `+` | accepted + permission | Continue the current active task with the next safe practical step. It is not permission for merge, deploy, delete, secrets, or runtime/server access unless Oleksii explicitly names that action. |
 | `СТ` | startup | Old startup alias. |
-| `СК` | Skeleton / ChatGPT exoskeleton | Use Skeleton namespace + model + runbook. |
-| `СТ СК` | start Skeleton | Old alias for Skeleton startup. |
-| `АУД СК` | audit Skeleton | Audit Skeleton state. |
-| `БЗ СК` | update Skeleton KB | Update Skeleton knowledge base after read-before-write. |
-| `ДЖ` | Jeeves runtime | Future Jeeves runtime/code project; not Skeleton. |
-| `СТ ДЖ` | start Jeeves runtime | Old alias for Jeeves runtime context. |
-| `КОД <project>` | code task | Create/update runner-readable task file, not manual Codex prompt. |
-| `ПРИВ` | private | Treat as private; do not write raw content to public GitHub. |
-| `СТАН` | handoff | Update short handoff for next session. |
+| `СТ <alias>` | project switch | Load only the relevant project/namespace context. |
+| `СК` | Skeleton | Use the current ChatGPT-facing Skeleton prototype at `knowledge_base/chatgpt_exoskeleton/START_HERE.md`. |
+| `ДЖ` | Jeeves | Switch to Jeeves runtime/product work only when explicitly named. |
+| `АУД <scope>` | audit | Check for drift, contradictions, stale instructions, privacy risk, or missing evidence before patching. |
+| `БЗ <scope>` | knowledge-base update | Update cleaned canon only after read-before-write and post-write verification. |
+| `КОД <scope>` | coding task | Create/update runner-readable task files. Do not turn it into a manual Codex copy/paste prompt. |
+| `ВІДН <scope>` | recovery | Treat historical material as evidence, not automatic canon. |
+| `РІШ <scope>` | decision | Process a decision candidate before storing it as canon. |
+| `ПРИВ <scope>` | private | Route private material away from public GitHub. |
+| `СТАН <scope>` | handoff | Update short current-state continuity. |
 
-## Project switch after wake
+## Active project switching
 
-After `прокинься`, Oleksii may name the current project:
+After `прокинься`, route only into the active project:
 
-```text
-Jeeves runtime / ДЖ
-Skeleton / СК
-BauClock / БК
-Gewerbe / ГЕВ
-Lavalamp / ЛАВ
-Homelab / ХЛ
-Android TV / АТВ
-Van / ВЕН
-```
+- `СК`: current ChatGPT-facing Skeleton prototype via `knowledge_base/chatgpt_exoskeleton/START_HERE.md`
+- `ДЖ`: separate Jeeves runtime/product via `knowledge_base/jeeves_runtime/START_HERE.md` and `knowledge_base/assistant_startup_prompt.md`
+- named project: use `knowledge_base/projects/PROJECT_INDEX.md`
 
-Then load only the relevant project context.
+Use the lowest safe boot level from `knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md`.
 
-## Namespace rule
+## Active operating rules
 
-The repository name `alanua/jeeves` is historical and can confuse project scope.
+- `read-before-answer`: for serious work on status, architecture, memory, protocol, runner behavior, or canon, read the relevant external source before answering.
+- `read-before-write`: before changing canon, instructions, handoffs, or task files, read the target file first.
+- `public/private/canon routing`: `knowledge_base/MEMORY_POLICY.md` is the storage authority.
+
+Default routing:
 
 ```text
-СК / Skeleton = ChatGPT-side external control/support layer.
-ДЖ / Jeeves runtime = separate future assistant runtime/code layer.
+public-safe durable canon -> GitHub KB
+private working context -> private Drive memory
+secrets/credentials -> local encrypted store or secret manager
+temporary noise -> do not persist unless needed for audit
 ```
 
-Do not treat Skeleton work as Jeeves runtime work just because both currently live in the same repository.
+- `critique-before-action`: for canon or instruction changes, inspect the current rule first, identify duplicates/conflicts/ambiguity, then patch minimally.
+- `archive/reference over blind deletion`: old material is demoted or archived, not thrown away blindly.
 
-## Boot levels
+## Evidence and merge discipline
 
-Use boot levels from `CHATGPT_EXOSKELETON_RUNBOOK.md`.
+- GitHub issues, PRs, and comments are the public evidence trail.
+- Executor self-report is not evidence by itself.
+- For coding tasks, required evidence is diff plus checks/tests plus `git status`.
+- Review before merge: inspect scope, diff, and evidence before recommending merge.
+- No merge without explicit Oleksii command.
+- No deploy without explicit approval.
+- No secrets, env, server, or runtime access in normal protocol work.
+- No destructive delete unless explicitly approved.
 
-```text
-L0 quick: current chat only
-L1 normal: starter + diary + Skeleton namespace + exoskeleton + runbook
-L2 project: starter + diary + Skeleton namespace + exoskeleton + runbook + project docs
-L3 private: L2 + Drive private hub
-L4 audit/recovery: full scan + structured facts + logs
-```
+## Role boundaries
 
-Default for `прокинься`: L1 global.
-Default after project selection: L2 or L3 if private context is needed.
-Default for audit/recovery: L4.
+- ChatGPT = current host/interface for using the prototype.
+- Runner = execution bridge for structured tasks.
+- Codex = coding executor.
+- OpenHands = bounded executor role.
+- Gemini = auditor / second-brain role.
+- Jeeves = separate future independent assistant/product.
 
-## ChatGPT exoskeleton rule
+`КОД <scope>` means runner-readable executor task creation, not “tell the user to manually pass this to Codex.”
 
-Skeleton uses these files:
+## Response compression
 
-```text
-knowledge_base/chatgpt_exoskeleton/START_HERE.md
-knowledge_base/CHATGPT_EXOSKELETON.md
-knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md
-```
-
-Namespace = where Skeleton begins.
-Model = what Skeleton is.
-Runbook = how to behave.
-
-## Jeeves runtime rule
-
-Jeeves runtime starts from:
-
-```text
-knowledge_base/jeeves_runtime/START_HERE.md
-knowledge_base/assistant_startup_prompt.md
-```
-
-Only enter this layer when Oleksii explicitly switches to Jeeves runtime work.
-
-## Runner-mediated executor rule
-
-`КОД <project>` never means “tell the user to manually pass this to Codex”.
-
-It means:
-
-```text
-ChatGPT creates or updates a structured task file
--> runner reads it
--> runner passes it to Codex/executor
--> runner returns logs/result/handoff
--> ChatGPT reviews and prepares the next task
-```
-
-For Skeleton tasks, prefer:
-
-```text
-knowledge_base/chatgpt_exoskeleton/SKELETON_RUNNER_TASK_TEMPLATE.md
-```
-
-## Response compression rule
-
-For direct chat with Oleksii, use one short human Ukrainian sentence by default: what changed, what matters, or the next step.
-
-For documentation, use concise technical English, repository conventions, and standard technical writing patterns. Do not use personal voice, chat style, or assistant-specific wording.
-
-Do not expose internal reasoning, long status blocks, or repeated safety explanations unless Oleksii asks.
+- For direct chat with Oleksii, use one short human Ukrainian sentence by default.
+- For repository docs, use concise technical English.
+- Do not expose internal reasoning or repeat long safety blocks unless needed.
 
 ## Default report style
 
-For memory/protocol work, use the compact format only when a structured report is actually useful:
+Use the compact format only when a structured report is actually useful:
 
 ```text
 Що сталося:
