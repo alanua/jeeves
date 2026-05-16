@@ -46,6 +46,109 @@ IDEA_BACKLOG — not ready to be called a skill
 | General exoskeleton docs/runbook | REFERENCE_ONLY | architecture/boot | branch recovery / orientation | useful background; not a narrow skill | keep reference, do not call it a skill |
 | Old host-local shell runner mapping | OBSOLETE_OR_REJECT | legacy execution | none; do not use | failed new tasks with unknown YELLOW task mapping | keep as evidence until inventoried, not active |
 
+## Practical convergence path
+
+Do not keep extending Skeleton by adding isolated paper skills. Combine useful pieces into a small number of practical operating lanes.
+
+### Audit Lane
+
+Combine these pieces:
+
+```text
+deep-diff evidence packet
+Gemini auditor / mock-first adapter
+false-confidence and shallow-gate audit lessons
+runner-status evidence checks
+```
+
+Target workflow:
+
+```text
+evidence packet
+-> deep diff
+-> Gemini/mock/manual audit
+-> finding
+-> next smallest safe task
+```
+
+Purpose:
+
+```text
+Detect duplicate, overlap, conflict, gap, and false-confidence before work expands.
+```
+
+Immediate next action:
+
+```text
+Finish #178 CLI wiring for deep-diff-audit-pack.
+```
+
+### Development Lane
+
+Combine these pieces:
+
+```text
+coding lane evidence protocol
+OpenHands bounded adapter
+OpenHands security-risk hardening
+wrapper-side status/diff/test evidence collection
+```
+
+Target workflow:
+
+```text
+task envelope
+-> bounded executor edit
+-> wrapper collects status/diff/tests
+-> draft PR
+-> review
+-> manual merge only
+```
+
+Purpose:
+
+```text
+Start real coding without giving executors broad autonomy.
+```
+
+Immediate next action:
+
+```text
+Build wrapper-side evidence collection for OpenHands, then use BauClock #23 as the first real test-only coding lane pilot.
+```
+
+### Domain Lane
+
+Keep domain-specific workflows separate from general coding/audit lanes.
+
+Current example:
+
+```text
+Construction takeoff / Aufmaß
+```
+
+Purpose:
+
+```text
+Use only when the user asks for that real domain workflow, with private/public source routing and human review.
+```
+
+### Archive / Evidence Lane
+
+Old or failed mechanisms are not active skills.
+
+Current example:
+
+```text
+old host-local shell runner mapping
+```
+
+Purpose:
+
+```text
+Keep as evidence until inventoried, then replace with a controlled dispatcher or archive.
+```
+
 ## Activation map
 
 | Task type | Required active gate | Stop if missing |
