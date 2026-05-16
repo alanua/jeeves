@@ -2,7 +2,7 @@
 
 Status: CONFIRMED_CANON
 Scope: short public-safe handoff for the next ChatGPT branch working on СК / Skeleton
-Last updated: 2026-05-09
+Last updated: 2026-05-17
 
 ## Active project
 
@@ -10,7 +10,29 @@ Last updated: 2026-05-09
 СК / ChatGPT Exoskeleton
 ```
 
-Current work is the ChatGPT-side external control/support layer, not Jeeves runtime/code.
+Current work is the historical/current ChatGPT-facing prototype of Skeleton, not Jeeves runtime/code.
+
+This file is a short handoff/status file. It is not the startup authority. Use the active route from `BOOTLOADER.md`, `knowledge_base/START_HERE_FOR_CHATGPT.md`, `knowledge_base/MEMORY_POLICY.md`, `knowledge_base/WORKING_PROTOCOL.md`, and `knowledge_base/chatgpt_exoskeleton/START_HERE.md`, then return here for short status/handoff context when needed.
+
+## Ontology checkpoint
+
+```text
+ChatGPT Exoskeleton = historical/current ChatGPT-facing prototype of Skeleton.
+Unified Skeleton Core = target model-neutral external operating layer for LLM-assisted work.
+ChatGPT = current host/interface for the prototype.
+Codex = coding executor.
+Gemini = auditor / second-brain role.
+OpenHands = bounded executor role.
+Jeeves = separate future independent assistant/product.
+```
+
+Critical rule:
+
+```text
+Jeeves is not a Skeleton adapter.
+Jeeves is not runtime under Skeleton.
+Skeleton is the precursor, proving ground, practical toolchain, and construction scaffold used to build Jeeves more safely.
+```
 
 ## Current state
 
@@ -248,6 +270,9 @@ Defines source priority, public/private routing, table schemas, statuses, valida
 Now includes optional Gemini second-brain review pass: Gemini reviews consistency/anomalies only, not final quantities or geometry source of record.
 Semi-automatic takeoff + Gemini workflow exists to coordinate human checkpoints, Runner extraction, Gemini review, stop/resume, and source-priority handling.
 No private drawings, real project data, extracted quantities, Drive URLs, parser code, live API calls, or final billable quantity claims were added to public GitHub.
+Next practical priority: Consum Quartier MVP-1 -> side building -> 1. OG -> 2 apartments.
+Real sources and outputs stay in private Drive/local runner only.
+Public GitHub stays generic code/templates/reports only.
 Remains LIKELY_NEEDS_REVIEW until one real private floor/object pilot is processed end-to-end and reviewed by Oleksii.
 ```
 
@@ -308,37 +333,30 @@ It allows bounded GitHub/KB maintenance inside that task.
 High-risk or destructive actions still require an explicit named instruction from Oleksii.
 ```
 
-## Short boot instruction for the next branch
+## Current startup route pointer
 
-When Oleksii says `прокинься СК`, load:
+`CURRENT_STATE.md` is a short handoff/status file, not the startup authority.
+
+Use the active route:
 
 ```text
 BOOTLOADER.md
-knowledge_base/START_HERE_FOR_CHATGPT.md
-knowledge_base/MEMORY_POLICY.md
-knowledge_base/WORKING_PROTOCOL.md
-knowledge_base/CHATGPT_BRANCH_CONTINUITY_BOOT.md
-knowledge_base/assistant_diary.md
-knowledge_base/chatgpt_exoskeleton/START_HERE.md
-knowledge_base/chatgpt_exoskeleton/CURRENT_STATE.md
-knowledge_base/chatgpt_exoskeleton/CONTROLLED_GROWTH.md
-knowledge_base/chatgpt_exoskeleton/SKELETON_RUNNER_TASK_TEMPLATE.md
-knowledge_base/CHATGPT_EXOSKELETON.md
-knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md
+-> knowledge_base/START_HERE_FOR_CHATGPT.md
+-> knowledge_base/MEMORY_POLICY.md
+-> knowledge_base/WORKING_PROTOCOL.md
+-> knowledge_base/chatgpt_exoskeleton/START_HERE.md
+-> active project route as needed
 ```
 
-Then load topic-specific files from the exact wake source map in `START_HERE.md`. If the topic involves Hetzner/Termux/live runner behavior, also read the private Drive handoff and require live runner script evidence when exact behavior matters.
+Then use `knowledge_base/chatgpt_exoskeleton/START_HERE.md` to decide whether `CURRENT_STATE.md` and any topic-specific files are needed.
 
-For Construction Takeoff / Aufmaß, also load:
+Do not treat diary, recovery, branch-continuity, or history files as default wake reads. Load them only when the task specifically needs continuity, recovery, audit, or live-infrastructure evidence.
 
-```text
-knowledge_base/chatgpt_exoskeleton/skills/construction_takeoff_from_drawings.md
-knowledge_base/chatgpt_exoskeleton/runner_tasks/construction_takeoff_runner_task_template.md
-knowledge_base/chatgpt_exoskeleton/skills/semi_automatic_construction_takeoff_with_gemini.md
-knowledge_base/chatgpt_exoskeleton/runner_tasks/semi_automatic_construction_takeoff_gemini_task_template.md
-```
+If the active takeoff topic is Consum Quartier MVP-1, keep real source folders, drawings, extracted outputs, and object-specific notes in private Drive/local runner only. Public GitHub remains generic code/templates/reports.
 
-If the active takeoff topic is the private Consum Quartier pilot, also read the private Drive document:
+If the topic involves Hetzner/Termux/live runner behavior, also read the private Drive handoff and require live runner script evidence when exact behavior matters.
+
+Private takeoff handoff reference:
 
 ```text
 СК Private Construction Takeoff Gemini Pilot Handoff
