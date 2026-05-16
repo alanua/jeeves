@@ -61,7 +61,7 @@ class OpenHandsIssuePayload(BaseModel):
     authority_level: str = "level_2_local_diff"
     risk_level: str = "yellow"
     fuel_provider: str = "openrouter"
-    fuel_model: str = "deepseek/deepseek-v4-flash:free"
+    fuel_model: str = "openrouter/free"
     fuel_max_usd: float = 1.0
 
 

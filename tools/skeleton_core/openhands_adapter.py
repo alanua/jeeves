@@ -28,7 +28,7 @@ class OpenHandsAdapterConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     executable: str = "/home/agent/.local/bin/openhands"
-    model: str = "deepseek/deepseek-v4-flash:free"
+    model: str = "openrouter/free"
     base_url: str = "https://openrouter.ai/api/v1"
     suppress_banner: bool = True
 
