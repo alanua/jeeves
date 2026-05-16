@@ -6,43 +6,20 @@ Main wake command:
 прокинься
 ```
 
-Meaning:
-- wake up through the ChatGPT exoskeleton;
-- read the global startup files first;
-- load the general context across projects;
-- do not assume the active project yet;
-- wait for Oleksii to name the current project or continue with a global task.
+This file is a tiny shim only.
 
-Important namespace rule:
+Active read order:
+1. Read `knowledge_base/START_HERE_FOR_CHATGPT.md`.
+2. Follow its global startup order.
+3. Route into the active project only after the user names it.
 
-```text
-The repo name `alanua/jeeves` is historical and can cause confusion.
-Skeleton / ChatGPT Exoskeleton = external control/support layer around ChatGPT.
-Jeeves runtime = separate future assistant runtime/code layer.
-Do not treat Skeleton work as Jeeves runtime work just because both currently live in the same repository.
-```
-
-Required global startup files:
+Namespace rule:
 
 ```text
-knowledge_base/START_HERE_FOR_CHATGPT.md
-knowledge_base/MEMORY_POLICY.md
-knowledge_base/WORKING_PROTOCOL.md
-knowledge_base/CHATGPT_BRANCH_CONTINUITY_BOOT.md
-knowledge_base/assistant_diary.md
-knowledge_base/chatgpt_exoskeleton/START_HERE.md
-knowledge_base/CHATGPT_EXOSKELETON.md
-knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md
+Skeleton / ChatGPT Exoskeleton = ChatGPT-side external control/support layer.
+Jeeves runtime = separate future runtime/code layer.
 ```
 
-Project switch after wake:
+Do not treat Skeleton work as Jeeves runtime work just because both live in `alanua/jeeves`.
 
-```text
-Skeleton -> use chatgpt_exoskeleton/START_HERE.md + CHATGPT_EXOSKELETON.md + CHATGPT_EXOSKELETON_RUNBOOK.md
-Jeeves runtime -> use jeeves_runtime/START_HERE.md + assistant_startup_prompt.md + Jeeves project docs
-BauClock / Gewerbe / Lavalamp / Homelab / Android TV / Van -> load the matching project context
-```
-
-Do not treat `прокинься` as a normal word. It is the main ChatGPT-side boot command.
-
-Old aliases such as `СТ СК`, `СТ ДЖ`, `АУД СК`, and `БЗ СК` remain valid, but the preferred entrypoint is now `прокинься`.
+Old aliases remain valid, but `прокинься` is the preferred entrypoint.
