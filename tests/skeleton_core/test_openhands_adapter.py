@@ -63,7 +63,15 @@ def test_command_is_exact_openhands_command() -> None:
 
     command = build_openhands_command("/tmp/task.md", config)
 
-    assert command == ["/bin/openhands", "--override-with-envs", "-f", "/tmp/task.md"]
+    assert command == [
+        "/bin/openhands",
+        "--headless",
+        "--json",
+        "--exit-without-confirmation",
+        "--override-with-envs",
+        "-f",
+        "/tmp/task.md",
+    ]
 
 
 def test_env_builder_keeps_secret_out_of_prepared_metadata() -> None:

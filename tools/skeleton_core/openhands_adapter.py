@@ -121,6 +121,9 @@ def build_openhands_command(
     resolved = config or OpenHandsAdapterConfig()
     return [
         resolved.executable,
+        "--headless",
+        "--json",
+        "--exit-without-confirmation",
         "--override-with-envs",
         "-f",
         task_file,
