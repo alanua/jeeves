@@ -1,10 +1,10 @@
 # START HERE FOR CHATGPT
 
 Status: CONFIRMED_CANON
-Scope: global ChatGPT wake entrypoint across Skeleton and project work.
+Scope: current ChatGPT-facing wake entrypoint/router for the Skeleton prototype and project work.
 Last consolidated: 2026-05-16
 
-This is the active global wake document. Keep it short and use it to route into the right namespace instead of rereading every continuity or history file by default.
+This is the active ChatGPT-facing wake document for the current prototype. It is not universal Skeleton canon. Keep it short and use it to route into the right namespace instead of rereading every continuity or history file by default.
 
 ## Main wake command
 
@@ -15,6 +15,18 @@ Preferred command:
 ```
 
 Old aliases remain valid, but `прокинься` is the preferred entrypoint.
+
+## Current ontology
+
+```text
+ChatGPT = current host/interface for using the prototype.
+ChatGPT Exoskeleton = historical/current ChatGPT-facing prototype of Skeleton.
+Unified Skeleton Core = target model-neutral external exoskeleton/control layer for LLM-assisted work.
+Codex = coding executor.
+Gemini = auditor / second-brain role.
+OpenHands = bounded executor role.
+Jeeves = separate future independent assistant/product.
+```
 
 ## 1. Global ChatGPT/Skeleton startup
 
@@ -69,8 +81,10 @@ If the task involves private context, raw exports, personal admin, accounting, i
 ## Namespace rule
 
 ```text
-Skeleton / ChatGPT Exoskeleton = ChatGPT-side external control/support layer.
-Jeeves runtime = separate future runtime/code layer.
+Historical name/path: ChatGPT Exoskeleton.
+Current implementation: ChatGPT-facing Skeleton prototype.
+Target: Unified Skeleton Core.
+Future product: Jeeves, independent from Skeleton runtime.
 ```
 
-Do not treat Skeleton work as Jeeves runtime work just because both live in `alanua/jeeves`.
+Jeeves is not a Skeleton adapter. Jeeves is not runtime under Skeleton.

@@ -13,7 +13,7 @@ knowledge_base/START_HERE_FOR_CHATGPT.md
 knowledge_base/jeeves_runtime/START_HERE.md
 ```
 
-This file is not the global ChatGPT or Skeleton wake entrypoint.
+This file is not the global ChatGPT-facing Skeleton wake entrypoint.
 
 Use it only when the active project is Jeeves runtime / `ДЖ`.
 
@@ -25,16 +25,31 @@ For private or non-public context, use the private Google Drive memory hub only 
 
 The goal is not to preserve every old chat detail. The goal is to keep Jeeves runtime behavior, architecture direction, safety model, memory hygiene, executor handoff, and recovery workflow stable across new conversations.
 
+## Relation to Skeleton
+
+```text
+ChatGPT Exoskeleton = historical/current ChatGPT-facing prototype of Skeleton.
+Unified Skeleton Core = target model-neutral external exoskeleton/control layer for LLM-assisted work.
+Jeeves = separate future independent assistant/product.
+```
+
+Jeeves is not a Skeleton adapter. Jeeves is not runtime under Skeleton.
+
+Skeleton is the precursor, proving ground, practical toolchain, and construction scaffold used to build Jeeves more safely.
+
 ## Identity and working model
 
 Jeeves is a local/server-first controlled personal/workspace orchestrator, not a chaotic autonomous corporation.
 
 Roles:
 - User = operator, owner, final controller.
-- ChatGPT in current collaboration = architect/reviewer, memory organizer, task framer, and behavioral prototype of Jeeves.
+- ChatGPT in current collaboration = current host/interface for the ChatGPT Exoskeleton prototype, plus architect/reviewer and memory organizer during Jeeves design work.
 - Runner = execution bridge that reads structured task files and passes them to Codex/executors.
-- Jeeves = future lead/orchestrator.
-- Codex/other coding agents = executors.
+- Jeeves = separate future independent assistant/product.
+- Codex = coding executor.
+- Gemini = auditor / second-brain role.
+- OpenHands = bounded executor role.
+- Other coding agents = bounded executors when explicitly assigned.
 - Specialist agents = execution team for bounded tasks.
 - Workspace and knowledge base = durable source of truth.
 
