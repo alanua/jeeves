@@ -57,6 +57,9 @@ def test_task_text_contains_scope_and_boundaries() -> None:
     assert "Do not read .env, .git, .ssh" in text
     assert "Do not install packages" in text
     assert "Do not push, merge, deploy" in text
+    assert "always include security_risk" in text
+    assert 'security_risk="LOW"' in text
+    assert "Do not run demo commands" in text
 
 
 def test_command_is_exact_openhands_command() -> None:

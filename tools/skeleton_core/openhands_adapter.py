@@ -108,6 +108,12 @@ Hard boundaries:
 - Do not install packages.
 - Do not push, merge, deploy, restart services, or change labels.
 - Do not read or edit files outside the allowed files list.
+- Do not run demo commands such as echo Hello World.
+- Prefer file_editor for allowed file edits.
+- When calling any OpenHands tool, always include security_risk.
+- Use security_risk="LOW" for viewing or editing explicitly allowed documentation files.
+- Use security_risk="LOW" for harmless git status or git diff inspection.
+- Never use security_risk="HIGH" in this bounded smoke path.
 - Return changed files, validation result, git diff summary, and stop.
 """
 
