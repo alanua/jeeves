@@ -102,6 +102,7 @@ SUBCOMMANDS = {
     "capability-request-broker",
     "checkpoint",
     "classify-queue",
+    "deep-diff-audit-pack",
     "decide",
     "format-preflight",
     "github-actions-runner-control",
@@ -368,6 +369,15 @@ def _subcommand_parser() -> argparse.ArgumentParser:
         help="Classify offline queue JSON items",
     )
     _add_input_arg(classify_queue_parser, "Path to public-safe queue JSON")
+
+    deep_diff_audit_pack_parser = subparsers.add_parser(
+        "deep-diff-audit-pack",
+        help="Build a public-safe deep-diff evidence packet from JSON",
+    )
+    _add_input_arg(
+        deep_diff_audit_pack_parser,
+        "Path to public-safe deep-diff evidence packet JSON",
+    )
 
     decide_parser = subparsers.add_parser("decide", help="Build a Skeleton task decision packet")
     _add_decide_args(decide_parser)
@@ -713,6 +723,12 @@ def _run_classify_queue(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_deep_diff_audit_pack(args: argparse.Namespace) -> int:
+    from tools.skeleton_core.cli_deep_diff_audit_pack import main as deep_diff_audit_pack_main
+
+    return deep_diff_audit_pack_main(["--input", str(args.input)])
+
+
 def _run_format_preflight(args: argparse.Namespace) -> int:
     try:
         if args.input is not None:
@@ -1032,6 +1048,8 @@ def main(argv: list[str] | None = None) -> int:
         return _run_checkpoint(args)
     if args.command == "classify-queue":
         return _run_classify_queue(args)
+    if args.command == "deep-diff-audit-pack":
+        return _run_deep_diff_audit_pack(args)
     if args.command == "format-preflight":
         return _run_format_preflight(args)
     if args.command == "github-actions-runner-control":
