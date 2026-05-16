@@ -1,49 +1,46 @@
 # ChatGPT Exoskeleton Runbook
 
 Status: CONFIRMED_CANON
-Scope: operational runbook for using the ChatGPT exoskeleton in real chat work.
+Scope: supporting runbook/checklist for applying the active protocol safely
 Created: 2026-05-03
-Last consolidated: 2026-05-05
+Last consolidated: 2026-05-16
 
 ## Purpose
 
-This file is the practical execution checklist for `knowledge_base/CHATGPT_EXOSKELETON.md`.
+`knowledge_base/WORKING_PROTOCOL.md` is the active operating protocol.
 
-`knowledge_base/chatgpt_exoskeleton/START_HERE.md` defines the Skeleton namespace.
-`CHATGPT_EXOSKELETON.md` defines the model.
-This runbook defines what ChatGPT must do step by step when commands such as `СТ`, `СК`, `АУД`, `БЗ`, `КОД`, `ВІДН`, `РІШ`, `ПРИВ`, or `СТАН` appear.
+This runbook is the supporting checklist for applying that protocol in real work. It keeps boot-level selection, read/write verification flow, evidence interpretation, recovery handling, and common failure defenses.
 
-This is ChatGPT-side operating discipline. It is not future Jeeves runtime memory.
+It does not redefine the full active alias table or reintroduce the long boot chain removed in Phase 2.
+
+## Active references
+
+Use these as the current operating stack:
+
+```text
+knowledge_base/START_HERE_FOR_CHATGPT.md
+knowledge_base/MEMORY_POLICY.md
+knowledge_base/WORKING_PROTOCOL.md
+knowledge_base/chatgpt_exoskeleton/START_HERE.md
+knowledge_base/CHATGPT_EXOSKELETON.md
+knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md
+```
+
+When instruction, canon, or ontology wording changes are involved, treat `knowledge_base/WORKING_PROTOCOL.md` as the active rules source and recheck its ontology gate before editing.
 
 ## Core invariant
 
 ```text
-Wake -> identify command/project/privacy -> choose boot level -> read required sources -> classify -> act -> verify -> record durable result only if needed.
-```
-
-No serious work should start from unsupported internal memory when GitHub/Drive memory can be checked.
-
-## Active operating loop
-
-Use this loop for Skeleton work by default:
-
-```text
-load current state
+identify command/project/privacy
+-> choose the lowest safe boot level
+-> read required sources
 -> classify the next safe action
--> perform the smallest useful action
--> verify the result
--> checkpoint only if durable
--> report one short sentence to Oleksii
+-> act
+-> verify
+-> record durable result only if needed
 ```
 
-## Namespace rule
-
-```text
-СК / Skeleton / ChatGPT Exoskeleton = ChatGPT-side external control/support layer.
-ДЖ / Jeeves runtime = separate future assistant runtime/code layer.
-```
-
-The repository name `alanua/jeeves` is historical and must not decide the active project scope.
+No serious work should start from unsupported internal memory when GitHub or Drive memory can be checked.
 
 ## Boot levels
 
@@ -51,10 +48,10 @@ Use the lowest level that is safe for the task.
 
 ```text
 L0 quick: current chat only
-L1 normal: starter + diary + Skeleton namespace + exoskeleton + runbook
-L2 project: starter + diary + Skeleton namespace + exoskeleton + runbook + project docs
-L3 private: L2 + Drive private hub
-L4 audit/recovery: full scan + structured facts + logs
+L1 normal: active startup route from START_HERE_FOR_CHATGPT.md
+L2 project: L1 + relevant namespace/project docs
+L3 private: L2 + private memory when needed
+L4 audit/recovery: L2/L3 + audit/history/reference sources needed for drift or recovery
 ```
 
 Defaults:
@@ -63,259 +60,88 @@ Defaults:
 - private/admin/infrastructure work: L3
 - audit/recovery/memory repair: L4
 
-## Required GitHub files for L1+
+## Command application patterns
+
+Use the alias meanings from `knowledge_base/WORKING_PROTOCOL.md`. Then apply the matching pattern below.
+
+### Startup / project switch
 
 ```text
-knowledge_base/START_HERE_FOR_CHATGPT.md
-knowledge_base/MEMORY_POLICY.md
-knowledge_base/WORKING_PROTOCOL.md
-knowledge_base/CHATGPT_BRANCH_CONTINUITY_BOOT.md
-knowledge_base/assistant_diary.md
-knowledge_base/chatgpt_exoskeleton/START_HERE.md
-knowledge_base/CHATGPT_EXOSKELETON.md
-knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md
+1. Identify project alias and privacy need.
+2. Choose the lowest safe boot level.
+3. Read only the needed startup/project sources.
+4. Continue from external state, not from internal guesswork.
 ```
 
-For Jeeves runtime / OpenClaw-style runtime work, also read:
+### Audit
 
 ```text
-knowledge_base/jeeves_runtime/START_HERE.md
-knowledge_base/assistant_startup_prompt.md
+1. Read the relevant canon/reference first.
+2. Compare the current source against active rules.
+3. Report drift, risk, and next action before patching unless the user explicitly asked to fix.
 ```
 
-For private context, also read Drive hub files:
+### Knowledge-base update
 
 ```text
-Jeeves Private Memory - START HERE
-Jeeves Private Memory - Handoff
-Jeeves Private Memory - Inbox Sources
-Jeeves Private Memory - Recovery Audit Log
-Jeeves Private Memory - Structured Facts
+1. Read the active rules and the target file.
+2. Classify the candidate memory.
+3. Choose the correct storage route from MEMORY_POLICY.
+4. Apply the minimal patch.
+5. Verify by rereading the result.
 ```
 
-Project-specific private handoff is read only when the task needs that project.
-
-## Command handling
-
-### `СТ` / startup
-
-Goal: reconstruct context before answering.
-
-Procedure:
+### Runner task
 
 ```text
-1. Identify project alias: СК, ДЖ, БК, ГЕВ, ЛАВ, ХЛ, АТВ, ВЕН, ВСЕ.
-2. Identify privacy need.
-3. Select boot level.
-4. Read required files for that level.
-5. Continue from remembered external state, not from internal guesswork.
-6. Answer shortly.
+1. Load the active project context.
+2. Create/update a runner-readable task with goal, context, allowed changes, forbidden changes, checks, expected output, handoff requirements, and safety boundaries.
+3. Keep ChatGPT in the framing/review role and the executor in the bounded execution role.
 ```
 
-### `СК` / Skeleton
-
-Goal: use or audit the ChatGPT exoskeleton.
-
-Procedure:
+### Recovery
 
 ```text
-1. Read chatgpt_exoskeleton/START_HERE.md.
-2. Read CHATGPT_EXOSKELETON.md.
-3. Read this runbook if the task is operational.
-4. Read Working Protocol if command aliases are involved.
-5. For audit, check GitHub startup files + Drive hub + Structured Facts when private context is needed.
-6. Report only gaps, risks, and next action.
+1. Treat old material as historical evidence, not automatic canon.
+2. Extract only durable items.
+3. Classify before writing anything back.
+4. Preserve history as archive/reference instead of deleting it blindly.
 ```
 
-### `АУД` / audit
-
-Goal: find drift, contradictions, stale instructions, privacy risk, broken docs, or missing handoff.
-
-Procedure:
+### Canon or instruction change
 
 ```text
-1. Read relevant startup/project/private docs.
-2. Compare against current canon.
-3. Identify exact issue and affected file.
-4. Do not patch during read phase unless user explicitly asked to fix.
-5. Report: what is OK, what is broken, risk, next action.
-```
-
-For `АУД СК`, check:
-
-```text
-START_HERE_FOR_CHATGPT.md
-MEMORY_POLICY.md
-WORKING_PROTOCOL.md
-CHATGPT_BRANCH_CONTINUITY_BOOT.md
-assistant_diary.md
-chatgpt_exoskeleton/START_HERE.md
-CHATGPT_EXOSKELETON.md
-CHATGPT_EXOSKELETON_RUNBOOK.md
-Drive START HERE only if private context is needed
-Drive Handoff only if private context is needed
-Drive Recovery Audit Log only if private context is needed
-Structured Facts only if private context is needed
-```
-
-### `БЗ` / knowledge-base update
-
-Goal: write cleaned durable knowledge to the correct layer.
-
-Procedure:
-
-```text
-1. Read starter/diary/exoskeleton namespace/model/runbook.
-2. Read target file before editing.
-3. Classify candidate memory.
-4. Decide storage route: GitHub / Drive / secret store / do not store.
-5. Apply minimal patch.
-6. Verify by reading changed file.
-7. Record diary/audit/structured fact only if durable.
-```
-
-Forbidden:
-
-```text
-write before read
-rewrite broad file when a small patch is enough
-store raw private data in GitHub
-claim a write succeeded before verification
-```
-
-For Google Docs, prefer replacing whole damaged sections rather than fragile index inserts inside old text.
-
-### `КОД` / runner task
-
-Goal: create or update runner-readable executor task.
-
-Procedure:
-
-```text
-1. Identify project and task target.
-2. Load project context and current handoff.
-3. Create/update structured task file for runner consumption.
-4. Include goal, context, allowed changes, forbidden changes, checks, expected output, handoff requirements, safety/privacy boundaries.
-5. Do not tell user to manually copy the task to Codex when runner workflow is available.
-```
-
-For Skeleton tasks, prefer:
-
-```text
-knowledge_base/chatgpt_exoskeleton/SKELETON_RUNNER_TASK_TEMPLATE.md
-```
-
-### `ВІДН` / recovery
-
-Goal: process old/current branch, export, screenshot, file, doc, or memory dump as historical source.
-
-Procedure:
-
-```text
-1. Treat source as historical evidence, not automatic canon.
-2. Extract durable items only.
-3. Classify each item.
-4. Cross-check existing KB/Drive when tools are available.
-5. Write only one of: history source index, behavior rule, recovery audit note, approved canonical doc.
-6. Never overwrite canon from old chat without approval.
-7. Report shortly.
-```
-
-Recovery classifications:
-
-```text
-CONFIRMED_CANON
-LIKELY_NEEDS_REVIEW
-IDEA_BACKLOG
-OUTDATED_REJECTED
-PRIVATE_DO_NOT_STORE_RAW
-TEMPORARY_DO_NOT_CANONIZE
-```
-
-### `РІШ` / decision
-
-Goal: process a candidate decision.
-
-Procedure:
-
-```text
-1. Determine whether the user is deciding, brainstorming, or asking.
-2. Check existing canon.
-3. Classify as canon/review/backlog/rejected/private/temporary.
-4. If durable and approved, write minimal update.
-5. If not durable, answer without storing.
-```
-
-### Behavior adjustment request
-
-Goal: adapt ChatGPT to Oleksii without creating duplicate or conflicting rules.
-
-Procedure:
-
-```text
-1. Treat the request as a candidate durable behavior rule.
-2. Check START_HERE and this runbook for existing similar rules.
-3. If it duplicates an existing rule, do not create a second copy; refine the existing rule only if needed.
-4. If it conflicts with an existing rule, report the conflict briefly before changing anything.
-5. Save only the cleaned rule, not the whole conversation.
-6. Keep the chat answer very short.
-```
-
-### `ПРИВ` / private
-
-Goal: keep private material out of public GitHub.
-
-Procedure:
-
-```text
-1. Treat content as private by default.
-2. Do not write raw content to public GitHub.
-3. If storage is needed, use Drive private memory or project-specific private handoff.
-4. Secrets/credentials must not be stored in plain Drive or GitHub.
-5. Public notes may contain only redacted summaries.
-```
-
-### `СТАН` / handoff
-
-Goal: prepare next-session continuity.
-
-Procedure:
-
-```text
-1. Summarize what changed.
-2. Record active state.
-3. Record open risks/debt.
-4. Record next action.
-5. Store public-safe handoff in GitHub when appropriate, private handoff in Drive when sensitive.
-6. Keep it short.
+1. Read the current rule first.
+2. Check the ontology gate in WORKING_PROTOCOL.
+3. Critique before action: find duplicate/conflict/ambiguity/risk.
+4. Patch minimally only after that critique.
 ```
 
 ## Read-before-answer checklist
 
-Before status, architecture, memory, Skeleton, boot, runner, or canon answers, all must be true:
+Before status, architecture, memory, protocol, runner, or canon answers:
 
 ```text
 [ ] I identified the exact topic and likely canon source.
-[ ] I checked the relevant GitHub/Drive canon when tools are available.
-[ ] I did not rely on branch-local or weak internal memory for status claims.
-[ ] I can say which source was used or say that I did not check.
+[ ] I checked the relevant GitHub or Drive source when tools are available.
+[ ] I am not relying on weak internal memory for a factual claim.
+[ ] I can name the source used, or I can say it was not checked.
 ```
 
-If any item is false, do not make a confident status/canon claim. Read first or answer with uncertainty.
+If any item is false, do not make a confident status or canon claim.
 
 ## Read-before-write checklist
 
-Before any KB/Drive write, all must be true:
+Before any KB, Drive, or task-file write:
 
 ```text
 [ ] I know the command and project.
-[ ] I selected a boot level.
-[ ] I read the relevant starter/diary/exoskeleton docs.
+[ ] I selected the lowest safe boot level.
+[ ] I read the relevant active rules.
 [ ] I read the target file before editing.
-[ ] I know whether the content is public/private/secret/temporary.
-[ ] I classified the memory item.
+[ ] I know whether the content is public, private, secret, or temporary.
+[ ] I classified the item.
 [ ] I know the minimal patch.
-[ ] I can verify after write.
 ```
 
 If any item is false, do not write yet.
@@ -325,28 +151,22 @@ If any item is false, do not write yet.
 After a write:
 
 ```text
-[ ] Re-read changed file or range.
+[ ] Re-read the changed file or range.
 [ ] Confirm the intended content exists.
 [ ] Check for broken inserted text, duplicated sections, or stale contradictory text.
 [ ] Record diary/audit/structured facts only if the change is durable.
 [ ] Report briefly and honestly.
 ```
 
-## Default report format
-
-Use for memory/protocol/Skeleton work:
+## Evidence interpretation checklist
 
 ```text
-Що сталося:
-Що важливо:
-Ризик:
-Що робити тобі:
-```
-
-If no user action is needed:
-
-```text
-Нічого важливого. Дій від тебе не треба.
+[ ] GitHub issues, PRs, and comments are treated as the public evidence trail.
+[ ] Executor self-report is not treated as sufficient evidence.
+[ ] Coding-task evidence includes diff, checks/tests, and git status.
+[ ] Without explicit Oleksii merge command, stop at review/draft PR state.
+[ ] Without explicit approval, do not deploy.
+[ ] Do not touch secrets, env, server, or runtime access during normal protocol work.
 ```
 
 ## Common failure modes and defenses
@@ -356,9 +176,7 @@ If no user action is needed:
 Defense:
 
 ```text
-For status, architecture, memory, Skeleton, boot, runner, and canon questions, read the relevant external canon before making confident claims.
-If the answer was given from unsupported internal memory, stop, correct it, identify the existing rule that was violated, and apply the rule instead of creating duplicate rules.
-Every correction should improve the next answer by enforcing the existing canon path first.
+For serious status/canon/protocol claims, read the external source first or answer with uncertainty.
 ```
 
 ### Failure: write-before-read
@@ -374,7 +192,7 @@ No read -> no write.
 Defense:
 
 ```text
-No classification -> no memory update.
+No classification -> no canon update.
 ```
 
 ### Failure: private leak
@@ -382,82 +200,28 @@ No classification -> no memory update.
 Defense:
 
 ```text
-No private review -> no public GitHub.
+Use MEMORY_POLICY routing before any public write.
 ```
 
-### Failure: Drive text corruption from index edits
+### Failure: ontology drift
 
 Defense:
 
 ```text
-Prefer full-section replacement when editing Google Docs.
-Always re-read after write.
+Use the ontology gate from WORKING_PROTOCOL before changing Skeleton, ChatGPT, or Jeeves instruction text.
 ```
 
-### Failure: treating recovery as whole operating model
+### Failure: merge/deploy drift
 
 Defense:
 
 ```text
-Recovery is one Skeleton layer, not the whole Skeleton.
-```
-
-### Failure: confusing ChatGPT exoskeleton with Jeeves runtime memory
-
-Defense:
-
-```text
-Skeleton is ChatGPT-side.
-Jeeves runtime is separate future runtime/code.
-Jeeves may inherit selected tested parts later.
-Jeeves must not inherit ChatGPT memory chaos.
-```
-
-### Failure: adaptation-rule drift
-
-Defense:
-
-```text
-When Oleksii asks for adaptation, save one cleaned rule and audit for duplicates/conflicts.
-```
-
-## Stage 1 implementation rule
-
-Skeleton Stage 1 is behavioral and procedural.
-
-Do not start with a large automation rewrite.
-
-Start by enforcing:
-
-```text
-boot level selection
-read-before-answer
-read-before-write
-post-write verification
-classification before storage
-private/public routing
-runner-readable tasks
-short handoffs
-periodic audits
-```
-
-## Completion criteria for Stage 1
-
-Stage 1 is working when:
-
-```text
-[ ] New serious project chats start with the correct boot level.
-[ ] ChatGPT does not ask the user to repeat context when memory tools are available.
-[ ] Status/canon answers about Skeleton, memory, runner, boot, or architecture use external canon instead of unsupported internal memory.
-[ ] KB/Drive writes happen only after reading target files.
-[ ] Durable changes leave diary/audit/structured facts traces.
-[ ] Private material is not copied raw into public GitHub.
-[ ] Runner tasks are structured for execution, not manual copy/paste.
-[ ] `АУД СК` can detect and report drift.
+No merge without explicit Oleksii command.
+No deploy without explicit approval.
 ```
 
 ## Canonical principle
 
 ```text
-Runbook turns Skeleton from document into behavior.
+Runbook turns protocol from text into behavior.
 ```
