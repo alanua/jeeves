@@ -1,94 +1,101 @@
-# Skeleton Skill Inventory and Activation Map
+# Skeleton Skill Inventory and Activation Snapshot
 
-Status: LIKELY_NEEDS_REVIEW
-Scope: public-safe inventory of existing Skeleton skills/protocols/templates
+Status: REFERENCE_SNAPSHOT
+Scope: dated status and inventory snapshot for the current ChatGPT-facing Skeleton prototype
 Issue: #228
+Snapshot date: 2026-05-16
 
-## Operating principle
+## Purpose
 
-Skeleton is practical usefulness, not a pile of unused templates.
+This file is a status snapshot, not core canon.
 
-```text
-A skill without activation is clutter.
-```
+Use it to see what currently exists, what appears active, and what still looks provisional. Do not use it as the durable source of operating rules.
 
-No new Skeleton skill should be accepted unless it has:
-
-```text
-trigger + gate + evidence of use + owner task type
-```
-
-## Classification legend
+Active rule sources:
 
 ```text
-ACTIVE_GATE — actively used as a workflow gate
-READY_NOT_WIRED — useful, but lacks trigger/gate/evidence wiring
-REFERENCE_ONLY — background reference, not a skill
-DUPLICATE_OR_OVERLAP — should be merged with another item
-OBSOLETE_OR_REJECT — should be archived or removed from active lists
-IDEA_BACKLOG — not ready to be called a skill
+knowledge_base/WORKING_PROTOCOL.md
+knowledge_base/CHATGPT_EXOSKELETON_RUNBOOK.md
+knowledge_base/chatgpt_exoskeleton/CONTROLLED_GROWTH.md
+knowledge_base/chatgpt_exoskeleton/runner_tasks/coding_lane_template_and_evidence_protocol.md
 ```
 
-## Current inventory
+## Ontology gate
 
-| Item | Current class | Task type | Trigger | Evidence/use today | Next action |
-|---|---|---|---|---|---|
-| `CURRENT_STATE.md` | ACTIVE_GATE | branch continuity | new branch / wake / status question | used to recover state and avoid chat-memory-only claims | keep active, update after important merges |
-| `START_HERE.md` wake source map | ACTIVE_GATE | Skeleton wake/recovery | `прокинься СК`, infrastructure/context recovery | defines files to read before claims | keep active |
-| `runner-status-check` | ACTIVE_GATE | runner truth check | user asks task/runner status, labels look stale | used to avoid trusting `agent:running` labels | keep active; prefer before queue advance |
-| `deep_diff_audit_pack.py` | READY_NOT_WIRED | deep audit evidence | duplicate/overlap/gap/conflict audit | core builder exists with tests; no full CLI/source workflow yet | wire CLI/source collection in #178 |
-| Gemini Auditor Node / adapter docs | READY_NOT_WIRED | external audit | user asks Gemini audit or second opinion | mock-first and safety policy exist; live route not always available | keep but require adapter status/evidence |
-| Coding lane evidence protocol | ACTIVE_GATE | agent coding work | OpenHands/Codex/bounded executor coding task | merged after OpenHands pilot; defines evidence requirements | use for every coding task |
-| OpenHands bounded adapter | READY_NOT_WIRED | bounded executor | sandbox/doc/test-only executor task | adapter exists; smoke path hardened; still needs wrapper evidence automation | use only for bounded pilots |
-| Construction takeoff skill docs | READY_NOT_WIRED | Aufmaß/takeoff | user asks drawing/takeoff/areas | workflow docs exist; private pilot not complete | use only with private source routing and review |
-| Semi-automatic construction takeoff + Gemini | READY_NOT_WIRED | takeoff with reviewer | takeoff needs Gemini second-brain review | workflow exists; no completed private pilot yet | keep as pilot workflow |
-| Skeleton runner task template | REFERENCE_ONLY | task drafting | creating runner tasks | template supports task creation but is not a gate itself | keep reference |
-| General exoskeleton docs/runbook | REFERENCE_ONLY | architecture/boot | branch recovery / orientation | useful background; not a narrow skill | keep reference, do not call it a skill |
-| Old host-local shell runner mapping | OBSOLETE_OR_REJECT | legacy execution | none; do not use | failed new tasks with unknown YELLOW task mapping | keep as evidence until inventoried, not active |
+```text
+ChatGPT Exoskeleton = historical/current ChatGPT-facing prototype of Skeleton.
+Unified Skeleton Core = target model-neutral external operating layer for LLM-assisted work.
+ChatGPT = current host/interface for the prototype.
+Codex = coding executor.
+Gemini = auditor / second-brain role.
+OpenHands = bounded executor role.
+Jeeves = separate future independent assistant/product.
+```
+
+Critical rule:
+
+```text
+Jeeves is not a Skeleton adapter.
+Jeeves is not runtime under Skeleton.
+Skeleton is the precursor, proving ground, practical toolchain, and construction scaffold used to build Jeeves more safely.
+```
+
+## How to read this file
+
+Classification legend:
+
+```text
+ACTIVE_GATE = active rule or gate that should change behavior
+AVAILABLE_CAPABILITY = usable now, but not itself the core rule source
+BOUNDED_EXECUTOR = executor role with explicit limits
+REFERENCE_ONLY = useful background or template, not active canon
+DOMAIN_SPECIFIC = active only inside a specific project/domain workflow
+LEGACY_OR_ARCHIVE = preserved history, not active path
+```
+
+## Current snapshot
+
+| Item | Class | What it means now | Evidence or status note | Next handling |
+|---|---|---|---|---|
+| `CONTROLLED_GROWTH.md` | ACTIVE_GATE | Durable anti-bloat and admission policy for lanes/skills/gates | Active canon after Phase 4 cleanup | Keep as core rule |
+| `runner_tasks/coding_lane_template_and_evidence_protocol.md` | ACTIVE_GATE | Active Development Lane gate for Codex/OpenHands/bounded coding work | Real evidence from #235, #236, #237, #238 | Keep as core rule |
+| `CURRENT_STATE.md` | ACTIVE_GATE | Short Skeleton continuity and handoff source | Active wake/recovery support | Keep active |
+| `runner-status-check` | AVAILABLE_CAPABILITY | Runner truth check before trusting labels or stale task claims | Used to avoid status guessing | Keep available |
+| `deep-diff-audit-pack` CLI | AVAILABLE_CAPABILITY | Public-safe duplicate/gap/conflict evidence builder | #178 CLI wiring merged through #235; available via `python -m tools.skeleton_core.cli deep-diff-audit-pack --input <json>` | Use when deep-diff audit evidence is needed |
+| Gemini auditor node / adapter docs | AVAILABLE_CAPABILITY | Auditor/second-brain reference with adapter boundary | Useful when independent critique is requested | Keep as reference-backed capability |
+| OpenHands bounded executor role | BOUNDED_EXECUTOR | Bounded executor path for sandboxed coding tasks | Must stay inside Development Lane gate and external evidence collection | Keep bounded |
+| `SKELETON_RUNNER_TASK_TEMPLATE.md` | REFERENCE_ONLY | Task drafting template | Helpful, but not a gate | Keep as reference |
+| General exoskeleton docs/runbook | REFERENCE_ONLY | Orientation and operating support | Useful background, not a skill inventory gate | Keep as reference |
+| Construction takeoff skill/task docs | DOMAIN_SPECIFIC | Domain workflow for takeoff work | Not core Skeleton canon | Keep scoped to that domain |
+| Old host-local shell runner mapping | LEGACY_OR_ARCHIVE | Historical runner route notes | Preserved as old evidence, not active behavior | Keep out of active path |
 
 ## Activation map
 
-| Task type | Required active gate | Stop if missing |
+| Task type | Use this first | Notes |
 |---|---|---|
-| New Skeleton branch / wake | `START_HERE.md` + `CURRENT_STATE.md` | yes |
-| Claiming runner/task state | runner-status-check or explicit issue/PR/log evidence | yes |
-| Coding with bounded executor | coding lane evidence protocol | yes |
-| OpenHands task | coding lane evidence protocol + OpenHands adapter boundaries | yes |
-| Deep duplicate/gap/conflict audit | deep-diff evidence packet | not yet mandatory until #178 CLI is wired |
-| Gemini audit | Gemini adapter contract + adapter/live/mock status | yes |
-| Construction takeoff | construction takeoff skill + private/public source routing | yes |
-| Creating a new skill | trigger + gate + evidence + owner task type | yes |
+| New lane/skill/gate proposal | `CONTROLLED_GROWTH.md` | Admission and anti-bloat rule |
+| Codex coding task | Development Lane gate | Branch -> validation -> draft PR -> independent review -> explicit Oleksii merge command |
+| OpenHands coding task | Development Lane gate + bounded OpenHands role | Same evidence and review boundary as Codex |
+| Deep duplicate/gap/conflict audit | `deep-diff-audit-pack` CLI when relevant | Capability is available now after #235 |
+| Runner/task state claim | runner-status-check or GitHub evidence | Do not trust stale labels or self-report |
+| Canon/instruction cleanup | `WORKING_PROTOCOL.md` + runbook + critique-before-action | Read current rules before editing |
 
-## Deadweight candidates
+## Snapshot cautions
 
-These are not deleted now, but should not be presented as active skills:
+This file will age faster than the active rule docs.
 
-```text
-general architecture docs without a trigger
-templates that only describe a process but do not block or validate work
-legacy runner route notes that no longer match live behavior
-old shell runner mappings
-```
-
-## Immediate wiring priorities
+Do not use it to overrule:
 
 ```text
-1. Finish #178 CLI wiring for deep-diff-audit-pack.
-2. Use coding lane evidence protocol for the next real coding task.
-3. Use BauClock #23 as the first real test-only coding lane pilot.
-4. Build wrapper-side evidence collection for OpenHands instead of relying on executor self-report.
-5. Inventory/archive old host-local shell runner scripts after reference capture.
+WORKING_PROTOCOL for ontology, merge, and safety rules
+RUNBOOK for operating checklist and verification flow
+CONTROLLED_GROWTH for admission policy
+Development Lane protocol for bounded coding work
 ```
 
-## Practical rule for future work
-
-If a document cannot answer all four questions, it is not an active Skeleton skill:
+## Canonical principle
 
 ```text
-When does it trigger?
-What does it check or block?
-What output does it produce?
-What evidence proves it was used?
+An inventory helps orientation.
+It should never compete with the active rule surface.
 ```
-
-If the answer is unclear, classify it as `REFERENCE_ONLY`, `READY_NOT_WIRED`, or `IDEA_BACKLOG` instead of calling it a skill.

@@ -1,26 +1,76 @@
-# Skeleton Coding Lane Template and Forced Evidence Protocol
+# Skeleton Development Lane Gate and Evidence Protocol
 
-Status: LIKELY_NEEDS_REVIEW
-Scope: public-safe operating template for bounded coding executors
+Status: CONFIRMED_CANON
+Scope: active Development Lane gate for Codex, OpenHands, and other bounded coding work
 Issue: #226
+Last consolidated: 2026-05-16
 
 ## Purpose
 
-Skeleton coding lanes exist to let bounded executors help with real code while keeping the control plane evidence-driven.
+The Development Lane exists so bounded executors can do real coding work without turning Skeleton into broad autonomy theater.
 
-The goal is not broad autonomy. The goal is small, repeatable, reviewable coding work through branches and draft pull requests.
+The lane is intentionally narrow:
 
-## Core rule
+```text
+branch
+-> bounded change
+-> validation
+-> draft PR
+-> independent review
+-> explicit Oleksii merge command
+```
+
+That boundary applies to docs-only work, test work, CLI wiring, and narrow production fixes.
+
+## Ontology gate
+
+```text
+ChatGPT Exoskeleton = historical/current ChatGPT-facing prototype of Skeleton.
+Unified Skeleton Core = target model-neutral external operating layer for LLM-assisted work.
+ChatGPT = current host/interface for the prototype.
+Codex = coding executor.
+OpenHands = bounded executor role.
+Gemini = auditor / second-brain role.
+Jeeves = separate future independent assistant/product.
+```
+
+Critical rule:
+
+```text
+Jeeves is not a Skeleton adapter.
+Jeeves is not runtime under Skeleton.
+Skeleton is the precursor, proving ground, practical toolchain, and construction scaffold used to build Jeeves more safely.
+```
+
+## Core evidence rule
 
 ```text
 Executor self-report is not evidence.
 ```
 
-A message like `done`, `fixed`, or `successfully updated` is only a claim. The runner, wrapper, or human operator must collect independent evidence after the executor stops.
+A claim like `done`, `fixed`, or `tests passed` is not enough by itself. Evidence must be collected outside the executor answer.
+
+GitHub issues, pull requests, and comments are the public evidence trail for this lane.
+
+## Lane trigger
+
+Use this gate whenever a task asks Codex, OpenHands, or another bounded executor to change repository content.
+
+This includes:
+
+```text
+docs-only PRs
+test-only PRs
+pure module plus tests
+CLI wiring
+narrow production fixes
+```
+
+If the work is broader than one reviewable PR, split it before execution.
 
 ## Standard task envelope
 
-Every coding task should define:
+Every Development Lane task should define:
 
 ```text
 Task ID:
@@ -34,38 +84,36 @@ Required validation:
 Expected output:
 ```
 
-The goal must be narrow enough for one reviewable pull request. The allowed files list must be explicit. If the task needs more files than allowed, the executor must stop and report instead of expanding scope.
+Allowed files must be explicit. If the task needs more files than allowed, stop and report instead of expanding scope.
 
 ## Default executor boundaries
 
 ```text
-No private configuration access.
-No remote environment access.
-No production data access.
-No deployment or service mutation.
 No merge.
-No broad setup actions unless explicitly allowed.
+No deploy.
+No secrets, private config, env, server, or runtime access.
+No production data access.
 No hidden expansion of scope.
+No broad setup or refactor unless explicitly authorized.
 ```
 
-A coding lane may allow extra actions only when the task envelope names them explicitly.
+For canon or instruction edits inside this lane, critique-before-action still applies: read the current rule first, identify overlap or contradiction, then patch minimally.
 
-## Forced evidence protocol
+## Required evidence collection
 
-After the executor finishes, evidence must be collected outside the executor's own answer.
+Collect evidence after the executor stops and outside the executor answer.
 
-Required evidence:
+Minimum evidence:
 
 ```text
 working tree status
 diff sanity check
 diff summary
-diff for allowed files only
-targeted tests
-format and lint checks when relevant
+diff limited to allowed files
+targeted validation relevant to the change
 ```
 
-Equivalent local commands may include:
+Typical commands:
 
 ```bash
 git status --short
@@ -74,152 +122,92 @@ git diff --stat
 git diff -- <allowed-files>
 ```
 
-For Python code, typical validation is:
+Typical validation:
 
-```bash
-python -m pytest -q <targeted-tests>
-python -m ruff check <changed-python-files-and-tests>
-python -m black --check <changed-python-files-and-tests>
+```text
+docs-only: git diff --check + git status --short
+code/test changes: targeted tests + relevant lint/format checks + git evidence
 ```
 
-For documentation-only changes, at minimum:
+Without that evidence, the lane is incomplete even if the edit itself looks correct.
 
-```bash
-git diff --check
-git status --short
+## Review and merge boundary
+
+The Development Lane ends at a reviewable draft PR unless Oleksii explicitly commands more.
+
+Required boundary:
+
+```text
+branch
+-> local validation
+-> draft PR
+-> independent review
+-> explicit Oleksii merge command
 ```
+
+Do not collapse review into executor self-approval. Do not treat draft PR creation as merge permission.
 
 ## Lane types
 
-### Sandbox edit
-
-Use for first executor pilots and safe file-bound edits.
-
-Done means:
-
-```text
-only allowed file changed
-diff/status evidence collected outside the executor
-```
-
 ### Docs-only PR
 
-Use for protocols, templates, task specs, and public-safe handoffs.
+Use for public-safe canon, protocol, or template compression.
 
 Done means:
 
 ```text
-draft PR opened
-files changed are documentation-only
+files stayed inside the allowed docs scope
 validation result reported
-```
-
-### Pure module plus tests
-
-Use for isolated logic with no external calls.
-
-Done means:
-
-```text
-targeted tests pass
-format/lint pass
-draft PR opened
-```
-
-### CLI wiring only
-
-Use after a tested core module exists.
-
-Done means:
-
-```text
-CLI test passes
-existing module tests still pass
-format/lint pass
 draft PR opened
 ```
 
 ### Test-only PR
 
-Use for access-control, privacy, business-logic, and regression hardening.
+Use for regression hardening and bounded validation work.
 
 Done means:
 
 ```text
-test files only by default
-no production code changes
-if a real bug is exposed, stop and report
+targeted tests changed
+no unrelated production edits
+draft PR opened
 ```
 
-### Narrow production fix after failing test
+### Pure module plus tests
 
-Use only after a test or audit identifies a specific failing behavior.
+Use for isolated logic with explicit boundaries.
+
+Done means:
+
+```text
+targeted tests pass
+relevant lint/format pass
+draft PR opened
+```
+
+### CLI wiring only
+
+Use when a tested core already exists and the task is only integration wiring.
+
+Done means:
+
+```text
+CLI behavior validated
+existing related tests still pass
+draft PR opened
+```
+
+### Narrow production fix
+
+Use only after a specific failing behavior is identified.
 
 Done means:
 
 ```text
 one bug
 smallest viable fix
-failing test included or referenced
-no architecture rewrite
-no unrelated cleanup
-```
-
-## Promotion rule
-
-Executors earn broader responsibility only by repeated clean runs.
-
-Promotion evidence should include:
-
-```text
-scope stayed inside allowed files
-no forbidden actions attempted
-wrapper evidence was complete
-tests and checks were run
-PR stayed small and reviewable
-```
-
-Suggested progression:
-
-```text
-sandbox edit
--> docs-only PR
--> pure module plus tests
--> CLI wiring only
--> test-only PR
--> narrow production fix after failing test
-```
-
-## OpenHands pilot lesson
-
-The first OpenHands sandbox pilot was useful but not sufficient as a trust signal.
-
-Observed:
-
-```text
-OpenHands completed the allowed sandbox edit.
-OpenHands stayed inside the allowed file boundary.
-OpenHands did not provide the required post-edit diff evidence.
-```
-
-Conclusion:
-
-```text
-A bounded executor can perform the edit and still miss the evidence protocol.
-The wrapper must force evidence collection independently.
-```
-
-## Minimal PR report template
-
-```text
-Summary:
-Files changed:
-Lane type:
-Validation run:
-Evidence collected:
-Scope confirmation:
-Known limitations:
-Next safe step:
+relevant failing test included or referenced
+draft PR opened
 ```
 
 ## Stop conditions
@@ -228,18 +216,27 @@ Stop and report instead of continuing if:
 
 ```text
 the task needs files outside the allowed list
-the task needs remote environment access
-the task needs private configuration or production data
-the task becomes broader than one reviewable change
-tests fail in a way that requires implementation outside the task scope
+the task needs private configuration, secrets, env, server, or runtime access
+the task needs deploy or merge
+the task becomes broader than one reviewable PR
+validation failure requires out-of-scope implementation
 ```
 
-## Current status
+## Current evidence trail
 
-This protocol is a draft operating rail. It should be tested on small tasks before being treated as a mandatory gate.
-
-Recommended first real pilot:
+The Development Lane is no longer hypothetical. As of 2026-05-16, real evidence exists in:
 
 ```text
-BauClock #23 test-only access-control hardening
+#235 deep-diff-audit-pack CLI wiring
+#236 first Skeleton/Jeeves canon audit matrix
+#237 boot surface compression
+#238 operating protocol compression
+```
+
+These PRs show the lane handling bounded implementation, docs-only compression, validation reporting, and reviewable draft-PR flow.
+
+## Canonical principle
+
+```text
+Development Lane is how bounded coding work becomes reviewable evidence instead of trust-based claims.
 ```
