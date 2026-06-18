@@ -1,0 +1,643 @@
+# Skeleton Idea and Pattern Backlog
+
+Status: LIKELY_NEEDS_REVIEW
+Scope: public-safe review queue for ChatGPT Exoskeleton / Skeleton ideas, external patterns, candidate skills, and future Jeeves design inputs
+Created: 2026-05-13
+Source issue: #181
+
+## Purpose
+
+This file tracks useful ideas and patterns before canonization or implementation.
+
+It is a review queue, not accepted canon and not implementation approval.
+
+Backlog entries may come from user ideas, external transcripts, audits, project failures, repeated manual work, or architecture discussions.
+
+## Intake rule
+
+All incoming architecture ideas, external patterns, tool patterns, candidate skills, and future-plan suggestions should pass through this backlog before they become canon, issues, or implementation tasks.
+
+Default route:
+
+```text
+incoming idea
+-> record or map to backlog entry
+-> compare with current canon
+-> classify
+-> deep audit if useful or risky
+-> rank priority
+-> queue next action
+-> promote only through a separate reviewed issue/PR
+```
+
+If an idea duplicates an existing backlog entry, update or reference the existing entry instead of creating a parallel one.
+
+## Core rule
+
+```text
+idea -> compare with canon -> classify -> audit if needed -> prioritize -> queue -> implement only through a separate reviewed task
+```
+
+No item in this backlog grants authority to write code, change runner behavior, merge, deploy, access production, read secrets, or update canon automatically.
+
+## Bureaucracy boundary
+
+Bureaucracy is required only where there is authority risk.
+
+Use the lightest safe path:
+
+```text
+Low risk
+-> do the small safe action directly and report briefly
+
+Medium risk
+-> use an issue and reviewable PR/diff
+
+High authority risk
+-> backlog entry + deep audit + separate reviewed issue/PR
+```
+
+Deep audit is required when an idea or action changes or could bypass:
+
+```text
+runner behavior
+secret/privacy handling
+GitHub label or queue semantics
+merge, deploy, server, SSH, database, or production boundaries
+memory or canon loading
+external model routing
+Telegram or other approval surfaces
+automatic execution authority
+new executors such as OpenHands
+```
+
+Deep audit is not required for every thought, small documentation cleanup, narrow local test, one-off sandbox experiment without secrets, or small worktree diff.
+
+Operational test:
+
+```text
+A document or process step is useful only if it changes behavior, reduces a real risk, or speeds up future work.
+If it does none of these, it is decorative armor and should be avoided, shortened, or parked.
+```
+
+## Skeleton vs Jeeves boundary
+
+Working distinction:
+
+```text
+Skeleton / king's armor = external trust/control exoskeleton.
+Jeeves = future personal assistant/runtime that may use the armor.
+```
+
+Skeleton answers control questions:
+
+```text
+What is allowed?
+What is forbidden?
+What is the scope?
+Which files may be touched?
+Is audit needed?
+Are secrets involved?
+May an executor run?
+May a PR be created?
+Are production/server/merge/deploy boundaries protected?
+```
+
+Jeeves answers assistant questions:
+
+```text
+What does Oleksii want to do?
+What private/work/life context matters?
+What is the next useful action?
+Who should be contacted?
+Which document/task/process should be prepared?
+What should be remembered?
+Where is human judgment needed?
+```
+
+Boundary rule:
+
+```text
+Skeleton must not grow into a heavy substitute for Jeeves.
+Jeeves must not bypass Skeleton's trust/control layer when performing risky actions.
+Skeleton should stay light, public-safe, technical, and control-oriented.
+Jeeves will be more private, contextual, and assistant-oriented.
+```
+
+## Adapter-based core requirements
+
+Skeleton should not become a fully custom monolith.
+
+Working model:
+
+```text
+small strict Skeleton core
++ replaceable external projects/tools
++ narrow adapters
++ GitHub-visible artifacts
++ human approval for authority-bearing actions
+```
+
+External tools may become parts of the armor only if they are constrained by the Skeleton model.
+
+Minimum core needed to safely host external components:
+
+```text
+1. Adapter contract
+2. Capability registry
+3. Authority levels
+4. Workspace/worktree manager
+5. Secrets preflight
+6. Artifact gate
+7. Trace format
+8. Stop conditions
+9. Queue/backpressure rules
+10. Tiny adapter test harness
+```
+
+Adapter contract:
+
+```text
+input:
+- task_id
+- repo/project
+- allowed files
+- forbidden files/actions
+- risk level
+- timeout
+- secrets policy
+- expected output
+
+output:
+- status
+- changed files
+- diff/report
+- logs summary
+- validation result
+- risk flags
+- next suggested action
+```
+
+Capability registry records what each external component can and cannot do.
+
+Examples:
+
+```text
+OpenHands:
+- can_read_files: yes
+- can_edit_files: yes
+- can_run_commands: only with approval
+- can_push: no
+- can_merge: no
+- can_deploy: no
+- can_access_secrets: no
+
+Gemini:
+- can_audit: yes
+- can_edit_files: no
+- can_execute: no
+- can_write_canon: no
+
+Telegram v1:
+- can_notify: yes
+- can_approve: no
+- can_run_command: no
+```
+
+Authority levels:
+
+```text
+LEVEL 0 — read/report only
+LEVEL 1 — draft text/artifact only
+LEVEL 2 — local diff in worktree
+LEVEL 3 — draft PR
+LEVEL 4 — human-approved action with GitHub-visible trace
+LEVEL 5 — forbidden for agents: secrets, merge, deploy, production/server authority
+```
+
+Workspace rule:
+
+```text
+one task = one disposable workspace/worktree
+main checkout = control plane
+executor never works in main
+workspace cleanup is part of the task lifecycle
+```
+
+Artifact gate:
+
+```text
+No vague "done" result is accepted.
+Every external component must return a concrete artifact: diff, PR, audit report, trace, log summary, or task-result packet.
+```
+
+Trace minimum:
+
+```text
+task_id
+executor/tool
+model, if any
+start/end time
+input packet hash or reference
+allowed scope
+actions attempted
+actions approved/rejected
+files changed
+validation result
+human decision
+```
+
+Universal stop conditions:
+
+```text
+executor touched forbidden path
+executor requested secrets
+executor tried to push/merge/deploy
+executor tried to use server/SSH/database/production resources
+executor installed unexpected packages
+executor ignored task scope
+executor produced too broad a diff
+executor entered a loop or stale state
+```
+
+Backpressure rule:
+
+```text
+Do not run multiple executors on the same repo/scope when an active worktree or PR already owns that scope.
+```
+
+Adapter test harness:
+
+```text
+dry run
+tiny docs task
+tiny test task
+forbidden-path refusal test
+secret-access refusal test
+cleanup test
+```
+
+Core design rule:
+
+```text
+Skeleton core should be stricter than all modules, not smarter than all modules.
+```
+
+## Self-assembly rule
+
+Skeleton should use already-mounted safe parts to help mount the next parts.
+
+Assembly flow:
+
+```text
+human/ChatGPT defines the boundary and authority
+-> Skeleton creates a bounded task packet
+-> executor works only in a disposable worktree/workspace
+-> executor returns a concrete artifact
+-> Skeleton checks scope, paths, secrets, validation, and trace
+-> human reviews and accepts/rejects
+-> accepted component becomes available for future assembly
+```
+
+Responsibility split:
+
+```text
+Human + ChatGPT/Skeleton decide:
+- architecture boundaries
+- authority levels
+- safety constraints
+- what counts as accepted behavior
+- whether to promote a component
+
+External executor may do:
+- schema files
+- validators
+- tests
+- documentation examples
+- narrow helper CLI code
+- draft diffs/PRs
+
+External executor must not decide:
+- its own authority
+- canon promotion
+- merge/deploy access
+- secret access
+- production/server access
+- replacement of Skeleton control plane
+```
+
+Preferred build order for adapter-core work:
+
+```text
+0. Finish tiny OpenHands pilot.
+1. If pilot is acceptable, use OpenHands for a small adapter-packet schema + tests task.
+2. Add a minimal capability registry.
+3. Add authority-level validation.
+4. Add artifact-gate validation.
+5. Add secrets-preflight integration.
+6. Only then consider a semi-regular OpenHands adapter.
+```
+
+Assembly principle:
+
+```text
+Skeleton designs ports, locks, and acceptance checks.
+External tools manufacture small parts inside those constraints.
+Skeleton validates the part before it becomes part of the armor.
+```
+
+## Server hygiene and terminal-minimal operation
+
+Experiments must not leave uncontrolled layers on the server.
+
+Cleanup rule:
+
+```text
+After each pilot or installation experiment:
+1. inventory what changed
+2. classify it as keep / pilot / archive / trash / unknown
+3. preserve a short evidence list before deletion
+4. remove only confirmed trash
+5. verify that active repo/runner state still works
+```
+
+Typical cleanup targets:
+
+```text
+old worktrees
+pilot branches
+temporary task files
+stale venvs
+uv/pip/npm caches from experiments
+test tool installs
+old logs not needed for audit
+unknown scripts or manual runner copies
+obsolete repo clones
+```
+
+Never delete without review:
+
+```text
+live runner scripts
+systemd services
+.env or secret files
+GitHub/token configuration
+active control checkout
+active worktrees with open PRs
+audit/debug logs still needed for investigation
+```
+
+Preferred future server layout:
+
+```text
+/repos          -> clean control checkouts
+/worktrees     -> disposable task workspaces
+/tools         -> approved external tools
+/state         -> runner state
+/logs          -> required logs
+/archive       -> old but preserved material
+/trash_review  -> staged deletion after review
+```
+
+Terminal-minimal rule:
+
+```text
+Oleksii should not be required to manually perform long terminal sequences from phone/Termux.
+Prefer single bounded command packets, runner-mediated actions, scripts with dry-run mode, or GitHub-visible task automation.
+```
+
+When terminal work is unavoidable:
+
+```text
+provide the smallest possible command block
+avoid explanatory lines mixed with commands
+avoid interactive flows from phone when possible
+stop after each risky boundary and inspect output
+```
+
+Goal:
+
+```text
+human decides and approves;
+Skeleton/executors perform repetitive terminal mechanics;
+terminal actions by Oleksii are reduced to the minimum needed for trust, access, or emergency control.
+```
+
+## Classification
+
+```text
+ACCEPT_FOR_DOCS
+-> safe to propose as docs-only canon candidate through a reviewed PR
+
+LIKELY_NEEDS_REVIEW
+-> promising and probably aligned, but needs audit, constraints, or a narrow task before adoption
+
+IDEA_BACKLOG
+-> useful idea to preserve; not actionable yet
+
+BLOCKED_OR_PREMATURE
+-> do not implement now; revisit only after prerequisites or a smaller version proves useful
+
+PARKED_ARCHIVE
+-> not in the active queue, but intentionally preserved for periodic review because it may become useful later
+
+OUTDATED_REJECTED
+-> recorded for traceability but not pursued because it is unsafe, contradicted, superseded, or no longer relevant
+```
+
+Premature is not the same as rejected.
+
+Only unsafe, contradictory, superseded, or clearly obsolete ideas should become `OUTDATED_REJECTED`.
+
+Potentially useful ideas that are not currently actionable should move to `PARKED_ARCHIVE` instead of being deleted.
+
+## Priority levels
+
+```text
+P0
+-> current blocker or near-term control-plane safety/stability need
+
+P1
+-> important next capability after P0 blockers are handled
+
+P2
+-> useful later improvement or pilot candidate
+
+P3
+-> future Jeeves/runtime direction, broad architecture, or high-complexity idea
+
+ARCHIVE
+-> parked outside the active queue until a review trigger occurs
+```
+
+## Audit workflow
+
+For each idea:
+
+```text
+1. Record the idea in this backlog.
+2. Identify the problem it solves.
+3. Identify benefit and risk.
+4. Classify it.
+5. Decide whether Gemini/canon audit is needed.
+6. Create a separate issue only when the next action is clear.
+7. Implement only after a reviewed task exists.
+```
+
+Gemini or any external model may provide evidence, but its output is not canon.
+
+Human review remains required before canon promotion, runner behavior changes, implementation, merge, or deployment.
+
+## Deep audit gate
+
+Use deep audit when an idea would affect any of these:
+
+```text
+runner behavior
+workflow gates
+GitHub label semantics
+PR creation/review/merge boundaries
+Gemini or external-model routing
+Telegram or other human-approval surfaces
+memory/canon loading
+secret/privacy handling
+automation authority
+future Jeeves runtime architecture
+```
+
+Deep audit must compare the idea against current canon, existing issues/PRs, existing files, known risks, and safer smaller alternatives.
+
+A shallow safety-envelope accept is not enough for backlog promotion when the idea changes authority, routing, memory, or execution behavior.
+
+## Idea archive / parking lot
+
+Old, premature, or temporarily inactive ideas should not be deleted by default.
+
+Use `PARKED_ARCHIVE` when an idea is potentially useful but should not remain in the active queue.
+
+Each parked idea should record:
+
+```text
+why parked
+what must change before reconsidering
+review trigger
+last reviewed date, if known
+```
+
+Suggested review triggers:
+
+```text
+after Worktree Protocol implementation
+after runner route/mapping stabilization
+after secrets-preflight is active
+after PR reviewer meta-skill exists
+after Telegram notification-only pilot
+when a parked idea becomes relevant to a real blocker
+periodic backlog review after major Skeleton milestones
+```
+
+Parking an idea does not approve it. It only preserves it for possible future reconsideration.
+
+## Forbidden shortcuts
+
+```text
+Do not treat this backlog as canon.
+Do not implement a backlog idea directly from this file.
+Do not merge multiple unrelated ideas into one implementation task.
+Do not bypass GitHub issue/PR audit trail.
+Do not give Telegram, Gemini, Codex, OpenHands, or runner hidden authority.
+Do not store secrets, .env values, tokens, private infrastructure data, or private user data here.
+Do not rewrite existing canon from external trend evidence without audit and review.
+```
+
+## Current queue order
+
+```text
+P0. Review/finish #166 Worktree Protocol docs.
+P0. Fix #157 unknown YELLOW task mapping.
+P0. Review #162 runner status live collector.
+
+P1. Create Secrets Preflight audit/design issue.
+P1. Create minimal adapter-core hardening design issue.
+P1. Create skeleton_pr_reviewer audit/design issue.
+P1. Create OpenHands executor adapter audit/pilot issue.
+P1. Finish #163 Gemini audit for controlled agentic engineering principles.
+P1. Create server-hygiene / terminal-minimal workflow only after OpenHands pilot if recurring manual cleanup is needed.
+
+P2. Telegram notification-only pilot via @Jeeveshelp_bot.
+P2. Canon Graph Index v0 audit.
+P2. Directory-specific override rules audit.
+
+P3. LLM Router / provider fallback.
+P3. Full graph memory / Infinite Brain only after smaller index proves useful.
+```
+
+## Backlog entries
+
+| ID | Idea / Pattern | Classification | Priority | Main benefit | Main risk | Audit status | Next action | Links |
+|---|---|---|---|---|---|---|---|---|
+| IPB-001 | Git Worktree Protocol | ACCEPT_FOR_DOCS | P0 | Enables parallel agent work while keeping the main control checkout clean. | Worktree isolation can be mistaken for runtime isolation. | Docs PR open. | Review #166; merge only after human review and optional validation. | #165, #166 |
+| IPB-002 | Unknown YELLOW task mapping fix | LIKELY_NEEDS_REVIEW | P0 | Prevents live runner tasks from staying falsely claimed/running when no route exists. | Incorrect generic fallback could expand runner authority. | Existing issue. | Fix fail-closed behavior before adding broader runner routes. | #157 |
+| IPB-003 | Runner status / stale task diagnostics | LIKELY_NEEDS_REVIEW | P0 | Makes stuck/running/failed runner tasks visible without guessing. | Live diagnostics can leak secrets or mutate state if not bounded. | PR open. | Review #162 and preserve read-only boundaries. | #161, #162 |
+| IPB-004 | Secrets preflight | LIKELY_NEEDS_REVIEW | P1 | Prevents `.env`, tokens, keys, credentials, private URLs, and secret-like data from entering diffs or outputs. | Over-broad detection can create false positives; under-broad detection can leak secrets. | Needs audit/design issue. | Create a narrow audit/design issue before implementation. | #89 |
+| IPB-005 | skeleton_pr_reviewer meta-skill | LIKELY_NEEDS_REVIEW | P1 | Adds a safety review report over PR diffs before human review. | Automated reviewer may be mistaken for final approval authority. | Needs audit/design issue. | Define report-only scope; no approve, merge, or final authority. | pr-review-gate related |
+| IPB-006 | Controlled agentic engineering principles | LIKELY_NEEDS_REVIEW | P1 | Frames Skeleton as controlled agentic engineering, not vibe coding. | External trend evidence may be over-canonized or overgeneralized. | Audit issue open. | Finish #163 and promote only concise reviewed principles if accepted. | #163 |
+| IPB-007 | Telegram notification-only gateway via @Jeeveshelp_bot | IDEA_BACKLOG | P2 | Gives Oleksii faster visibility into PRs, audits, stale tasks, and approval requests. | Telegram could bypass GitHub audit trail if granted authority too early. | Needs future audit. | Start only as notification/read-only mirror over GitHub state. | future issue |
+| IPB-008 | Canon Graph Index v0 | IDEA_BACKLOG | P2 | Reduces context noise by mapping intents to required canon sections. | Graph/index errors may hide mandatory safety rules. | Needs concept audit. | Audit a read-only index over existing Markdown canon; do not replace canon. | future issue |
+| IPB-009 | Directory-specific overrides | IDEA_BACKLOG | P2 | Allows local conventions for docs, tests, mocks, or project folders. | Local overrides can create canon drift or conflict with global safety rules. | Needs audit. | Define priority order: global canon > project profile > local override > task packet. | future issue |
+| IPB-010 | LLM Router / provider fallback | IDEA_BACKLOG | P3 | Reduces dependency on one model/provider and may handle quota/rate-limit failures. | Adds complexity, inconsistent behavior, cost risk, and authority confusion. | Future Jeeves/runtime audit needed. | Postpone until control plane, secrets, PR review, and runner routes are stable. | future issue |
+| IPB-011 | Full Infinite Brain / graph-memory rewrite | BLOCKED_OR_PREMATURE | P3 | Could eventually support richer machine-readable memory. | Full rewrite would fragment human-readable canon and increase drift. | Not approved. | Do not implement; first test smaller Canon Graph Index v0. Move to PARKED_ARCHIVE after v0 decision if still premature. | future issue |
+| IPB-012 | OpenHands executor adapter | LIKELY_NEEDS_REVIEW | P1 | May accelerate controlled code-writing and test tasks as a bounded software-agent executor inside worktrees. | Could become a second control plane, receive excessive permissions, conflict with runner, or expose secrets if integrated too broadly. | Needs deep audit and tiny pilot issue. | Audit OpenHands only as a bounded executor: no secrets, no merge, no deploy, no production access, worktree-only, PR/diff output only. | future issue |
+| IPB-013 | Skeleton vs Jeeves boundary / king's armor distinction | ACCEPT_FOR_DOCS | P0 | Prevents Skeleton from becoming a heavy substitute for Jeeves and prevents Jeeves from bypassing Skeleton's trust layer. | If ignored, Skeleton may become decorative bureaucracy or Jeeves may inherit unsafe authority. | User-approved working distinction recorded here. | Promote a concise boundary into core docs after current docs PRs are merged or rebased. | future docs |
+| IPB-014 | Minimal adapter-based Skeleton core hardening | LIKELY_NEEDS_REVIEW | P1 | Lets Skeleton safely host external tools as replaceable modules without becoming a fully custom monolith. | Too much core design can become another bureaucracy layer; too little lets external tools become hidden control planes. | Working requirements recorded here. | Create one narrow design issue only after OpenHands pilot or when a second external executor is added. | future issue |
+| IPB-015 | Self-assembly workflow for mounting external components | LIKELY_NEEDS_REVIEW | P1 | Lets existing Skeleton parts help install and validate the next external aggregate without giving that aggregate architecture authority. | If done too early, an executor may shape its own control layer; if done too late, Skeleton remains slow and overly manual. | Working assembly rule recorded here. | Use after OpenHands pilot: first real assisted build should be adapter-packet schema plus tests. | future issue |
+| IPB-016 | Server hygiene and controlled cleanup | LIKELY_NEEDS_REVIEW | P1 | Prevents Hetzner/runner host from accumulating unmanaged pilot worktrees, branches, venvs, caches, logs, and tool installs. | Over-eager cleanup can delete live runner scripts, secrets, active worktrees, or audit evidence. | Working cleanup rule recorded here. | After OpenHands pilot, run inventory first; clean only confirmed trash. | future issue |
+| IPB-017 | Terminal-minimal operation for Oleksii | LIKELY_NEEDS_REVIEW | P1 | Reduces manual Termux/phone terminal work and avoids errors from long interactive command sequences. | Too much automation can hide what happened or bypass approval. | Working rule recorded here. | Prefer short bounded command blocks now; later add runner-mediated wrappers only where repeated work appears. | future issue |
+
+## Parking lot entries
+
+| ID | Idea / Pattern | Why parked | Reconsider when | Review trigger | Last reviewed | Links |
+|---|---|---|---|---|---|---|
+| PARK-001 | Full autonomous multi-agent orchestrator | Too much authority and complexity before worktree, runner mapping, secrets, and PR review are stable. | Control plane is stable and worktree execution is implemented safely. | After Worktree Protocol implementation and skeleton_pr_reviewer audit. | 2026-05-13 | IPB-011 |
+| PARK-002 | Telegram approval buttons with real actions | Notification-only mode must prove safe first; approval buttons can bypass GitHub trace if implemented too early. | Telegram v1 is only a GitHub-visible mirror and audit trail rules are proven. | After notification-only pilot. | 2026-05-13 | IPB-007 |
+| PARK-003 | Full knowledge-base graph rewrite | Full rewrite risks fragmenting human-readable canon and increasing drift. | Canon Graph Index v0 proves useful and safe. | After Canon Graph Index v0 audit and pilot. | 2026-05-13 | IPB-008, IPB-011 |
+
+## Automation level rule candidate
+
+This rule is not canon yet, but should be evaluated in #163:
+
+```text
+Verifiability determines automation level.
+If an action cannot be objectively checked, it stays audit/report-only.
+```
+
+Possible levels:
+
+```text
+report-only
+-> model or tool can produce findings only
+
+draft-only
+-> model or tool can create a draft artifact for review
+
+PR-only
+-> executor can open a reviewable PR after validation
+
+human-approved action
+-> action occurs only after explicit human approval and GitHub-visible trace
+```
+
+## Promotion rule
+
+An idea may be promoted out of this backlog only through a separate reviewed artifact:
+
+```text
+backlog entry
+-> audit/design issue
+-> docs-only canon PR if appropriate
+-> implementation issue only after docs/protocol approval
+-> tests/validation
+-> human review
+```
+
+Do not combine backlog promotion, implementation, runner behavior changes, and merge/deploy in one task.
